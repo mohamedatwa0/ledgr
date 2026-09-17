@@ -31,4 +31,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       SettingsRowsCompanion(currencyCode: Value(currencyCode)),
     );
   }
+
+  @override
+  Future<void> setSmsLastScanAt(DateTime scannedAt) {
+    return (_db.update(_db.settingsRows)..where((s) => s.id.equals(1))).write(
+      SettingsRowsCompanion(smsLastScanAt: Value(scannedAt)),
+    );
+  }
 }

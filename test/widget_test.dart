@@ -105,4 +105,88 @@ void main() {
     expect(find.text('Pets'), findsWidgets);
     await disposeApp(tester);
   });
+
+  const cibSms =
+      'CIB: Purchase of EGP 250.00 at STARBUCKS using card ending 1234 '
+      'on 15/09/2026. Available balance EGP 5,000.00';
+
+  Future<void> openSmsAndParse(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('settings-button')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('settings-sms')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('sms-paste-field')), cibSms);
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('sms-parse-button')));
+    await tester.tap(find.byKey(const Key('sms-parse-button')));
+    await settle(tester);
+  }
+
+  testWidgets('pasting a bank SMS shows it in To review', (tester) async {
+    await pumpApp(tester);
+    await openSmsAndParse(tester);
+
+    expect(find.text('STARBUCKS'), findsOneWidget);
+    await disposeApp(tester);
+  });
+
+  testWidgets('confirming a parsed SMS adds it to the home ledger', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openSmsAndParse(tester);
+
+    await tester.ensureVisible(find.text('STARBUCKS'));
+    await tester.tap(find.text('STARBUCKS'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('save-entry')));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+
+    expect(find.text('Food & Dining'), findsOneWidget);
+    expect(find.text('-250.00'), findsOneWidget);
+    await disposeApp(tester);
+  });
+
+  testWidgets('dismissing a parsed SMS does not add it to the home ledger', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openSmsAndParse(tester);
+
+    await tester.ensureVisible(find.text('STARBUCKS'));
+    await tester.tap(find.text('STARBUCKS'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('sms-dismiss')));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+
+    expect(find.text('-250.00'), findsNothing);
+    await disposeApp(tester);
+  });
+
+  testWidgets('duplicate paste does not create a second ready row', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openSmsAndParse(tester);
+
+    await tester.enterText(find.byKey(const Key('sms-paste-field')), cibSms);
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('sms-parse-button')));
+    await tester.tap(find.byKey(const Key('sms-parse-button')));
+    await settle(tester);
+
+    expect(find.text('STARBUCKS'), findsOneWidget);
+    expect(find.text('Already in the inbox'), findsOneWidget);
+    await disposeApp(tester);
+  });
 }

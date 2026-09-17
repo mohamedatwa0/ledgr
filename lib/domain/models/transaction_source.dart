@@ -1,3 +1,4 @@
 enum TransactionSource {
   manual,
+  sms,
 }

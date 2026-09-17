@@ -2,6 +2,7 @@ import '../../domain/models/app_settings.dart';
 import '../../domain/models/category.dart';
 import '../../domain/models/ledger_transaction.dart';
 import '../../domain/models/transaction_entry.dart';
+import '../../domain/sms/sms_inbox_item.dart';
 import 'db/app_database.dart';
 
 Category categoryFromRow(CategoryRow row) {
@@ -37,5 +38,30 @@ TransactionEntry entryFromRows(TransactionRow transaction, CategoryRow category)
 }
 
 AppSettings settingsFromRow(SettingsRow row) {
-  return AppSettings(currencyCode: row.currencyCode);
+  return AppSettings(
+    currencyCode: row.currencyCode,
+    smsLastScanAt: row.smsLastScanAt,
+  );
+}
+
+SmsInboxItem smsInboxFromRow(SmsInboxRow row) {
+  return SmsInboxItem(
+    id: row.id,
+    fingerprint: row.fingerprint,
+    platformMessageId: row.platformMessageId,
+    sender: row.sender,
+    body: row.body,
+    receivedAt: row.receivedAt,
+    createdAt: row.createdAt,
+    status: row.status,
+    bankId: row.bankId,
+    templateId: row.templateId,
+    amount: row.amount,
+    type: row.type,
+    suggestedCategoryId: row.suggestedCategoryId,
+    note: row.note,
+    valueDate: row.valueDate,
+    currencyCode: row.currencyCode,
+    transactionId: row.transactionId,
+  );
 }

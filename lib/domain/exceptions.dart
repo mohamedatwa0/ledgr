@@ -20,3 +20,12 @@ class DefaultCategoryException extends LedgrException {
   const DefaultCategoryException()
       : super('Default categories cannot be changed or deleted.');
 }
+
+class SmsNotFoundException extends LedgrException {
+  const SmsNotFoundException() : super('That SMS is no longer in the inbox.');
+}
+
+class SmsAlreadyImportedException extends LedgrException {
+  const SmsAlreadyImportedException()
+      : super('This SMS has already been added to the ledger.');
+}

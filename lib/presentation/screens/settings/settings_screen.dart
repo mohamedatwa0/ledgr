@@ -55,13 +55,16 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => context.push('/history'),
               ),
               SettingsRow(
+                key: const Key('settings-sms'),
                 icon: TablerIcons.message,
                 label: 'Bank SMS Import',
-                enabled: false,
-                trailing: Text(
-                  'Coming soon',
-                  style: uiStyle(fontSize: 12, color: mutedInk),
-                ),
+                trailing: state.readyCount > 0
+                    ? Text(
+                        '${state.readyCount} to review',
+                        style: uiStyle(fontSize: 12, color: mutedInk),
+                      )
+                    : null,
+                onTap: () => context.push('/settings/sms'),
               ),
               SettingsRow(
                 icon: TablerIcons.chart_bar,

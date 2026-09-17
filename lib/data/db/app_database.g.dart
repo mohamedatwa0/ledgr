@@ -835,8 +835,14 @@ class $SettingsRowsTable extends SettingsRows
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('EGP'));
+  static const VerificationMeta _smsLastScanAtMeta =
+      const VerificationMeta('smsLastScanAt');
   @override
-  List<GeneratedColumn> get $columns => [id, currencyCode];
+  late final GeneratedColumn<DateTime> smsLastScanAt =
+      GeneratedColumn<DateTime>('sms_last_scan_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [id, currencyCode, smsLastScanAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -856,6 +862,12 @@ class $SettingsRowsTable extends SettingsRows
           currencyCode.isAcceptableOrUnknown(
               data['currency_code']!, _currencyCodeMeta));
     }
+    if (data.containsKey('sms_last_scan_at')) {
+      context.handle(
+          _smsLastScanAtMeta,
+          smsLastScanAt.isAcceptableOrUnknown(
+              data['sms_last_scan_at']!, _smsLastScanAtMeta));
+    }
     return context;
   }
 
@@ -869,6 +881,8 @@ class $SettingsRowsTable extends SettingsRows
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       currencyCode: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}currency_code'])!,
+      smsLastScanAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}sms_last_scan_at']),
     );
   }
 
@@ -881,12 +895,17 @@ class $SettingsRowsTable extends SettingsRows
 class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final int id;
   final String currencyCode;
-  const SettingsRow({required this.id, required this.currencyCode});
+  final DateTime? smsLastScanAt;
+  const SettingsRow(
+      {required this.id, required this.currencyCode, this.smsLastScanAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['currency_code'] = Variable<String>(currencyCode);
+    if (!nullToAbsent || smsLastScanAt != null) {
+      map['sms_last_scan_at'] = Variable<DateTime>(smsLastScanAt);
+    }
     return map;
   }
 
@@ -894,6 +913,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     return SettingsRowsCompanion(
       id: Value(id),
       currencyCode: Value(currencyCode),
+      smsLastScanAt: smsLastScanAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smsLastScanAt),
     );
   }
 
@@ -903,6 +925,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     return SettingsRow(
       id: serializer.fromJson<int>(json['id']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      smsLastScanAt: serializer.fromJson<DateTime?>(json['smsLastScanAt']),
     );
   }
   @override
@@ -911,12 +934,19 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'currencyCode': serializer.toJson<String>(currencyCode),
+      'smsLastScanAt': serializer.toJson<DateTime?>(smsLastScanAt),
     };
   }
 
-  SettingsRow copyWith({int? id, String? currencyCode}) => SettingsRow(
+  SettingsRow copyWith(
+          {int? id,
+          String? currencyCode,
+          Value<DateTime?> smsLastScanAt = const Value.absent()}) =>
+      SettingsRow(
         id: id ?? this.id,
         currencyCode: currencyCode ?? this.currencyCode,
+        smsLastScanAt:
+            smsLastScanAt.present ? smsLastScanAt.value : this.smsLastScanAt,
       );
   SettingsRow copyWithCompanion(SettingsRowsCompanion data) {
     return SettingsRow(
@@ -924,6 +954,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       currencyCode: data.currencyCode.present
           ? data.currencyCode.value
           : this.currencyCode,
+      smsLastScanAt: data.smsLastScanAt.present
+          ? data.smsLastScanAt.value
+          : this.smsLastScanAt,
     );
   }
 
@@ -931,47 +964,57 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   String toString() {
     return (StringBuffer('SettingsRow(')
           ..write('id: $id, ')
-          ..write('currencyCode: $currencyCode')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('smsLastScanAt: $smsLastScanAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, currencyCode);
+  int get hashCode => Object.hash(id, currencyCode, smsLastScanAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SettingsRow &&
           other.id == this.id &&
-          other.currencyCode == this.currencyCode);
+          other.currencyCode == this.currencyCode &&
+          other.smsLastScanAt == this.smsLastScanAt);
 }
 
 class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int> id;
   final Value<String> currencyCode;
+  final Value<DateTime?> smsLastScanAt;
   const SettingsRowsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
+    this.smsLastScanAt = const Value.absent(),
   });
   SettingsRowsCompanion.insert({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
+    this.smsLastScanAt = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
     Expression<String>? currencyCode,
+    Expression<DateTime>? smsLastScanAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (currencyCode != null) 'currency_code': currencyCode,
+      if (smsLastScanAt != null) 'sms_last_scan_at': smsLastScanAt,
     });
   }
 
   SettingsRowsCompanion copyWith(
-      {Value<int>? id, Value<String>? currencyCode}) {
+      {Value<int>? id,
+      Value<String>? currencyCode,
+      Value<DateTime?>? smsLastScanAt}) {
     return SettingsRowsCompanion(
       id: id ?? this.id,
       currencyCode: currencyCode ?? this.currencyCode,
+      smsLastScanAt: smsLastScanAt ?? this.smsLastScanAt,
     );
   }
 
@@ -984,6 +1027,9 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     if (currencyCode.present) {
       map['currency_code'] = Variable<String>(currencyCode.value);
     }
+    if (smsLastScanAt.present) {
+      map['sms_last_scan_at'] = Variable<DateTime>(smsLastScanAt.value);
+    }
     return map;
   }
 
@@ -991,7 +1037,833 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
   String toString() {
     return (StringBuffer('SettingsRowsCompanion(')
           ..write('id: $id, ')
-          ..write('currencyCode: $currencyCode')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('smsLastScanAt: $smsLastScanAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SmsInboxRowsTable extends SmsInboxRows
+    with TableInfo<$SmsInboxRowsTable, SmsInboxRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmsInboxRowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _fingerprintMeta =
+      const VerificationMeta('fingerprint');
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+      'fingerprint', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  static const VerificationMeta _platformMessageIdMeta =
+      const VerificationMeta('platformMessageId');
+  @override
+  late final GeneratedColumn<String> platformMessageId =
+      GeneratedColumn<String>('platform_message_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+      'sender', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+      'body', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _receivedAtMeta =
+      const VerificationMeta('receivedAt');
+  @override
+  late final GeneratedColumn<DateTime> receivedAt = GeneratedColumn<DateTime>(
+      'received_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<SmsInboxStatus, String> status =
+      GeneratedColumn<String>('status', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<SmsInboxStatus>($SmsInboxRowsTable.$converterstatus);
+  static const VerificationMeta _bankIdMeta = const VerificationMeta('bankId');
+  @override
+  late final GeneratedColumn<String> bankId = GeneratedColumn<String>(
+      'bank_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _templateIdMeta =
+      const VerificationMeta('templateId');
+  @override
+  late final GeneratedColumn<String> templateId = GeneratedColumn<String>(
+      'template_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+      'amount', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  late final GeneratedColumnWithTypeConverter<TransactionType?, String> type =
+      GeneratedColumn<String>('type', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<TransactionType?>($SmsInboxRowsTable.$convertertypen);
+  static const VerificationMeta _suggestedCategoryIdMeta =
+      const VerificationMeta('suggestedCategoryId');
+  @override
+  late final GeneratedColumn<int> suggestedCategoryId = GeneratedColumn<int>(
+      'suggested_category_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES categories (id) ON DELETE SET NULL'));
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+      'note', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _valueDateMeta =
+      const VerificationMeta('valueDate');
+  @override
+  late final GeneratedColumn<DateTime> valueDate = GeneratedColumn<DateTime>(
+      'value_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _currencyCodeMeta =
+      const VerificationMeta('currencyCode');
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+      'currency_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _transactionIdMeta =
+      const VerificationMeta('transactionId');
+  @override
+  late final GeneratedColumn<int> transactionId = GeneratedColumn<int>(
+      'transaction_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES transactions (id) ON DELETE SET NULL'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        fingerprint,
+        platformMessageId,
+        sender,
+        body,
+        receivedAt,
+        createdAt,
+        status,
+        bankId,
+        templateId,
+        amount,
+        type,
+        suggestedCategoryId,
+        note,
+        valueDate,
+        currencyCode,
+        transactionId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sms_inbox';
+  @override
+  VerificationContext validateIntegrity(Insertable<SmsInboxRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+          _fingerprintMeta,
+          fingerprint.isAcceptableOrUnknown(
+              data['fingerprint']!, _fingerprintMeta));
+    } else if (isInserting) {
+      context.missing(_fingerprintMeta);
+    }
+    if (data.containsKey('platform_message_id')) {
+      context.handle(
+          _platformMessageIdMeta,
+          platformMessageId.isAcceptableOrUnknown(
+              data['platform_message_id']!, _platformMessageIdMeta));
+    }
+    if (data.containsKey('sender')) {
+      context.handle(_senderMeta,
+          sender.isAcceptableOrUnknown(data['sender']!, _senderMeta));
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+          _bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('received_at')) {
+      context.handle(
+          _receivedAtMeta,
+          receivedAt.isAcceptableOrUnknown(
+              data['received_at']!, _receivedAtMeta));
+    } else if (isInserting) {
+      context.missing(_receivedAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('bank_id')) {
+      context.handle(_bankIdMeta,
+          bankId.isAcceptableOrUnknown(data['bank_id']!, _bankIdMeta));
+    }
+    if (data.containsKey('template_id')) {
+      context.handle(
+          _templateIdMeta,
+          templateId.isAcceptableOrUnknown(
+              data['template_id']!, _templateIdMeta));
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    }
+    if (data.containsKey('suggested_category_id')) {
+      context.handle(
+          _suggestedCategoryIdMeta,
+          suggestedCategoryId.isAcceptableOrUnknown(
+              data['suggested_category_id']!, _suggestedCategoryIdMeta));
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+          _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    }
+    if (data.containsKey('value_date')) {
+      context.handle(_valueDateMeta,
+          valueDate.isAcceptableOrUnknown(data['value_date']!, _valueDateMeta));
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+          _currencyCodeMeta,
+          currencyCode.isAcceptableOrUnknown(
+              data['currency_code']!, _currencyCodeMeta));
+    }
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+          _transactionIdMeta,
+          transactionId.isAcceptableOrUnknown(
+              data['transaction_id']!, _transactionIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SmsInboxRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmsInboxRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      fingerprint: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}fingerprint'])!,
+      platformMessageId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}platform_message_id']),
+      sender: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender'])!,
+      body: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      receivedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}received_at'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      status: $SmsInboxRowsTable.$converterstatus.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!),
+      bankId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bank_id']),
+      templateId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}template_id']),
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amount']),
+      type: $SmsInboxRowsTable.$convertertypen.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])),
+      suggestedCategoryId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}suggested_category_id']),
+      note: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}note']),
+      valueDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}value_date']),
+      currencyCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency_code']),
+      transactionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}transaction_id']),
+    );
+  }
+
+  @override
+  $SmsInboxRowsTable createAlias(String alias) {
+    return $SmsInboxRowsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SmsInboxStatus, String, String> $converterstatus =
+      const EnumNameConverter<SmsInboxStatus>(SmsInboxStatus.values);
+  static JsonTypeConverter2<TransactionType, String, String> $convertertype =
+      const EnumNameConverter<TransactionType>(TransactionType.values);
+  static JsonTypeConverter2<TransactionType?, String?, String?>
+      $convertertypen = JsonTypeConverter2.asNullable($convertertype);
+}
+
+class SmsInboxRow extends DataClass implements Insertable<SmsInboxRow> {
+  final int id;
+  final String fingerprint;
+  final String? platformMessageId;
+  final String sender;
+  final String body;
+  final DateTime receivedAt;
+  final DateTime createdAt;
+  final SmsInboxStatus status;
+  final String? bankId;
+  final String? templateId;
+  final int? amount;
+  final TransactionType? type;
+  final int? suggestedCategoryId;
+  final String? note;
+  final DateTime? valueDate;
+  final String? currencyCode;
+  final int? transactionId;
+  const SmsInboxRow(
+      {required this.id,
+      required this.fingerprint,
+      this.platformMessageId,
+      required this.sender,
+      required this.body,
+      required this.receivedAt,
+      required this.createdAt,
+      required this.status,
+      this.bankId,
+      this.templateId,
+      this.amount,
+      this.type,
+      this.suggestedCategoryId,
+      this.note,
+      this.valueDate,
+      this.currencyCode,
+      this.transactionId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['fingerprint'] = Variable<String>(fingerprint);
+    if (!nullToAbsent || platformMessageId != null) {
+      map['platform_message_id'] = Variable<String>(platformMessageId);
+    }
+    map['sender'] = Variable<String>(sender);
+    map['body'] = Variable<String>(body);
+    map['received_at'] = Variable<DateTime>(receivedAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    {
+      map['status'] =
+          Variable<String>($SmsInboxRowsTable.$converterstatus.toSql(status));
+    }
+    if (!nullToAbsent || bankId != null) {
+      map['bank_id'] = Variable<String>(bankId);
+    }
+    if (!nullToAbsent || templateId != null) {
+      map['template_id'] = Variable<String>(templateId);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<int>(amount);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] =
+          Variable<String>($SmsInboxRowsTable.$convertertypen.toSql(type));
+    }
+    if (!nullToAbsent || suggestedCategoryId != null) {
+      map['suggested_category_id'] = Variable<int>(suggestedCategoryId);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || valueDate != null) {
+      map['value_date'] = Variable<DateTime>(valueDate);
+    }
+    if (!nullToAbsent || currencyCode != null) {
+      map['currency_code'] = Variable<String>(currencyCode);
+    }
+    if (!nullToAbsent || transactionId != null) {
+      map['transaction_id'] = Variable<int>(transactionId);
+    }
+    return map;
+  }
+
+  SmsInboxRowsCompanion toCompanion(bool nullToAbsent) {
+    return SmsInboxRowsCompanion(
+      id: Value(id),
+      fingerprint: Value(fingerprint),
+      platformMessageId: platformMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(platformMessageId),
+      sender: Value(sender),
+      body: Value(body),
+      receivedAt: Value(receivedAt),
+      createdAt: Value(createdAt),
+      status: Value(status),
+      bankId:
+          bankId == null && nullToAbsent ? const Value.absent() : Value(bankId),
+      templateId: templateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(templateId),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      suggestedCategoryId: suggestedCategoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(suggestedCategoryId),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      valueDate: valueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueDate),
+      currencyCode: currencyCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currencyCode),
+      transactionId: transactionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionId),
+    );
+  }
+
+  factory SmsInboxRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmsInboxRow(
+      id: serializer.fromJson<int>(json['id']),
+      fingerprint: serializer.fromJson<String>(json['fingerprint']),
+      platformMessageId:
+          serializer.fromJson<String?>(json['platformMessageId']),
+      sender: serializer.fromJson<String>(json['sender']),
+      body: serializer.fromJson<String>(json['body']),
+      receivedAt: serializer.fromJson<DateTime>(json['receivedAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      status: $SmsInboxRowsTable.$converterstatus
+          .fromJson(serializer.fromJson<String>(json['status'])),
+      bankId: serializer.fromJson<String?>(json['bankId']),
+      templateId: serializer.fromJson<String?>(json['templateId']),
+      amount: serializer.fromJson<int?>(json['amount']),
+      type: $SmsInboxRowsTable.$convertertypen
+          .fromJson(serializer.fromJson<String?>(json['type'])),
+      suggestedCategoryId:
+          serializer.fromJson<int?>(json['suggestedCategoryId']),
+      note: serializer.fromJson<String?>(json['note']),
+      valueDate: serializer.fromJson<DateTime?>(json['valueDate']),
+      currencyCode: serializer.fromJson<String?>(json['currencyCode']),
+      transactionId: serializer.fromJson<int?>(json['transactionId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fingerprint': serializer.toJson<String>(fingerprint),
+      'platformMessageId': serializer.toJson<String?>(platformMessageId),
+      'sender': serializer.toJson<String>(sender),
+      'body': serializer.toJson<String>(body),
+      'receivedAt': serializer.toJson<DateTime>(receivedAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'status': serializer
+          .toJson<String>($SmsInboxRowsTable.$converterstatus.toJson(status)),
+      'bankId': serializer.toJson<String?>(bankId),
+      'templateId': serializer.toJson<String?>(templateId),
+      'amount': serializer.toJson<int?>(amount),
+      'type': serializer
+          .toJson<String?>($SmsInboxRowsTable.$convertertypen.toJson(type)),
+      'suggestedCategoryId': serializer.toJson<int?>(suggestedCategoryId),
+      'note': serializer.toJson<String?>(note),
+      'valueDate': serializer.toJson<DateTime?>(valueDate),
+      'currencyCode': serializer.toJson<String?>(currencyCode),
+      'transactionId': serializer.toJson<int?>(transactionId),
+    };
+  }
+
+  SmsInboxRow copyWith(
+          {int? id,
+          String? fingerprint,
+          Value<String?> platformMessageId = const Value.absent(),
+          String? sender,
+          String? body,
+          DateTime? receivedAt,
+          DateTime? createdAt,
+          SmsInboxStatus? status,
+          Value<String?> bankId = const Value.absent(),
+          Value<String?> templateId = const Value.absent(),
+          Value<int?> amount = const Value.absent(),
+          Value<TransactionType?> type = const Value.absent(),
+          Value<int?> suggestedCategoryId = const Value.absent(),
+          Value<String?> note = const Value.absent(),
+          Value<DateTime?> valueDate = const Value.absent(),
+          Value<String?> currencyCode = const Value.absent(),
+          Value<int?> transactionId = const Value.absent()}) =>
+      SmsInboxRow(
+        id: id ?? this.id,
+        fingerprint: fingerprint ?? this.fingerprint,
+        platformMessageId: platformMessageId.present
+            ? platformMessageId.value
+            : this.platformMessageId,
+        sender: sender ?? this.sender,
+        body: body ?? this.body,
+        receivedAt: receivedAt ?? this.receivedAt,
+        createdAt: createdAt ?? this.createdAt,
+        status: status ?? this.status,
+        bankId: bankId.present ? bankId.value : this.bankId,
+        templateId: templateId.present ? templateId.value : this.templateId,
+        amount: amount.present ? amount.value : this.amount,
+        type: type.present ? type.value : this.type,
+        suggestedCategoryId: suggestedCategoryId.present
+            ? suggestedCategoryId.value
+            : this.suggestedCategoryId,
+        note: note.present ? note.value : this.note,
+        valueDate: valueDate.present ? valueDate.value : this.valueDate,
+        currencyCode:
+            currencyCode.present ? currencyCode.value : this.currencyCode,
+        transactionId:
+            transactionId.present ? transactionId.value : this.transactionId,
+      );
+  SmsInboxRow copyWithCompanion(SmsInboxRowsCompanion data) {
+    return SmsInboxRow(
+      id: data.id.present ? data.id.value : this.id,
+      fingerprint:
+          data.fingerprint.present ? data.fingerprint.value : this.fingerprint,
+      platformMessageId: data.platformMessageId.present
+          ? data.platformMessageId.value
+          : this.platformMessageId,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      body: data.body.present ? data.body.value : this.body,
+      receivedAt:
+          data.receivedAt.present ? data.receivedAt.value : this.receivedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      status: data.status.present ? data.status.value : this.status,
+      bankId: data.bankId.present ? data.bankId.value : this.bankId,
+      templateId:
+          data.templateId.present ? data.templateId.value : this.templateId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      type: data.type.present ? data.type.value : this.type,
+      suggestedCategoryId: data.suggestedCategoryId.present
+          ? data.suggestedCategoryId.value
+          : this.suggestedCategoryId,
+      note: data.note.present ? data.note.value : this.note,
+      valueDate: data.valueDate.present ? data.valueDate.value : this.valueDate,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsInboxRow(')
+          ..write('id: $id, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('platformMessageId: $platformMessageId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('bankId: $bankId, ')
+          ..write('templateId: $templateId, ')
+          ..write('amount: $amount, ')
+          ..write('type: $type, ')
+          ..write('suggestedCategoryId: $suggestedCategoryId, ')
+          ..write('note: $note, ')
+          ..write('valueDate: $valueDate, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('transactionId: $transactionId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      fingerprint,
+      platformMessageId,
+      sender,
+      body,
+      receivedAt,
+      createdAt,
+      status,
+      bankId,
+      templateId,
+      amount,
+      type,
+      suggestedCategoryId,
+      note,
+      valueDate,
+      currencyCode,
+      transactionId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmsInboxRow &&
+          other.id == this.id &&
+          other.fingerprint == this.fingerprint &&
+          other.platformMessageId == this.platformMessageId &&
+          other.sender == this.sender &&
+          other.body == this.body &&
+          other.receivedAt == this.receivedAt &&
+          other.createdAt == this.createdAt &&
+          other.status == this.status &&
+          other.bankId == this.bankId &&
+          other.templateId == this.templateId &&
+          other.amount == this.amount &&
+          other.type == this.type &&
+          other.suggestedCategoryId == this.suggestedCategoryId &&
+          other.note == this.note &&
+          other.valueDate == this.valueDate &&
+          other.currencyCode == this.currencyCode &&
+          other.transactionId == this.transactionId);
+}
+
+class SmsInboxRowsCompanion extends UpdateCompanion<SmsInboxRow> {
+  final Value<int> id;
+  final Value<String> fingerprint;
+  final Value<String?> platformMessageId;
+  final Value<String> sender;
+  final Value<String> body;
+  final Value<DateTime> receivedAt;
+  final Value<DateTime> createdAt;
+  final Value<SmsInboxStatus> status;
+  final Value<String?> bankId;
+  final Value<String?> templateId;
+  final Value<int?> amount;
+  final Value<TransactionType?> type;
+  final Value<int?> suggestedCategoryId;
+  final Value<String?> note;
+  final Value<DateTime?> valueDate;
+  final Value<String?> currencyCode;
+  final Value<int?> transactionId;
+  const SmsInboxRowsCompanion({
+    this.id = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.platformMessageId = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.body = const Value.absent(),
+    this.receivedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.bankId = const Value.absent(),
+    this.templateId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.type = const Value.absent(),
+    this.suggestedCategoryId = const Value.absent(),
+    this.note = const Value.absent(),
+    this.valueDate = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.transactionId = const Value.absent(),
+  });
+  SmsInboxRowsCompanion.insert({
+    this.id = const Value.absent(),
+    required String fingerprint,
+    this.platformMessageId = const Value.absent(),
+    required String sender,
+    required String body,
+    required DateTime receivedAt,
+    required DateTime createdAt,
+    required SmsInboxStatus status,
+    this.bankId = const Value.absent(),
+    this.templateId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.type = const Value.absent(),
+    this.suggestedCategoryId = const Value.absent(),
+    this.note = const Value.absent(),
+    this.valueDate = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.transactionId = const Value.absent(),
+  })  : fingerprint = Value(fingerprint),
+        sender = Value(sender),
+        body = Value(body),
+        receivedAt = Value(receivedAt),
+        createdAt = Value(createdAt),
+        status = Value(status);
+  static Insertable<SmsInboxRow> custom({
+    Expression<int>? id,
+    Expression<String>? fingerprint,
+    Expression<String>? platformMessageId,
+    Expression<String>? sender,
+    Expression<String>? body,
+    Expression<DateTime>? receivedAt,
+    Expression<DateTime>? createdAt,
+    Expression<String>? status,
+    Expression<String>? bankId,
+    Expression<String>? templateId,
+    Expression<int>? amount,
+    Expression<String>? type,
+    Expression<int>? suggestedCategoryId,
+    Expression<String>? note,
+    Expression<DateTime>? valueDate,
+    Expression<String>? currencyCode,
+    Expression<int>? transactionId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (platformMessageId != null) 'platform_message_id': platformMessageId,
+      if (sender != null) 'sender': sender,
+      if (body != null) 'body': body,
+      if (receivedAt != null) 'received_at': receivedAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (status != null) 'status': status,
+      if (bankId != null) 'bank_id': bankId,
+      if (templateId != null) 'template_id': templateId,
+      if (amount != null) 'amount': amount,
+      if (type != null) 'type': type,
+      if (suggestedCategoryId != null)
+        'suggested_category_id': suggestedCategoryId,
+      if (note != null) 'note': note,
+      if (valueDate != null) 'value_date': valueDate,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (transactionId != null) 'transaction_id': transactionId,
+    });
+  }
+
+  SmsInboxRowsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? fingerprint,
+      Value<String?>? platformMessageId,
+      Value<String>? sender,
+      Value<String>? body,
+      Value<DateTime>? receivedAt,
+      Value<DateTime>? createdAt,
+      Value<SmsInboxStatus>? status,
+      Value<String?>? bankId,
+      Value<String?>? templateId,
+      Value<int?>? amount,
+      Value<TransactionType?>? type,
+      Value<int?>? suggestedCategoryId,
+      Value<String?>? note,
+      Value<DateTime?>? valueDate,
+      Value<String?>? currencyCode,
+      Value<int?>? transactionId}) {
+    return SmsInboxRowsCompanion(
+      id: id ?? this.id,
+      fingerprint: fingerprint ?? this.fingerprint,
+      platformMessageId: platformMessageId ?? this.platformMessageId,
+      sender: sender ?? this.sender,
+      body: body ?? this.body,
+      receivedAt: receivedAt ?? this.receivedAt,
+      createdAt: createdAt ?? this.createdAt,
+      status: status ?? this.status,
+      bankId: bankId ?? this.bankId,
+      templateId: templateId ?? this.templateId,
+      amount: amount ?? this.amount,
+      type: type ?? this.type,
+      suggestedCategoryId: suggestedCategoryId ?? this.suggestedCategoryId,
+      note: note ?? this.note,
+      valueDate: valueDate ?? this.valueDate,
+      currencyCode: currencyCode ?? this.currencyCode,
+      transactionId: transactionId ?? this.transactionId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (platformMessageId.present) {
+      map['platform_message_id'] = Variable<String>(platformMessageId.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (receivedAt.present) {
+      map['received_at'] = Variable<DateTime>(receivedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+          $SmsInboxRowsTable.$converterstatus.toSql(status.value));
+    }
+    if (bankId.present) {
+      map['bank_id'] = Variable<String>(bankId.value);
+    }
+    if (templateId.present) {
+      map['template_id'] = Variable<String>(templateId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+          $SmsInboxRowsTable.$convertertypen.toSql(type.value));
+    }
+    if (suggestedCategoryId.present) {
+      map['suggested_category_id'] = Variable<int>(suggestedCategoryId.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (valueDate.present) {
+      map['value_date'] = Variable<DateTime>(valueDate.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<int>(transactionId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmsInboxRowsCompanion(')
+          ..write('id: $id, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('platformMessageId: $platformMessageId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('receivedAt: $receivedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('bankId: $bankId, ')
+          ..write('templateId: $templateId, ')
+          ..write('amount: $amount, ')
+          ..write('type: $type, ')
+          ..write('suggestedCategoryId: $suggestedCategoryId, ')
+          ..write('note: $note, ')
+          ..write('valueDate: $valueDate, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('transactionId: $transactionId')
           ..write(')'))
         .toString();
   }
@@ -1004,12 +1876,32 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TransactionRowsTable transactionRows =
       $TransactionRowsTable(this);
   late final $SettingsRowsTable settingsRows = $SettingsRowsTable(this);
+  late final $SmsInboxRowsTable smsInboxRows = $SmsInboxRowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [categoryRows, transactionRows, settingsRows];
+      [categoryRows, transactionRows, settingsRows, smsInboxRows];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('categories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('sms_inbox', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('transactions',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('sms_inbox', kind: UpdateKind.update),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$CategoryRowsTableCreateCompanionBuilder = CategoryRowsCompanion
@@ -1050,6 +1942,22 @@ final class $$CategoryRowsTableReferences
 
     final cache =
         $_typedResult.readTableOrNull(_transactionRowsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SmsInboxRowsTable, List<SmsInboxRow>>
+      _smsInboxRowsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.smsInboxRows,
+              aliasName: $_aliasNameGenerator(
+                  db.categoryRows.id, db.smsInboxRows.suggestedCategoryId));
+
+  $$SmsInboxRowsTableProcessedTableManager get smsInboxRowsRefs {
+    final manager = $$SmsInboxRowsTableTableManager($_db, $_db.smsInboxRows)
+        .filter((f) =>
+            f.suggestedCategoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_smsInboxRowsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -1100,6 +2008,27 @@ class $$CategoryRowsTableFilterComposer
             $$TransactionRowsTableFilterComposer(
               $db: $db,
               $table: $db.transactionRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> smsInboxRowsRefs(
+      Expression<bool> Function($$SmsInboxRowsTableFilterComposer f) f) {
+    final $$SmsInboxRowsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.smsInboxRows,
+        getReferencedColumn: (t) => t.suggestedCategoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SmsInboxRowsTableFilterComposer(
+              $db: $db,
+              $table: $db.smsInboxRows,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1191,6 +2120,27 @@ class $$CategoryRowsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> smsInboxRowsRefs<T extends Object>(
+      Expression<T> Function($$SmsInboxRowsTableAnnotationComposer a) f) {
+    final $$SmsInboxRowsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.smsInboxRows,
+        getReferencedColumn: (t) => t.suggestedCategoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SmsInboxRowsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.smsInboxRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$CategoryRowsTableTableManager extends RootTableManager<
@@ -1204,7 +2154,7 @@ class $$CategoryRowsTableTableManager extends RootTableManager<
     $$CategoryRowsTableUpdateCompanionBuilder,
     (CategoryRow, $$CategoryRowsTableReferences),
     CategoryRow,
-    PrefetchHooks Function({bool transactionRowsRefs})> {
+    PrefetchHooks Function({bool transactionRowsRefs, bool smsInboxRowsRefs})> {
   $$CategoryRowsTableTableManager(_$AppDatabase db, $CategoryRowsTable table)
       : super(TableManagerState(
           db: db,
@@ -1257,11 +2207,13 @@ class $$CategoryRowsTableTableManager extends RootTableManager<
                     $$CategoryRowsTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({transactionRowsRefs = false}) {
+          prefetchHooksCallback: (
+              {transactionRowsRefs = false, smsInboxRowsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
-                if (transactionRowsRefs) db.transactionRows
+                if (transactionRowsRefs) db.transactionRows,
+                if (smsInboxRowsRefs) db.smsInboxRows
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -1278,6 +2230,19 @@ class $$CategoryRowsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.categoryId == item.id),
+                        typedResults: items),
+                  if (smsInboxRowsRefs)
+                    await $_getPrefetchedData<CategoryRow, $CategoryRowsTable,
+                            SmsInboxRow>(
+                        currentTable: table,
+                        referencedTable: $$CategoryRowsTableReferences
+                            ._smsInboxRowsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoryRowsTableReferences(db, table, p0)
+                                .smsInboxRowsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.suggestedCategoryId == item.id),
                         typedResults: items)
                 ];
               },
@@ -1297,7 +2262,7 @@ typedef $$CategoryRowsTableProcessedTableManager = ProcessedTableManager<
     $$CategoryRowsTableUpdateCompanionBuilder,
     (CategoryRow, $$CategoryRowsTableReferences),
     CategoryRow,
-    PrefetchHooks Function({bool transactionRowsRefs})>;
+    PrefetchHooks Function({bool transactionRowsRefs, bool smsInboxRowsRefs})>;
 typedef $$TransactionRowsTableCreateCompanionBuilder = TransactionRowsCompanion
     Function({
   Value<int> id,
@@ -1339,6 +2304,21 @@ final class $$TransactionRowsTableReferences extends BaseReferences<
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$SmsInboxRowsTable, List<SmsInboxRow>>
+      _smsInboxRowsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.smsInboxRows,
+              aliasName: $_aliasNameGenerator(
+                  db.transactionRows.id, db.smsInboxRows.transactionId));
+
+  $$SmsInboxRowsTableProcessedTableManager get smsInboxRowsRefs {
+    final manager = $$SmsInboxRowsTableTableManager($_db, $_db.smsInboxRows)
+        .filter((f) => f.transactionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_smsInboxRowsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
   }
 }
 
@@ -1394,6 +2374,27 @@ class $$TransactionRowsTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> smsInboxRowsRefs(
+      Expression<bool> Function($$SmsInboxRowsTableFilterComposer f) f) {
+    final $$SmsInboxRowsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.smsInboxRows,
+        getReferencedColumn: (t) => t.transactionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SmsInboxRowsTableFilterComposer(
+              $db: $db,
+              $table: $db.smsInboxRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 }
 
@@ -1497,6 +2498,27 @@ class $$TransactionRowsTableAnnotationComposer
             ));
     return composer;
   }
+
+  Expression<T> smsInboxRowsRefs<T extends Object>(
+      Expression<T> Function($$SmsInboxRowsTableAnnotationComposer a) f) {
+    final $$SmsInboxRowsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.smsInboxRows,
+        getReferencedColumn: (t) => t.transactionId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SmsInboxRowsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.smsInboxRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$TransactionRowsTableTableManager extends RootTableManager<
@@ -1510,7 +2532,7 @@ class $$TransactionRowsTableTableManager extends RootTableManager<
     $$TransactionRowsTableUpdateCompanionBuilder,
     (TransactionRow, $$TransactionRowsTableReferences),
     TransactionRow,
-    PrefetchHooks Function({bool categoryId})> {
+    PrefetchHooks Function({bool categoryId, bool smsInboxRowsRefs})> {
   $$TransactionRowsTableTableManager(
       _$AppDatabase db, $TransactionRowsTable table)
       : super(TableManagerState(
@@ -1568,10 +2590,11 @@ class $$TransactionRowsTableTableManager extends RootTableManager<
                     $$TransactionRowsTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({categoryId = false}) {
+          prefetchHooksCallback: (
+              {categoryId = false, smsInboxRowsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (smsInboxRowsRefs) db.smsInboxRows],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -1600,7 +2623,21 @@ class $$TransactionRowsTableTableManager extends RootTableManager<
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (smsInboxRowsRefs)
+                    await $_getPrefetchedData<TransactionRow,
+                            $TransactionRowsTable, SmsInboxRow>(
+                        currentTable: table,
+                        referencedTable: $$TransactionRowsTableReferences
+                            ._smsInboxRowsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$TransactionRowsTableReferences(db, table, p0)
+                                .smsInboxRowsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.transactionId == item.id),
+                        typedResults: items)
+                ];
               },
             );
           },
@@ -1618,16 +2655,18 @@ typedef $$TransactionRowsTableProcessedTableManager = ProcessedTableManager<
     $$TransactionRowsTableUpdateCompanionBuilder,
     (TransactionRow, $$TransactionRowsTableReferences),
     TransactionRow,
-    PrefetchHooks Function({bool categoryId})>;
+    PrefetchHooks Function({bool categoryId, bool smsInboxRowsRefs})>;
 typedef $$SettingsRowsTableCreateCompanionBuilder = SettingsRowsCompanion
     Function({
   Value<int> id,
   Value<String> currencyCode,
+  Value<DateTime?> smsLastScanAt,
 });
 typedef $$SettingsRowsTableUpdateCompanionBuilder = SettingsRowsCompanion
     Function({
   Value<int> id,
   Value<String> currencyCode,
+  Value<DateTime?> smsLastScanAt,
 });
 
 class $$SettingsRowsTableFilterComposer
@@ -1644,6 +2683,9 @@ class $$SettingsRowsTableFilterComposer
 
   ColumnFilters<String> get currencyCode => $composableBuilder(
       column: $table.currencyCode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get smsLastScanAt => $composableBuilder(
+      column: $table.smsLastScanAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$SettingsRowsTableOrderingComposer
@@ -1661,6 +2703,10 @@ class $$SettingsRowsTableOrderingComposer
   ColumnOrderings<String> get currencyCode => $composableBuilder(
       column: $table.currencyCode,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get smsLastScanAt => $composableBuilder(
+      column: $table.smsLastScanAt,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsRowsTableAnnotationComposer
@@ -1677,6 +2723,9 @@ class $$SettingsRowsTableAnnotationComposer
 
   GeneratedColumn<String> get currencyCode => $composableBuilder(
       column: $table.currencyCode, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get smsLastScanAt => $composableBuilder(
+      column: $table.smsLastScanAt, builder: (column) => column);
 }
 
 class $$SettingsRowsTableTableManager extends RootTableManager<
@@ -1707,18 +2756,22 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
+            Value<DateTime?> smsLastScanAt = const Value.absent(),
           }) =>
               SettingsRowsCompanion(
             id: id,
             currencyCode: currencyCode,
+            smsLastScanAt: smsLastScanAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
+            Value<DateTime?> smsLastScanAt = const Value.absent(),
           }) =>
               SettingsRowsCompanion.insert(
             id: id,
             currencyCode: currencyCode,
+            smsLastScanAt: smsLastScanAt,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1742,6 +2795,542 @@ typedef $$SettingsRowsTableProcessedTableManager = ProcessedTableManager<
     ),
     SettingsRow,
     PrefetchHooks Function()>;
+typedef $$SmsInboxRowsTableCreateCompanionBuilder = SmsInboxRowsCompanion
+    Function({
+  Value<int> id,
+  required String fingerprint,
+  Value<String?> platformMessageId,
+  required String sender,
+  required String body,
+  required DateTime receivedAt,
+  required DateTime createdAt,
+  required SmsInboxStatus status,
+  Value<String?> bankId,
+  Value<String?> templateId,
+  Value<int?> amount,
+  Value<TransactionType?> type,
+  Value<int?> suggestedCategoryId,
+  Value<String?> note,
+  Value<DateTime?> valueDate,
+  Value<String?> currencyCode,
+  Value<int?> transactionId,
+});
+typedef $$SmsInboxRowsTableUpdateCompanionBuilder = SmsInboxRowsCompanion
+    Function({
+  Value<int> id,
+  Value<String> fingerprint,
+  Value<String?> platformMessageId,
+  Value<String> sender,
+  Value<String> body,
+  Value<DateTime> receivedAt,
+  Value<DateTime> createdAt,
+  Value<SmsInboxStatus> status,
+  Value<String?> bankId,
+  Value<String?> templateId,
+  Value<int?> amount,
+  Value<TransactionType?> type,
+  Value<int?> suggestedCategoryId,
+  Value<String?> note,
+  Value<DateTime?> valueDate,
+  Value<String?> currencyCode,
+  Value<int?> transactionId,
+});
+
+final class $$SmsInboxRowsTableReferences
+    extends BaseReferences<_$AppDatabase, $SmsInboxRowsTable, SmsInboxRow> {
+  $$SmsInboxRowsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoryRowsTable _suggestedCategoryIdTable(_$AppDatabase db) =>
+      db.categoryRows.createAlias($_aliasNameGenerator(
+          db.smsInboxRows.suggestedCategoryId, db.categoryRows.id));
+
+  $$CategoryRowsTableProcessedTableManager? get suggestedCategoryId {
+    final $_column = $_itemColumn<int>('suggested_category_id');
+    if ($_column == null) return null;
+    final manager = $$CategoryRowsTableTableManager($_db, $_db.categoryRows)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_suggestedCategoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $TransactionRowsTable _transactionIdTable(_$AppDatabase db) =>
+      db.transactionRows.createAlias($_aliasNameGenerator(
+          db.smsInboxRows.transactionId, db.transactionRows.id));
+
+  $$TransactionRowsTableProcessedTableManager? get transactionId {
+    final $_column = $_itemColumn<int>('transaction_id');
+    if ($_column == null) return null;
+    final manager =
+        $$TransactionRowsTableTableManager($_db, $_db.transactionRows)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_transactionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$SmsInboxRowsTableFilterComposer
+    extends Composer<_$AppDatabase, $SmsInboxRowsTable> {
+  $$SmsInboxRowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get platformMessageId => $composableBuilder(
+      column: $table.platformMessageId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sender => $composableBuilder(
+      column: $table.sender, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get body => $composableBuilder(
+      column: $table.body, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SmsInboxStatus, SmsInboxStatus, String>
+      get status => $composableBuilder(
+          column: $table.status,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get bankId => $composableBuilder(
+      column: $table.bankId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<TransactionType?, TransactionType, String>
+      get type => $composableBuilder(
+          column: $table.type,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get valueDate => $composableBuilder(
+      column: $table.valueDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+      column: $table.currencyCode, builder: (column) => ColumnFilters(column));
+
+  $$CategoryRowsTableFilterComposer get suggestedCategoryId {
+    final $$CategoryRowsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.suggestedCategoryId,
+        referencedTable: $db.categoryRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoryRowsTableFilterComposer(
+              $db: $db,
+              $table: $db.categoryRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TransactionRowsTableFilterComposer get transactionId {
+    final $$TransactionRowsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactionRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionRowsTableFilterComposer(
+              $db: $db,
+              $table: $db.transactionRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SmsInboxRowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmsInboxRowsTable> {
+  $$SmsInboxRowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get platformMessageId => $composableBuilder(
+      column: $table.platformMessageId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sender => $composableBuilder(
+      column: $table.sender, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get body => $composableBuilder(
+      column: $table.body, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bankId => $composableBuilder(
+      column: $table.bankId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get valueDate => $composableBuilder(
+      column: $table.valueDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+      column: $table.currencyCode,
+      builder: (column) => ColumnOrderings(column));
+
+  $$CategoryRowsTableOrderingComposer get suggestedCategoryId {
+    final $$CategoryRowsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.suggestedCategoryId,
+        referencedTable: $db.categoryRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoryRowsTableOrderingComposer(
+              $db: $db,
+              $table: $db.categoryRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TransactionRowsTableOrderingComposer get transactionId {
+    final $$TransactionRowsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactionRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionRowsTableOrderingComposer(
+              $db: $db,
+              $table: $db.transactionRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SmsInboxRowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmsInboxRowsTable> {
+  $$SmsInboxRowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+      column: $table.fingerprint, builder: (column) => column);
+
+  GeneratedColumn<String> get platformMessageId => $composableBuilder(
+      column: $table.platformMessageId, builder: (column) => column);
+
+  GeneratedColumn<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get receivedAt => $composableBuilder(
+      column: $table.receivedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SmsInboxStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get bankId =>
+      $composableBuilder(column: $table.bankId, builder: (column) => column);
+
+  GeneratedColumn<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TransactionType?, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get valueDate =>
+      $composableBuilder(column: $table.valueDate, builder: (column) => column);
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+      column: $table.currencyCode, builder: (column) => column);
+
+  $$CategoryRowsTableAnnotationComposer get suggestedCategoryId {
+    final $$CategoryRowsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.suggestedCategoryId,
+        referencedTable: $db.categoryRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoryRowsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categoryRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$TransactionRowsTableAnnotationComposer get transactionId {
+    final $$TransactionRowsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.transactionId,
+        referencedTable: $db.transactionRows,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionRowsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.transactionRows,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SmsInboxRowsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SmsInboxRowsTable,
+    SmsInboxRow,
+    $$SmsInboxRowsTableFilterComposer,
+    $$SmsInboxRowsTableOrderingComposer,
+    $$SmsInboxRowsTableAnnotationComposer,
+    $$SmsInboxRowsTableCreateCompanionBuilder,
+    $$SmsInboxRowsTableUpdateCompanionBuilder,
+    (SmsInboxRow, $$SmsInboxRowsTableReferences),
+    SmsInboxRow,
+    PrefetchHooks Function({bool suggestedCategoryId, bool transactionId})> {
+  $$SmsInboxRowsTableTableManager(_$AppDatabase db, $SmsInboxRowsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmsInboxRowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmsInboxRowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmsInboxRowsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> fingerprint = const Value.absent(),
+            Value<String?> platformMessageId = const Value.absent(),
+            Value<String> sender = const Value.absent(),
+            Value<String> body = const Value.absent(),
+            Value<DateTime> receivedAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<SmsInboxStatus> status = const Value.absent(),
+            Value<String?> bankId = const Value.absent(),
+            Value<String?> templateId = const Value.absent(),
+            Value<int?> amount = const Value.absent(),
+            Value<TransactionType?> type = const Value.absent(),
+            Value<int?> suggestedCategoryId = const Value.absent(),
+            Value<String?> note = const Value.absent(),
+            Value<DateTime?> valueDate = const Value.absent(),
+            Value<String?> currencyCode = const Value.absent(),
+            Value<int?> transactionId = const Value.absent(),
+          }) =>
+              SmsInboxRowsCompanion(
+            id: id,
+            fingerprint: fingerprint,
+            platformMessageId: platformMessageId,
+            sender: sender,
+            body: body,
+            receivedAt: receivedAt,
+            createdAt: createdAt,
+            status: status,
+            bankId: bankId,
+            templateId: templateId,
+            amount: amount,
+            type: type,
+            suggestedCategoryId: suggestedCategoryId,
+            note: note,
+            valueDate: valueDate,
+            currencyCode: currencyCode,
+            transactionId: transactionId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String fingerprint,
+            Value<String?> platformMessageId = const Value.absent(),
+            required String sender,
+            required String body,
+            required DateTime receivedAt,
+            required DateTime createdAt,
+            required SmsInboxStatus status,
+            Value<String?> bankId = const Value.absent(),
+            Value<String?> templateId = const Value.absent(),
+            Value<int?> amount = const Value.absent(),
+            Value<TransactionType?> type = const Value.absent(),
+            Value<int?> suggestedCategoryId = const Value.absent(),
+            Value<String?> note = const Value.absent(),
+            Value<DateTime?> valueDate = const Value.absent(),
+            Value<String?> currencyCode = const Value.absent(),
+            Value<int?> transactionId = const Value.absent(),
+          }) =>
+              SmsInboxRowsCompanion.insert(
+            id: id,
+            fingerprint: fingerprint,
+            platformMessageId: platformMessageId,
+            sender: sender,
+            body: body,
+            receivedAt: receivedAt,
+            createdAt: createdAt,
+            status: status,
+            bankId: bankId,
+            templateId: templateId,
+            amount: amount,
+            type: type,
+            suggestedCategoryId: suggestedCategoryId,
+            note: note,
+            valueDate: valueDate,
+            currencyCode: currencyCode,
+            transactionId: transactionId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SmsInboxRowsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {suggestedCategoryId = false, transactionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (suggestedCategoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.suggestedCategoryId,
+                    referencedTable: $$SmsInboxRowsTableReferences
+                        ._suggestedCategoryIdTable(db),
+                    referencedColumn: $$SmsInboxRowsTableReferences
+                        ._suggestedCategoryIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (transactionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.transactionId,
+                    referencedTable:
+                        $$SmsInboxRowsTableReferences._transactionIdTable(db),
+                    referencedColumn: $$SmsInboxRowsTableReferences
+                        ._transactionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SmsInboxRowsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SmsInboxRowsTable,
+    SmsInboxRow,
+    $$SmsInboxRowsTableFilterComposer,
+    $$SmsInboxRowsTableOrderingComposer,
+    $$SmsInboxRowsTableAnnotationComposer,
+    $$SmsInboxRowsTableCreateCompanionBuilder,
+    $$SmsInboxRowsTableUpdateCompanionBuilder,
+    (SmsInboxRow, $$SmsInboxRowsTableReferences),
+    SmsInboxRow,
+    PrefetchHooks Function({bool suggestedCategoryId, bool transactionId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1752,4 +3341,6 @@ class $AppDatabaseManager {
       $$TransactionRowsTableTableManager(_db, _db.transactionRows);
   $$SettingsRowsTableTableManager get settingsRows =>
       $$SettingsRowsTableTableManager(_db, _db.settingsRows);
+  $$SmsInboxRowsTableTableManager get smsInboxRows =>
+      $$SmsInboxRowsTableTableManager(_db, _db.smsInboxRows);
 }

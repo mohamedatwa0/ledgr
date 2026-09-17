@@ -12,6 +12,18 @@ import '../../domain/usecases/delete_category.dart';
 import '../../domain/usecases/delete_transaction.dart';
 import '../../domain/usecases/update_category.dart';
 import '../../domain/usecases/update_transaction.dart';
+import '../../domain/sms/sms_gateway.dart';
+import '../../domain/usecases/dismiss_sms.dart';
+import '../../domain/usecases/import_parsed_sms.dart';
+import '../../domain/usecases/ingest_sms.dart';
+import '../../domain/usecases/scan_sms_inbox.dart';
+import '../../domain/repositories/sms_inbox_repository.dart';
+import '../screens/sms_inbox/bloc/sms_inbox_bloc.dart';
+import '../screens/sms_inbox/bloc/sms_inbox_event.dart';
+import '../screens/sms_inbox/sms_inbox_screen.dart';
+import '../screens/sms_review/bloc/sms_review_bloc.dart';
+import '../screens/sms_review/bloc/sms_review_event.dart';
+import '../screens/sms_review/sms_review_screen.dart';
 import '../screens/add_transaction/add_transaction_screen.dart';
 import '../screens/add_transaction/bloc/add_transaction_bloc.dart';
 import '../screens/add_transaction/bloc/add_transaction_event.dart';
@@ -56,10 +68,41 @@ GoRouter createAppRouter() {
         ),
       ),
       GoRoute(
+        path: '/settings/sms',
+        builder: (context, state) => BlocProvider(
+          create: (context) => SmsInboxBloc(
+            inbox: context.read<SmsInboxRepository>(),
+            gateway: context.read<SmsGateway>(),
+            ingestSms: context.read<IngestSms>(),
+            scanSmsInbox: context.read<ScanSmsInbox>(),
+            dismissSms: context.read<DismissSms>(),
+          )..add(const SmsInboxStarted()),
+          child: const SmsInboxScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/settings/sms/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return BlocProvider(
+            create: (context) => SmsReviewBloc(
+              inboxId: id,
+              inbox: context.read<SmsInboxRepository>(),
+              categories: context.read<CategoryRepository>(),
+              settings: context.read<SettingsRepository>(),
+              importParsedSms: context.read<ImportParsedSms>(),
+              dismissSms: context.read<DismissSms>(),
+            )..add(const SmsReviewStarted()),
+            child: SmsReviewScreen(inboxId: id),
+          );
+        },
+      ),
+      GoRoute(
         path: '/settings',
         builder: (context, state) => BlocProvider(
           create: (context) => SettingsBloc(
             settings: context.read<SettingsRepository>(),
+            smsInbox: context.read<SmsInboxRepository>(),
           )..add(const SettingsStarted()),
           child: const SettingsScreen(),
         ),

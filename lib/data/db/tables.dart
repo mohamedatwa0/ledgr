@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../domain/models/transaction_source.dart';
 import '../../domain/models/transaction_type.dart';
+import '../../domain/sms/sms_inbox_status.dart';
 
 class CategoryRows extends Table {
   @override
@@ -42,7 +43,39 @@ class SettingsRows extends Table {
 
   IntColumn get id => integer()();
   TextColumn get currencyCode => text().withDefault(const Constant('EGP'))();
+  DateTimeColumn get smsLastScanAt => dateTime().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
+}
+
+class SmsInboxRows extends Table {
+  @override
+  String get tableName => 'sms_inbox';
+
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get fingerprint => text().unique()();
+  TextColumn get platformMessageId => text().nullable()();
+  TextColumn get sender => text()();
+  TextColumn get body => text()();
+  DateTimeColumn get receivedAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get status => textEnum<SmsInboxStatus>()();
+  TextColumn get bankId => text().nullable()();
+  TextColumn get templateId => text().nullable()();
+  IntColumn get amount => integer().nullable()();
+  TextColumn get type => textEnum<TransactionType>().nullable()();
+  IntColumn get suggestedCategoryId => integer().nullable().references(
+        CategoryRows,
+        #id,
+        onDelete: KeyAction.setNull,
+      )();
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get valueDate => dateTime().nullable()();
+  TextColumn get currencyCode => text().nullable()();
+  IntColumn get transactionId => integer().nullable().references(
+        TransactionRows,
+        #id,
+        onDelete: KeyAction.setNull,
+      )();
 }
