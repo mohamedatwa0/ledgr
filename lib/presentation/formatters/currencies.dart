@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 class SupportedCurrency {
   const SupportedCurrency({
     required this.code,
@@ -24,4 +26,23 @@ SupportedCurrency currencyByCode(String code) {
     (c) => c.code == code,
     orElse: () => supportedCurrencies.first,
   );
+}
+
+String localizedCurrencyLabel(AppLocalizations l10n, String code) {
+  switch (code) {
+    case 'EGP':
+      return l10n.currencyEgp;
+    case 'USD':
+      return l10n.currencyUsd;
+    case 'EUR':
+      return l10n.currencyEur;
+    case 'GBP':
+      return l10n.currencyGbp;
+    case 'SAR':
+      return l10n.currencySar;
+    case 'AED':
+      return l10n.currencyAed;
+    default:
+      return currencyByCode(code).label;
+  }
 }

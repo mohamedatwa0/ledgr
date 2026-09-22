@@ -98,7 +98,7 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
           parsing: false,
           pasteText: '',
           filter: result.item.status.statusFilter,
-          message: result.duplicate ? 'Already in the inbox' : null,
+          flash: result.duplicate ? SmsInboxFlash.alreadyInInbox : null,
           clearMessage: !result.duplicate,
         ),
       );
@@ -120,9 +120,10 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
     emit(
       state.copyWith(
         scanning: false,
-        message: added == 0
-            ? 'No new bank messages'
-            : 'Found $added message${added == 1 ? '' : 's'} to review',
+        flash: added == 0
+            ? SmsInboxFlash.noNewBankMessages
+            : SmsInboxFlash.foundMessages,
+        flashCount: added,
       ),
     );
   }

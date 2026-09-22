@@ -20,6 +20,7 @@ import '../../domain/usecases/dismiss_sms.dart';
 import '../../domain/usecases/import_parsed_sms.dart';
 import '../../domain/usecases/ingest_sms.dart';
 import '../../domain/usecases/scan_sms_inbox.dart';
+import '../../domain/usecases/reset_ledger.dart';
 import '../../domain/usecases/update_category.dart';
 import '../../domain/usecases/update_transaction.dart';
 
@@ -120,6 +121,12 @@ class _LedgrScopeState extends State<LedgrScope> {
             context.read<SmsGateway>(),
             context.read<SettingsRepository>(),
             context.read<IngestSms>(),
+          ),
+        ),
+        RepositoryProvider<ResetLedger>(
+          create: (context) => ResetLedger(
+            transactions: context.read<TransactionRepository>(),
+            smsInbox: context.read<SmsInboxRepository>(),
           ),
         ),
       ],

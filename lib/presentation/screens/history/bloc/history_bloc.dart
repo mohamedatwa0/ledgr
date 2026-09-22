@@ -20,6 +20,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     on<HistoryFilterChanged>(_onFilterChanged);
     on<HistoryDeleteRequested>(_onDeleteRequested);
     on<HistoryEntriesUpdated>(_onEntriesUpdated);
+    on<HistoryQueryChanged>(_onQueryChanged);
   }
 
   final TransactionRepository _transactions;
@@ -51,6 +52,13 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     Emitter<HistoryState> emit,
   ) {
     emit(state.copyWith(entries: event.entries, loading: false));
+  }
+
+  void _onQueryChanged(
+    HistoryQueryChanged event,
+    Emitter<HistoryState> emit,
+  ) {
+    emit(state.copyWith(query: event.query));
   }
 
   void _watch(HistoryFilter filter) {

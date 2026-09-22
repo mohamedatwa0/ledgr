@@ -32,6 +32,8 @@ void main() {
     expect(result.credits, 10000);
     expect(result.debits, 5000);
     expect(result.balance, 5000);
+    expect(result.creditCount, 1);
+    expect(result.debitCount, 2);
   });
 
   test('empty list is zero', () {

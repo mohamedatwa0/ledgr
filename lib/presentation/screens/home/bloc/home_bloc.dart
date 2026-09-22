@@ -72,9 +72,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _entriesSub?.cancel();
     _entriesSub = _transactions
         .watchEntries(
-          from: monthStart(month),
-          toExclusive: monthEndExclusive(month),
-        )
+      from: monthStart(month),
+      toExclusive: monthEndExclusive(month),
+    )
         .listen((entries) {
       if (!isClosed) add(HomeEntriesUpdated(entries));
     });

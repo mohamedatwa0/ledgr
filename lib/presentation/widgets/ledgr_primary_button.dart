@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
@@ -15,22 +16,30 @@ class LedgrPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final enabled = onPressed != null;
     return SizedBox(
       width: double.infinity,
+      height: 48.h,
       child: FilledButton(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: enabled ? tealAccent : tealAccent.withValues(alpha: 0.4),
-          foregroundColor: tealOnAccent,
-          disabledBackgroundColor: tealAccent.withValues(alpha: 0.4),
-          disabledForegroundColor: tealOnAccent.withValues(alpha: 0.8),
+          backgroundColor:
+              enabled ? colors.primary : colors.primary.withValues(alpha: 0.4),
+          foregroundColor: colors.onPrimary,
+          disabledBackgroundColor: colors.primary.withValues(alpha: 0.4),
+          disabledForegroundColor: colors.onPrimary.withValues(alpha: 0.8),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          textStyle: uiStyle(fontSize: 15, fontWeight: FontWeight.w500, color: tealOnAccent),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+          textStyle: uiStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: colors.onPrimary,
+            letterSpacing: 0.8,
+          ),
         ),
-        child: Text(label),
+        child: Text(label.toUpperCase()),
       ),
     );
   }

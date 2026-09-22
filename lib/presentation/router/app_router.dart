@@ -5,25 +5,20 @@ import 'package:go_router/go_router.dart';
 import '../../domain/models/transaction_type.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
+import '../../domain/repositories/sms_inbox_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
+import '../../domain/sms/sms_gateway.dart';
 import '../../domain/usecases/create_category.dart';
 import '../../domain/usecases/create_transaction.dart';
 import '../../domain/usecases/delete_category.dart';
 import '../../domain/usecases/delete_transaction.dart';
-import '../../domain/usecases/update_category.dart';
-import '../../domain/usecases/update_transaction.dart';
-import '../../domain/sms/sms_gateway.dart';
 import '../../domain/usecases/dismiss_sms.dart';
 import '../../domain/usecases/import_parsed_sms.dart';
 import '../../domain/usecases/ingest_sms.dart';
+import '../../domain/usecases/reset_ledger.dart';
 import '../../domain/usecases/scan_sms_inbox.dart';
-import '../../domain/repositories/sms_inbox_repository.dart';
-import '../screens/sms_inbox/bloc/sms_inbox_bloc.dart';
-import '../screens/sms_inbox/bloc/sms_inbox_event.dart';
-import '../screens/sms_inbox/sms_inbox_screen.dart';
-import '../screens/sms_review/bloc/sms_review_bloc.dart';
-import '../screens/sms_review/bloc/sms_review_event.dart';
-import '../screens/sms_review/sms_review_screen.dart';
+import '../../domain/usecases/update_category.dart';
+import '../../domain/usecases/update_transaction.dart';
 import '../screens/add_transaction/add_transaction_screen.dart';
 import '../screens/add_transaction/bloc/add_transaction_bloc.dart';
 import '../screens/add_transaction/bloc/add_transaction_event.dart';
@@ -42,32 +37,86 @@ import '../screens/home/home_screen.dart';
 import '../screens/settings/bloc/settings_bloc.dart';
 import '../screens/settings/bloc/settings_event.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/sms_inbox/bloc/sms_inbox_bloc.dart';
+import '../screens/sms_inbox/bloc/sms_inbox_event.dart';
+import '../screens/sms_inbox/sms_inbox_screen.dart';
+import '../screens/sms_review/bloc/sms_review_bloc.dart';
+import '../screens/sms_review/bloc/sms_review_event.dart';
+import '../screens/sms_review/sms_review_screen.dart';
+import '../widgets/ledgr_shell.dart';
+
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 GoRouter createAppRouter() {
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => BlocProvider(
-          create: (context) => HomeBloc(
-            transactions: context.read<TransactionRepository>(),
-            settings: context.read<SettingsRepository>(),
-          )..add(const HomeStarted()),
-          child: const HomeScreen(),
-        ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return LedgrShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => BlocProvider(
+                  create: (context) => HomeBloc(
+                    transactions: context.read<TransactionRepository>(),
+                    settings: context.read<SettingsRepository>(),
+                  )..add(const HomeStarted()),
+                  child: const HomeScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/history',
+                builder: (context, state) => BlocProvider(
+                  create: (context) => HistoryBloc(
+                    transactions: context.read<TransactionRepository>(),
+                    deleteTransaction: context.read<DeleteTransaction>(),
+                  )..add(const HistoryStarted()),
+                  child: const HistoryScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/categories',
+                builder: (context, state) => BlocProvider(
+                  create: (context) => CategoriesBloc(
+                    categories: context.read<CategoryRepository>(),
+                  )..add(const CategoriesStarted()),
+                  child: const CategoriesScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                builder: (context, state) => BlocProvider(
+                  create: (context) => SettingsBloc(
+                    settings: context.read<SettingsRepository>(),
+                    smsInbox: context.read<SmsInboxRepository>(),
+                    resetLedger: context.read<ResetLedger>(),
+                  )..add(const SettingsStarted()),
+                  child: const SettingsScreen(),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
-        path: '/history',
-        builder: (context, state) => BlocProvider(
-          create: (context) => HistoryBloc(
-            transactions: context.read<TransactionRepository>(),
-            deleteTransaction: context.read<DeleteTransaction>(),
-          )..add(const HistoryStarted()),
-          child: const HistoryScreen(),
-        ),
-      ),
-      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/sms',
         builder: (context, state) => BlocProvider(
           create: (context) => SmsInboxBloc(
@@ -81,6 +130,7 @@ GoRouter createAppRouter() {
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/sms/:id',
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
@@ -98,25 +148,7 @@ GoRouter createAppRouter() {
         },
       ),
       GoRoute(
-        path: '/settings',
-        builder: (context, state) => BlocProvider(
-          create: (context) => SettingsBloc(
-            settings: context.read<SettingsRepository>(),
-            smsInbox: context.read<SmsInboxRepository>(),
-          )..add(const SettingsStarted()),
-          child: const SettingsScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/categories',
-        builder: (context, state) => BlocProvider(
-          create: (context) => CategoriesBloc(
-            categories: context.read<CategoryRepository>(),
-          )..add(const CategoriesStarted()),
-          child: const CategoriesScreen(),
-        ),
-      ),
-      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/categories/new',
         builder: (context, state) {
           final typeName = state.uri.queryParameters['type'];
@@ -131,6 +163,7 @@ GoRouter createAppRouter() {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/categories/:id',
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
@@ -142,14 +175,16 @@ GoRouter createAppRouter() {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/transaction/new',
         builder: (context, state) => BlocProvider(
-          create: (context) => _addTransactionBloc(context)
-            ..add(const AddTransactionStarted()),
+          create: (context) =>
+              _addTransactionBloc(context)..add(const AddTransactionStarted()),
           child: const AddTransactionScreen(),
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/transaction/:id',
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
@@ -191,5 +226,31 @@ CategoryFormBloc _categoryFormBloc(
     deleteCategory: context.read<DeleteCategory>(),
     categoryId: categoryId,
     type: type,
+  );
+}
+
+Future<int?> showCategoryFormSheet(
+  BuildContext context, {
+  int? categoryId,
+  TransactionType type = TransactionType.expense,
+}) {
+  return showModalBottomSheet<int>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      return BlocProvider(
+        create: (_) => _categoryFormBloc(
+          context,
+          categoryId: categoryId,
+          type: type,
+        )..add(const CategoryFormStarted()),
+        child: CategoryFormScreen(
+          categoryId: categoryId,
+          type: type,
+          asSheet: true,
+        ),
+      );
+    },
   );
 }

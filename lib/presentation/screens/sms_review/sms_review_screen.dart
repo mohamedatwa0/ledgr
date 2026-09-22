@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../domain/models/transaction_type.dart';
+import '../../../l10n/l10n.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/theme.dart';
 import '../../../theme/typography.dart';
+import '../../formatters/category_labels.dart';
 import '../../formatters/currencies.dart';
 import '../../formatters/date_labels.dart';
 import '../../formatters/money_input_formatter.dart';
 import '../../icons/tabler_icon.dart';
+import '../../router/app_router.dart';
 import '../../widgets/category_circle.dart';
 import '../../widgets/debit_credit_toggle.dart';
 import '../../widgets/ledgr_app_bar.dart';
@@ -49,6 +53,8 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final l10n = context.l10n;
     return BlocConsumer<SmsReviewBloc, SmsReviewState>(
       listener: (context, state) {
         if (!_hydrated && !state.loading) {
@@ -75,34 +81,34 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
 
         return Scaffold(
           appBar: LedgrAppBar(
-            title: 'Confirm entry',
+            title: l10n.confirmEntry,
             leading: IconButton(
-              tooltip: 'Close',
+              tooltip: l10n.close,
               onPressed: () => context.pop(),
-              icon: const Icon(TablerIcons.x, color: paper, size: 19),
+              icon: Icon(TablerIcons.x, color: colors.onSurface, size: 19.r),
             ),
             actions: [
               IconButton(
                 key: const Key('sms-dismiss'),
-                tooltip: 'Skip',
+                tooltip: l10n.skip,
                 onPressed: () => bloc.add(const SmsReviewDismissRequested()),
-                icon: const Icon(TablerIcons.trash, color: paper, size: 19),
+                icon: Icon(TablerIcons.trash,
+                    color: colors.ledgerRed, size: 19.r),
               ),
             ],
           ),
           body: state.loading
-              ? const Center(
-                  child: CircularProgressIndicator(color: tealAccent),
-                )
+              ? Center(child: CircularProgressIndicator(color: colors.primary))
               : Column(
                   children: [
                     Expanded(
                       child: ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
                         children: [
                           DebitCreditToggle(
                             expenseSelected:
                                 state.type == TransactionType.expense,
+                            expanded: true,
                             onChanged: (expense) => bloc.add(
                               SmsReviewTypeChanged(
                                 expense
@@ -111,12 +117,19 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 26),
+                          SizedBox(height: 20.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(symbol, style: amountStyle(fontSize: 40)),
-                              const SizedBox(width: 8),
+                              Text(
+                                symbol,
+                                style: amountStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w400,
+                                  color: colors.secondary,
+                                ),
+                              ),
+                              SizedBox(width: 6.w),
                               IntrinsicWidth(
                                 child: TextField(
                                   key: const Key('amount-field'),
@@ -125,140 +138,172 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
                                       const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                                  inputFormatters: const [MoneyInputFormatter()],
-                                  textInputAction: TextInputAction.done,
+                                  inputFormatters: const [
+                                    MoneyInputFormatter()
+                                  ],
                                   textAlign: TextAlign.center,
-                                  style: amountStyle(fontSize: 40),
-                                  cursorColor: tealAccent,
+                                  style: amountStyle(
+                                    fontSize: 28,
+                                    color: colors.onSurface,
+                                  ),
+                                  cursorColor: colors.primary,
                                   decoration: InputDecoration(
                                     isDense: true,
                                     border: InputBorder.none,
                                     hintText: '0.00',
                                     hintStyle: amountStyle(
-                                      fontSize: 40,
-                                      color: mutedInk,
+                                      fontSize: 28,
+                                      color: colors.secondary,
                                     ),
                                   ),
-                                  onChanged: (value) => bloc.add(
-                                    SmsReviewAmountChanged(value),
-                                  ),
+                                  onChanged: (value) =>
+                                      bloc.add(SmsReviewAmountChanged(value)),
                                 ),
                               ),
                             ],
                           ),
                           if (state.currencyMismatch)
                             Padding(
-                              padding: const EdgeInsets.only(top: 8),
+                              padding: EdgeInsets.only(top: 8.h),
                               child: Text(
-                                'SMS currency ${state.smsCurrencyCode} — stored as display currency, not converted.',
+                                l10n.smsCurrencyMismatch(
+                                  state.smsCurrencyCode ?? '',
+                                ),
                                 textAlign: TextAlign.center,
-                                style: uiStyle(fontSize: 12, color: mutedInk),
+                                style: uiStyle(
+                                  fontSize: 12,
+                                  color: colors.secondary,
+                                ),
                               ),
                             ),
-                          const SizedBox(height: 26),
+                          SizedBox(height: 20.h),
                           if (state.categoriesLoading)
-                            const Center(
-                              child:
-                                  CircularProgressIndicator(color: tealAccent),
+                            Center(
+                              child: CircularProgressIndicator(
+                                color: colors.primary,
+                              ),
                             )
                           else
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: state.categories.length + 1,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 0.85,
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
-                              itemBuilder: (context, index) {
-                                if (index == state.categories.length) {
-                                  return CategoryCircle(
-                                    icon: TablerIcons.plus,
-                                    label: 'Add new',
-                                    onTap: () async {
-                                      final createdId = await context.push<int>(
-                                        '/categories/new?type=${state.type.name}',
-                                      );
-                                      if (createdId != null && context.mounted) {
-                                        bloc.add(
-                                          SmsReviewCategorySelected(createdId),
-                                        );
-                                      }
-                                    },
-                                  );
-                                }
-                                final category = state.categories[index];
-                                return CategoryCircle(
-                                  key: Key('category-${category.name}'),
-                                  icon: tablerIcon(category.iconCodePoint),
-                                  label: category.name,
-                                  selected: state.categoryId == category.id,
-                                  onTap: () => bloc.add(
-                                    SmsReviewCategorySelected(category.id),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w, vertical: 16.h),
+                                child: GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: state.categories.length + 1,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    mainAxisSpacing: 12.h,
+                                    crossAxisSpacing: 8.w,
+                                    childAspectRatio: 0.72,
                                   ),
-                                );
-                              },
+                                  itemBuilder: (context, index) {
+                                    if (index == state.categories.length) {
+                                      return CategoryCircle(
+                                        icon: TablerIcons.plus,
+                                        label: l10n.addNew,
+                                        size: 44.r,
+                                        onTap: () async {
+                                          final createdId =
+                                              await showCategoryFormSheet(
+                                            context,
+                                            type: state.type,
+                                          );
+                                          if (createdId != null &&
+                                              context.mounted) {
+                                            bloc.add(
+                                              SmsReviewCategorySelected(
+                                                createdId,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    }
+                                    final category = state.categories[index];
+                                    return CategoryCircle(
+                                      key: Key('category-${category.name}'),
+                                      icon: tablerIcon(category.iconCodePoint),
+                                      label: localizedCategoryName(
+                                        l10n,
+                                        category.name,
+                                      ),
+                                      size: 44.r,
+                                      selected: state.categoryId == category.id,
+                                      iconColor: Color(category.colorValue),
+                                      onTap: () => bloc.add(
+                                        SmsReviewCategorySelected(category.id),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 16.h),
                           TextField(
                             controller: _note,
-                            style: uiStyle(fontSize: 14),
-                            cursorColor: tealAccent,
+                            style:
+                                uiStyle(fontSize: 14, color: colors.onSurface),
+                            cursorColor: colors.primary,
                             decoration: InputDecoration(
-                              hintText: 'Note (optional)',
-                              hintStyle: uiStyle(fontSize: 14, color: mutedInk),
+                              hintText: l10n.noteOptional,
+                              hintStyle: uiStyle(
+                                  fontSize: 14, color: colors.secondary),
                               border: InputBorder.none,
                             ),
                             onChanged: (value) =>
                                 bloc.add(SmsReviewNoteChanged(value)),
                           ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              border: Border(top: BorderSide(color: ruleColor)),
-                            ),
-                            padding: const EdgeInsets.only(top: 14),
-                            child: InkWell(
-                              onTap: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: state.date,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2100),
-                                  builder: (context, child) {
-                                    return DatePickerTheme(
-                                      data: ledgrDatePickerTheme,
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (picked != null) {
-                                  bloc.add(SmsReviewDateChanged(picked));
-                                }
-                              },
+                          InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: state.date,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                                builder: (context, child) {
+                                  return DatePickerTheme(
+                                    data: ledgrDatePickerTheme(colors),
+                                    child: child!,
+                                  );
+                                },
+                              );
+                              if (picked != null) {
+                                bloc.add(SmsReviewDateChanged(picked));
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 8.h),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     TablerIcons.calendar,
-                                    size: 18,
-                                    color: mutedInk,
+                                    size: 18.r,
+                                    color: colors.secondary,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8.w),
                                   Text(
-                                    formatLedgerDate(state.date),
-                                    style:
-                                        uiStyle(fontSize: 13, color: mutedInk),
+                                    formatLedgerDate(state.date, l10n: l10n),
+                                    style: uiStyle(
+                                      fontSize: 13,
+                                      color: colors.secondary,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Text(
                             state.body,
-                            style: uiStyle(fontSize: 12, color: mutedInk),
+                            style:
+                                uiStyle(fontSize: 12, color: colors.secondary),
                           ),
                         ],
                       ),
@@ -266,24 +311,26 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
                     SafeArea(
                       top: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 20.h),
                         child: Column(
                           children: [
                             if (state.missingRequiredFields)
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
+                                padding: EdgeInsets.only(bottom: 8.h),
                                 child: Text(
-                                  'Enter an amount and choose a category',
-                                  style: uiStyle(fontSize: 12, color: mutedInk),
+                                  l10n.missingAmountAndCategory,
+                                  style: uiStyle(
+                                    fontSize: 12,
+                                    color: colors.secondary,
+                                  ),
                                 ),
                               ),
                             LedgrPrimaryButton(
                               key: const Key('save-entry'),
-                              label: 'Save entry',
+                              label: l10n.saveEntry,
                               onPressed: state.canSave
-                                  ? () => bloc.add(
-                                        const SmsReviewSaveRequested(),
-                                      )
+                                  ? () =>
+                                      bloc.add(const SmsReviewSaveRequested())
                                   : null,
                             ),
                           ],

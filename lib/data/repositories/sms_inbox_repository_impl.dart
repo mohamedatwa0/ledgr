@@ -93,4 +93,9 @@ class SmsInboxRepositoryImpl implements SmsInboxRepository {
       const SmsInboxRowsCompanion(status: Value(SmsInboxStatus.dismissed)),
     );
   }
+
+  @override
+  Future<void> deleteAll() {
+    return _db.delete(_db.smsInboxRows).go();
+  }
 }

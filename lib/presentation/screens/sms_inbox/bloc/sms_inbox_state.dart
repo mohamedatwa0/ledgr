@@ -1,6 +1,12 @@
 import '../../../../domain/sms/sms_inbox_item.dart';
 import 'sms_inbox_event.dart';
 
+enum SmsInboxFlash {
+  alreadyInInbox,
+  noNewBankMessages,
+  foundMessages,
+}
+
 class SmsInboxState {
   const SmsInboxState({
     required this.filter,
@@ -12,6 +18,8 @@ class SmsInboxState {
     this.scanning = false,
     this.parsing = false,
     this.message,
+    this.flash,
+    this.flashCount,
   });
 
   final SmsInboxFilter filter;
@@ -23,6 +31,8 @@ class SmsInboxState {
   final bool scanning;
   final bool parsing;
   final String? message;
+  final SmsInboxFlash? flash;
+  final int? flashCount;
 
   SmsInboxState copyWith({
     SmsInboxFilter? filter,
@@ -34,6 +44,8 @@ class SmsInboxState {
     bool? scanning,
     bool? parsing,
     String? message,
+    SmsInboxFlash? flash,
+    int? flashCount,
     bool clearMessage = false,
   }) {
     return SmsInboxState(
@@ -46,6 +58,8 @@ class SmsInboxState {
       scanning: scanning ?? this.scanning,
       parsing: parsing ?? this.parsing,
       message: clearMessage ? null : (message ?? this.message),
+      flash: clearMessage ? null : (flash ?? this.flash),
+      flashCount: clearMessage ? null : (flashCount ?? this.flashCount),
     );
   }
 }

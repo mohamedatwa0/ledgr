@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../domain/models/transaction_type.dart';
 import '../../../domain/sms/sms_inbox_item.dart';
+import '../../../l10n/l10n.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../formatters/date_labels.dart';
 import '../../formatters/money_format.dart';
 import '../../widgets/debit_credit_toggle.dart';
 import '../../widgets/dialogs.dart';
+import '../../widgets/directional_icon.dart';
 import '../../widgets/ledgr_app_bar.dart';
 import '../../widgets/ledgr_empty_state.dart';
 import '../../widgets/ledgr_primary_button.dart';
@@ -42,111 +45,117 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return BlocConsumer<SmsInboxBloc, SmsInboxState>(
       listenWhen: (previous, current) =>
-          previous.message != current.message && current.message != null,
+          (previous.message != current.message && current.message != null) ||
+          (previous.flash != current.flash && current.flash != null),
       listener: (context, state) {
         if (state.pasteText.isEmpty && _paste.text.isNotEmpty) {
           _paste.clear();
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.message!)),
-        );
+        final l10n = context.l10n;
+        final text = switch (state.flash) {
+          SmsInboxFlash.alreadyInInbox => l10n.alreadyInInbox,
+          SmsInboxFlash.noNewBankMessages => l10n.noNewBankMessages,
+          SmsInboxFlash.foundMessages =>
+            l10n.foundMessagesToReview(state.flashCount ?? 0),
+          null => state.message,
+        };
+        if (text != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(text)),
+          );
+        }
       },
       builder: (context, state) {
         final bloc = context.read<SmsInboxBloc>();
+        final l10n = context.l10n;
         return Scaffold(
           appBar: LedgrAppBar(
-            title: 'Bank SMS',
+            title: l10n.bankSms,
             leading: IconButton(
-              tooltip: 'Back',
+              tooltip: l10n.back,
               onPressed: () => context.pop(),
-              icon: const Icon(TablerIcons.chevron_left, color: paper, size: 20),
+              icon: DirectionalIcon(
+                TablerIcons.arrow_left,
+                color: colors.onSurface,
+                size: 22.r,
+              ),
             ),
           ),
-          body: Column(
+          body: ListView(
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
             children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  children: [
-                    Text(
-                      state.inboxSupported
-                          ? 'Ledgr reads only known bank senders. SMS access is for personal/sideload use — Google Play restricts this permission for expense apps.'
-                          : 'Inbox reading isn’t available on this device. Paste a bank SMS below.',
-                      style: uiStyle(fontSize: 13, color: mutedInk, height: 1.4),
-                    ),
-                    if (state.inboxSupported) ...[
-                      const SizedBox(height: 14),
-                      _PermissionCard(
-                        granted: state.hasPermission,
-                        scanning: state.scanning,
-                        onRequest: () =>
-                            bloc.add(const SmsInboxPermissionRequested()),
-                        onScan: state.hasPermission
-                            ? () => bloc.add(const SmsInboxScanRequested())
-                            : null,
-                      ),
-                    ],
-                    const SizedBox(height: 18),
-                    TextField(
-                      key: const Key('sms-paste-field'),
-                      controller: _paste,
-                      minLines: 3,
-                      maxLines: 5,
-                      style: uiStyle(fontSize: 14),
-                      cursorColor: tealAccent,
-                      decoration: InputDecoration(
-                        hintText: 'Paste a bank SMS',
-                        hintStyle: uiStyle(fontSize: 14, color: mutedInk),
-                        filled: true,
-                        fillColor: paper,
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: ruleColor),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: tealAccent),
-                        ),
-                      ),
-                      onChanged: (value) =>
-                          bloc.add(SmsInboxPasteChanged(value)),
-                    ),
-                    const SizedBox(height: 10),
-                    LedgrPrimaryButton(
-                      key: const Key('sms-parse-button'),
-                      label: state.parsing ? 'Parsing…' : 'Parse',
-                      onPressed: state.parsing
-                          ? null
-                          : () => bloc.add(SmsInboxParseRequested(_paste.text)),
-                    ),
-                    const SizedBox(height: 20),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: FilterSegmentedControl(
-                        labels: const ['To review', 'Unmatched', 'Imported'],
-                        selectedIndex: state.filter.index,
-                        onSelected: (i) {
-                          bloc.add(
-                            SmsInboxFilterChanged(SmsInboxFilter.values[i]),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (state.loading)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
-                        child: Center(
-                          child: CircularProgressIndicator(color: tealAccent),
-                        ),
-                      )
-                    else if (state.items.isEmpty)
-                      LedgrEmptyState(message: _emptyMessage(state.filter))
-                    else
-                      ..._rows(context, state.items),
-                  ],
-                ),
+              Text(
+                state.inboxSupported
+                    ? l10n.smsInboxSupported
+                    : l10n.smsInboxUnsupported,
+                style:
+                    uiStyle(fontSize: 13, color: colors.secondary, height: 1.4),
               ),
+              if (state.inboxSupported) ...[
+                SizedBox(height: 14.h),
+                _PermissionCard(
+                  granted: state.hasPermission,
+                  scanning: state.scanning,
+                  onRequest: () =>
+                      bloc.add(const SmsInboxPermissionRequested()),
+                  onScan: state.hasPermission
+                      ? () => bloc.add(const SmsInboxScanRequested())
+                      : null,
+                ),
+              ],
+              SizedBox(height: 18.h),
+              TextField(
+                key: const Key('sms-paste-field'),
+                controller: _paste,
+                minLines: 3,
+                maxLines: 5,
+                style: uiStyle(fontSize: 14, color: colors.onSurface),
+                cursorColor: colors.primary,
+                decoration: InputDecoration(
+                  hintText: l10n.pasteBankSms,
+                  hintStyle: uiStyle(fontSize: 14, color: colors.secondary),
+                  filled: true,
+                  fillColor: colors.paperLight,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: colors.rule),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: colors.primary),
+                  ),
+                ),
+                onChanged: (value) => bloc.add(SmsInboxPasteChanged(value)),
+              ),
+              SizedBox(height: 10.h),
+              LedgrPrimaryButton(
+                key: const Key('sms-parse-button'),
+                label: state.parsing ? l10n.parsing : l10n.parse,
+                onPressed: state.parsing
+                    ? null
+                    : () => bloc.add(SmsInboxParseRequested(_paste.text)),
+              ),
+              SizedBox(height: 20.h),
+              FilterSegmentedControl(
+                labels: [l10n.toReview, l10n.unmatched, l10n.imported],
+                selectedIndex: state.filter.index,
+                onSelected: (i) {
+                  bloc.add(SmsInboxFilterChanged(SmsInboxFilter.values[i]));
+                },
+              ),
+              SizedBox(height: 12.h),
+              if (state.loading)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32.h),
+                  child: Center(
+                    child: CircularProgressIndicator(color: colors.primary),
+                  ),
+                )
+              else if (state.items.isEmpty)
+                LedgrEmptyState(message: _emptyMessage(l10n, state.filter))
+              else
+                ..._rows(context, state.items),
             ],
           ),
         );
@@ -154,35 +163,37 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     );
   }
 
-  String _emptyMessage(SmsInboxFilter filter) {
+  String _emptyMessage(AppLocalizations l10n, SmsInboxFilter filter) {
     switch (filter) {
       case SmsInboxFilter.toReview:
-        return 'Nothing to review — paste a bank SMS or scan the inbox';
+        return l10n.emptyToReview;
       case SmsInboxFilter.unmatched:
-        return 'No unmatched messages';
+        return l10n.emptyUnmatched;
       case SmsInboxFilter.imported:
-        return 'No imported SMS yet';
+        return l10n.emptyImported;
     }
   }
 
   List<Widget> _rows(BuildContext context, List<SmsInboxItem> items) {
+    final colors = context.colors;
     return [
       for (var i = 0; i < items.length; i++)
         Dismissible(
           key: ValueKey(items[i].id),
           direction: DismissDirection.endToStart,
           background: Container(
-            alignment: Alignment.centerRight,
-            color: ledgerRed,
-            padding: const EdgeInsets.only(right: 16),
-            child: const Icon(TablerIcons.trash, color: paper, size: 20),
+            alignment: AlignmentDirectional.centerEnd,
+            color: colors.ledgerRed,
+            padding: EdgeInsetsDirectional.only(end: 16.w),
+            child: Icon(TablerIcons.trash, color: colors.onPrimary, size: 20.r),
           ),
           confirmDismiss: (_) {
+            final l10n = context.l10n;
             return showDeleteConfirmDialog(
               context: context,
-              title: 'Skip this SMS?',
-              message: 'It will not be added to the ledger.',
-              confirmLabel: 'Skip',
+              title: l10n.skipSmsTitle,
+              message: l10n.skipSmsMessage,
+              confirmLabel: l10n.skip,
             );
           },
           onDismissed: (_) {
@@ -215,35 +226,37 @@ class _PermissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: ruleColor),
-          bottom: BorderSide(color: ruleColor),
+          top: BorderSide(color: colors.rule),
+          bottom: BorderSide(color: colors.rule),
         ),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
-              granted ? 'Inbox access granted' : 'Allow SMS access to scan bank messages',
-              style: uiStyle(fontSize: 13, color: mutedInk),
+              granted ? l10n.inboxAccessGranted : l10n.allowSmsAccess,
+              style: uiStyle(fontSize: 13, color: colors.secondary),
             ),
           ),
           TextButton(
             key: granted
                 ? const Key('sms-scan-button')
                 : const Key('sms-request-permission'),
-            onPressed: granted
-                ? (scanning ? null : onScan)
-                : onRequest,
+            onPressed: granted ? (scanning ? null : onScan) : onRequest,
             child: Text(
-              granted ? (scanning ? 'Scanning…' : 'Scan inbox') : 'Request',
+              granted
+                  ? (scanning ? l10n.scanning : l10n.scanInbox)
+                  : l10n.request,
               style: uiStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: tealAccent,
+                color: colors.primary,
               ),
             ),
           ),
@@ -266,6 +279,7 @@ class _SmsInboxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final title = item.note?.trim().isNotEmpty == true
         ? item.note!
         : (item.body.trim().isEmpty
@@ -278,10 +292,10 @@ class _SmsInboxRow extends StatelessWidget {
       key: Key('sms-row-${item.id}'),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: EdgeInsets.symmetric(vertical: 10.h),
         decoration: BoxDecoration(
           border: showDivider
-              ? const Border(bottom: BorderSide(color: ruleColor, width: 1))
+              ? Border(bottom: BorderSide(color: colors.rule, width: 1.w))
               : null,
         ),
         child: Row(
@@ -294,14 +308,17 @@ class _SmsInboxRow extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: uiStyle(fontSize: 14),
+                    style: uiStyle(fontSize: 14, color: colors.onSurface),
                   ),
                   Text(
                     [
                       if (item.bankId != null) item.bankId!,
-                      dateGroupLabel(item.valueDate ?? item.receivedAt),
+                      dateGroupLabel(
+                        item.valueDate ?? item.receivedAt,
+                        l10n: context.l10n,
+                      ),
                     ].join(' · '),
-                    style: uiStyle(fontSize: 12, color: mutedInk),
+                    style: uiStyle(fontSize: 12, color: colors.secondary),
                   ),
                 ],
               ),
@@ -312,7 +329,9 @@ class _SmsInboxRow extends StatelessWidget {
                 textAlign: TextAlign.right,
                 style: amountStyle(
                   fontSize: 14,
-                  color: type == TransactionType.income ? ledgerGreen : ledgerRed,
+                  color: type == TransactionType.income
+                      ? colors.ledgerGreen
+                      : colors.ledgerRed,
                 ),
               ),
           ],

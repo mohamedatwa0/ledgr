@@ -10,103 +10,126 @@ bool _isSelected(Set<WidgetState> states) =>
 bool _isDisabled(Set<WidgetState> states) =>
     states.contains(WidgetState.disabled);
 
-/// Today uses [DatePickerThemeData.todayForegroundColor] for both the digit
-/// and the ring. Selected today must be light-on-teal or the number vanishes.
-DatePickerThemeData get ledgrDatePickerTheme {
+DatePickerThemeData ledgrDatePickerTheme(LedgrColors colors) {
   return DatePickerThemeData(
-    backgroundColor: paper,
-    headerBackgroundColor: inkNavy,
-    headerForegroundColor: paper,
-    dividerColor: ruleColor,
+    backgroundColor: colors.surface,
+    headerBackgroundColor: colors.primaryContainer,
+    headerForegroundColor: colors.onPrimary,
+    dividerColor: colors.rule,
     dayStyle: uiStyle(fontSize: 13, height: 1),
     dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-      if (_isSelected(states)) return tealOnAccent;
-      if (_isDisabled(states)) return mutedInk.withValues(alpha: 0.38);
-      return inkNavy;
+      if (_isSelected(states)) return colors.onPrimary;
+      if (_isDisabled(states)) return colors.secondary.withValues(alpha: 0.38);
+      return colors.onSurface;
     }),
     dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-      if (_isSelected(states)) return tealAccent;
+      if (_isSelected(states)) return colors.primaryContainer;
       return null;
     }),
     todayForegroundColor: WidgetStateProperty.resolveWith((states) {
-      if (_isSelected(states)) return tealOnAccent;
-      if (_isDisabled(states)) return mutedInk.withValues(alpha: 0.38);
-      return tealAccent;
+      if (_isSelected(states)) return colors.onPrimary;
+      if (_isDisabled(states)) return colors.secondary.withValues(alpha: 0.38);
+      return colors.primary;
     }),
     todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-      if (_isSelected(states)) return tealAccent;
+      if (_isSelected(states)) return colors.primaryContainer;
       return null;
     }),
-    todayBorder: const BorderSide(color: tealAccent),
+    todayBorder: BorderSide(color: colors.primary),
   );
 }
 
-final ledgrTheme = ThemeData(
-  useMaterial3: true,
-  brightness: Brightness.light,
-  fontFamily: spaceGrotesk,
-  scaffoldBackgroundColor: paper,
-  colorScheme: const ColorScheme.light(
-    primary: tealAccent,
-    onPrimary: tealOnAccent,
-    secondary: tealAccent,
-    onSecondary: tealOnAccent,
-    surface: paper,
-    onSurface: inkNavy,
-    error: ledgerRed,
-    onError: paper,
-  ),
-  appBarTheme: const AppBarTheme(
-    backgroundColor: inkNavy,
-    foregroundColor: paper,
-    elevation: 0,
-    scrolledUnderElevation: 0,
-    centerTitle: true,
-    systemOverlayStyle: SystemUiOverlayStyle.light,
-    titleTextStyle: TextStyle(
-      fontFamily: spaceGrotesk,
-      fontWeight: FontWeight.w500,
-      fontSize: 14,
-      color: paper,
+ThemeData buildLedgrTheme(LedgrColors colors, Brightness brightness) {
+  final overlay = brightness == Brightness.dark
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark;
+  return ThemeData(
+    useMaterial3: true,
+    brightness: brightness,
+    fontFamily: spaceGrotesk,
+    scaffoldBackgroundColor: colors.surface,
+    extensions: [colors],
+    colorScheme: ColorScheme(
+      brightness: brightness,
+      primary: colors.primary,
+      onPrimary: colors.onPrimary,
+      secondary: colors.primaryContainer,
+      onSecondary: colors.onPrimary,
+      surface: colors.surface,
+      onSurface: colors.onSurface,
+      error: colors.ledgerRed,
+      onError: colors.onPrimary,
     ),
-  ),
-  dividerColor: ruleColor,
-  dividerTheme: const DividerThemeData(
-    color: ruleColor,
-    thickness: 1,
-    space: 1,
-  ),
-  floatingActionButtonTheme: const FloatingActionButtonThemeData(
-    backgroundColor: tealAccent,
-    foregroundColor: tealOnAccent,
-    elevation: 0,
-    focusElevation: 0,
-    hoverElevation: 0,
-    highlightElevation: 0,
-    shape: CircleBorder(),
-  ),
-  datePickerTheme: ledgrDatePickerTheme,
-  textTheme: TextTheme(
-    displayLarge: amountStyle(fontSize: 40),
-    displayMedium: amountStyle(fontSize: 30),
-    headlineSmall: amountStyle(fontSize: 19, color: paper),
-    bodyLarge: uiStyle(fontSize: 14),
-    bodyMedium: uiStyle(fontSize: 13, color: mutedInk),
-    labelLarge: uiStyle(fontSize: 15, fontWeight: FontWeight.w500, color: tealOnAccent),
-    labelSmall: uiStyle(fontSize: 12, color: mutedInk),
-  ),
-  snackBarTheme: const SnackBarThemeData(
-    backgroundColor: inkNavy,
-    contentTextStyle: TextStyle(
-      fontFamily: spaceGrotesk,
-      fontSize: 14,
-      color: paper,
+    appBarTheme: AppBarTheme(
+      backgroundColor: colors.surface,
+      foregroundColor: colors.onSurface,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      systemOverlayStyle: overlay,
+      titleTextStyle: TextStyle(
+        fontFamily: spaceGrotesk,
+        fontWeight: FontWeight.w500,
+        fontSize: 14,
+        color: colors.onSurface,
+      ),
     ),
-    behavior: SnackBarBehavior.floating,
-  ),
-  dialogTheme: DialogThemeData(
-    backgroundColor: paper,
-    titleTextStyle: uiStyle(fontSize: 16, fontWeight: FontWeight.w500),
-    contentTextStyle: uiStyle(fontSize: 14, color: mutedInk),
-  ),
-);
+    dividerColor: colors.rule,
+    dividerTheme: DividerThemeData(
+      color: colors.rule,
+      thickness: 1,
+      space: 1,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: colors.primaryContainer,
+      foregroundColor: colors.onPrimary,
+      elevation: 4,
+      focusElevation: 4,
+      hoverElevation: 4,
+      highlightElevation: 4,
+      shape: const CircleBorder(),
+    ),
+    datePickerTheme: ledgrDatePickerTheme(colors),
+    textTheme: TextTheme(
+      displayLarge: amountStyle(fontSize: 40, color: colors.onSurface),
+      displayMedium: amountStyle(fontSize: 32, color: colors.onSurface),
+      headlineSmall: amountStyle(fontSize: 24, color: colors.onSurface),
+      bodyLarge: uiStyle(fontSize: 14, color: colors.onSurface),
+      bodyMedium: uiStyle(fontSize: 13, color: colors.secondary),
+      labelLarge: uiStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+        color: colors.onPrimary,
+      ),
+      labelSmall: uiStyle(fontSize: 12, color: colors.secondary),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: colors.onSurface,
+      contentTextStyle: TextStyle(
+        fontFamily: spaceGrotesk,
+        fontSize: 14,
+        color: colors.surface,
+      ),
+      behavior: SnackBarBehavior.floating,
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: colors.paperLight,
+      titleTextStyle: uiStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: colors.onSurface,
+      ),
+      contentTextStyle: uiStyle(fontSize: 14, color: colors.secondary),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: colors.paperLight,
+      surfaceTintColor: Colors.transparent,
+    ),
+  );
+}
+
+final ledgrLightTheme = buildLedgrTheme(LedgrColors.light, Brightness.light);
+final ledgrDarkTheme = buildLedgrTheme(LedgrColors.dark, Brightness.dark);
+
+@Deprecated('Use ledgrLightTheme')
+final ledgrTheme = ledgrLightTheme;

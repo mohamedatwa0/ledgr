@@ -16,9 +16,15 @@ void main() {
   });
 
   Future<void> pumpApp(WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(LedgrApp(database: db));
+    await tester.pumpWidget(
+      LedgrApp(database: db, showLaunchScreen: false),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
   }
@@ -47,8 +53,8 @@ void main() {
     await tester.tap(find.byKey(const Key('save-entry')));
     await settle(tester);
 
-    expect(find.text('Food & Dining'), findsOneWidget);
-    expect(find.text('-45.00'), findsOneWidget);
+    expect(find.text('Food & Dining'), findsWidgets);
+    expect(find.text('-45.00'), findsWidgets);
     expect(find.textContaining('Debits 45.00'), findsOneWidget);
     await disposeApp(tester);
   });
@@ -65,7 +71,7 @@ void main() {
     await tester.tap(find.byKey(const Key('save-entry')));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('see-all')));
+    await tester.tap(find.byKey(const Key('tab-transactions')));
     await settle(tester);
 
     expect(find.byType(Dismissible), findsOneWidget);
@@ -88,9 +94,7 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    await tester.tap(find.byKey(const Key('settings-button')));
-    await settle(tester);
-    await tester.tap(find.byKey(const Key('settings-categories')));
+    await tester.tap(find.byKey(const Key('tab-categories')));
     await settle(tester);
 
     await tester.tap(find.byKey(const Key('add-category-cell')));
@@ -99,6 +103,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('category-name-field')), 'Pets');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('save-category')));
     await tester.tap(find.byKey(const Key('save-category')));
     await settle(tester);
 
@@ -111,8 +116,14 @@ void main() {
       'on 15/09/2026. Available balance EGP 5,000.00';
 
   Future<void> openSmsAndParse(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('settings-button')));
+    await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);
+    expect(find.text('Language'), findsOneWidget);
+    await tester.dragUntilVisible(
+      find.byKey(const Key('settings-sms')),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     await tester.tap(find.byKey(const Key('settings-sms')));
     await settle(tester);
     await tester.enterText(find.byKey(const Key('sms-paste-field')), cibSms);
@@ -144,11 +155,11 @@ void main() {
 
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byKey(const Key('tab-dashboard')));
     await settle(tester);
 
     expect(find.text('Food & Dining'), findsOneWidget);
-    expect(find.text('-250.00'), findsOneWidget);
+    expect(find.text('-250.00'), findsWidgets);
     await disposeApp(tester);
   });
 
@@ -166,7 +177,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Back'));
     await settle(tester);
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byKey(const Key('tab-dashboard')));
     await settle(tester);
 
     expect(find.text('-250.00'), findsNothing);
@@ -187,6 +198,23 @@ void main() {
 
     expect(find.text('STARBUCKS'), findsOneWidget);
     expect(find.text('Already in the inbox'), findsOneWidget);
+    await disposeApp(tester);
+  });
+
+  testWidgets('switching language to Arabic applies RTL', (tester) async {
+    await pumpApp(tester);
+
+    await tester.tap(find.byKey(const Key('tab-settings')));
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('settings-locale-ar')));
+    await settle(tester);
+
+    expect(find.text('اللغة'), findsWidgets);
+    expect(
+      Directionality.of(tester.element(find.byKey(const Key('settings-locale')))),
+      TextDirection.rtl,
+    );
     await disposeApp(tester);
   });
 }

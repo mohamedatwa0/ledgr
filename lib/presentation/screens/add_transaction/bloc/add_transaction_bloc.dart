@@ -16,7 +16,8 @@ import '../../../../domain/usecases/update_transaction.dart';
 import 'add_transaction_event.dart';
 import 'add_transaction_state.dart';
 
-class AddTransactionBloc extends Bloc<AddTransactionEvent, AddTransactionState> {
+class AddTransactionBloc
+    extends Bloc<AddTransactionEvent, AddTransactionState> {
   AddTransactionBloc({
     required TransactionRepository transactions,
     required CategoryRepository categories,
@@ -70,10 +71,16 @@ class AddTransactionBloc extends Bloc<AddTransactionEvent, AddTransactionState> 
     _settingsSub = _settings.watch().listen((settings) {
       if (!isClosed) add(AddTransactionCurrencyUpdated(settings.currencyCode));
     });
-    _watchCategories(state.type);
 
     final id = transactionId;
-    if (id == null) return;
+    if (id == null) {
+      final settings = await _settings.get();
+      if (isClosed) return;
+      emit(state.copyWith(type: settings.defaultEntryType));
+      _watchCategories(settings.defaultEntryType);
+      return;
+    }
+    _watchCategories(state.type);
     final tx = await _transactions.getById(id);
     if (tx == null || isClosed) return;
     emit(

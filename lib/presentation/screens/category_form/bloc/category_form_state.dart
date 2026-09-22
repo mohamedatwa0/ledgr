@@ -58,8 +58,9 @@ class CategoryFormState {
       saving: saving ?? this.saving,
       saved: saved ?? this.saved,
       deleted: deleted ?? this.deleted,
-      deletePromptCount:
-          clearDeletePrompt ? null : (deletePromptCount ?? this.deletePromptCount),
+      deletePromptCount: clearDeletePrompt
+          ? null
+          : (deletePromptCount ?? this.deletePromptCount),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       savedCategoryId: savedCategoryId ?? this.savedCategoryId,
     );

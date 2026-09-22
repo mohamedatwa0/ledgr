@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/models/app_locale.dart';
+import '../../domain/models/app_theme_mode.dart';
 import '../../domain/models/transaction_source.dart';
 import '../../domain/models/transaction_type.dart';
 import '../../domain/sms/sms_inbox_status.dart';
@@ -44,6 +46,12 @@ class SettingsRows extends Table {
   IntColumn get id => integer()();
   TextColumn get currencyCode => text().withDefault(const Constant('EGP'))();
   DateTimeColumn get smsLastScanAt => dateTime().nullable()();
+  TextColumn get themeMode =>
+      textEnum<AppThemeMode>().withDefault(const Constant('system'))();
+  TextColumn get defaultEntryType =>
+      textEnum<TransactionType>().withDefault(const Constant('expense'))();
+  TextColumn get localeCode =>
+      textEnum<AppLocale>().withDefault(const Constant('en'))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

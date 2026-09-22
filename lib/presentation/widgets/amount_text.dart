@@ -8,13 +8,13 @@ class AmountText extends StatelessWidget {
     super.key,
     required this.text,
     this.fontSize = 14,
-    this.color = inkNavy,
+    this.color,
     this.textAlign,
   });
 
   final String text;
   final double fontSize;
-  final Color color;
+  final Color? color;
   final TextAlign? textAlign;
 
   @override
@@ -22,7 +22,10 @@ class AmountText extends StatelessWidget {
     return Text(
       text,
       textAlign: textAlign,
-      style: amountStyle(fontSize: fontSize, color: color),
+      style: amountStyle(
+        fontSize: fontSize,
+        color: color ?? context.colors.onSurface,
+      ),
     );
   }
 }

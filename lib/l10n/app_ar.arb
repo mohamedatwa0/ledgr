@@ -1,0 +1,251 @@
+{
+  "@@locale": "ar",
+  "navDashboard": "لوحة الحساب",
+  "navTransactions": "العمليات",
+  "navCategories": "التصنيفات",
+  "navSettings": "الإعدادات",
+  "newEntryTooltip": "قيد جديد",
+  "ledgerBook": "دفتر الحساب",
+  "thisMonth": "هذا الشهر",
+  "thisMonthLabel": "هذا الشهر",
+  "credits": "دائن",
+  "debits": "مدين",
+  "previousMonth": "الشهر السابق",
+  "nextMonth": "الشهر التالي",
+  "depositCount": "{count, plural, =0{لا إيداعات} =1{إيداع واحد} =2{إيداعان} few{{count} إيداعات} many{{count} إيداعاً} other{{count} إيداع}}",
+  "@depositCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "postingCount": "{count, plural, =0{لا قيود} =1{قيد واحد} =2{قيدان} few{{count} قيود} many{{count} قيداً} other{{count} قيد}}",
+  "@postingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "hiddenDebitsLookup": "مدين {amount}",
+  "@hiddenDebitsLookup": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "dailyOutlayPace": "وتيرة الصرف اليومي",
+  "perDayAverage": "{symbol}{amount} / متوسط اليوم",
+  "@perDayAverage": {
+    "placeholders": {
+      "symbol": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "ledgerEntries": "قيود الدفتر",
+  "postingsCount": "قيود • {count}",
+  "@postingsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "emptyHomeTransactions": "لا عمليات بعد — اضغط + لإضافة أول قيد",
+  "searchHint": "ابحث بالتاجر أو الملاحظة أو المبلغ...",
+  "filterAllRecords": "كل السجلات",
+  "filterDebitsOut": "مدين (خارج)",
+  "filterCreditsIn": "دائن (داخل)",
+  "entriesCount": "{count} قيود",
+  "@entriesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "emptyHistory": "لا عمليات في هذا العرض",
+  "postItemsCount": "{count} قيود",
+  "@postItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "deleteEntry": "حذف القيد",
+  "deleteEntryMessage": "إزالة هذه العملية من الدفتر؟",
+  "categoriesTitle": "التصنيفات",
+  "ledgerNomenclature": "تسميات الدفتر",
+  "add": "إضافة",
+  "debitCategories": "تصنيفات المدين ({count})",
+  "@debitCategories": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "creditCategories": "تصنيفات الدائن ({count})",
+  "@creditCategories": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "defaultCategoriesProtected": "التصنيفات الافتراضية التي لها قيود مسجّلة محمية من الحذف.",
+  "defaultBadge": "افتراضي",
+  "newCategory": "تصنيف جديد",
+  "editCategory": "تعديل التصنيف",
+  "addCategory": "إضافة تصنيف",
+  "editCategoryTitle": "تعديل التصنيف",
+  "close": "إغلاق",
+  "back": "رجوع",
+  "nameHint": "الاسم",
+  "icon": "الأيقونة",
+  "color": "اللون",
+  "preview": "معاينة",
+  "deleteCategory": "حذف التصنيف",
+  "deleteThisCategory": "حذف هذا التصنيف؟",
+  "entriesWillMoveToOther": "{count, plural, =1{سيُنقل قيد واحد إلى أخرى.} =2{سيُنقل قيدان إلى أخرى.} few{ستُنقل {count} قيود إلى أخرى.} many{سيُنقل {count} قيداً إلى أخرى.} other{سيُنقل {count} قيد إلى أخرى.}}",
+  "@entriesWillMoveToOther": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "saveCategory": "حفظ التصنيف",
+  "newEntry": "قيد جديد",
+  "editEntry": "تعديل القيد",
+  "entryValue": "قيمة القيد",
+  "ledgerAccount": "حساب الدفتر",
+  "categoriesCount": "{count} تصنيفات",
+  "@categoriesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "addNew": "إضافة جديد",
+  "bookkeeperMemo": "ملاحظة المحاسب",
+  "noteHint": "أضف ملاحظة أو طرفاً مقابلاً (اختياري)...",
+  "transactionDate": "تاريخ العملية",
+  "change": "تغيير",
+  "missingAmountAndCategory": "أدخل مبلغاً واختر تصنيفاً",
+  "saveEntry": "حفظ القيد",
+  "offlineEntryNote": "قيد محلي محدد • بدون مزامنة سحابية",
+  "debit": "مدين",
+  "credit": "دائن",
+  "debitExpense": "مدين (مصروف)",
+  "creditIncome": "دائن (دخل)",
+  "today": "اليوم",
+  "yesterday": "أمس",
+  "todayWithDate": "اليوم، {date}",
+  "@todayWithDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "yesterdayWithDate": "أمس، {date}",
+  "@yesterdayWithDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "language": "اللغة",
+  "languageSubtitle": "واجهة إنجليزية أو عربية",
+  "localeEn": "EN",
+  "localeAr": "ع",
+  "ledgrJournal": "دفتر Ledgr",
+  "journal": "دفتر",
+  "physicalDriftStorage": "تخزين SQLite محلي على الجهاز",
+  "offlineChip": "بدون اتصال",
+  "zeroAiChip": "بدون سحابة",
+  "activeConfiguration": "الإعدادات الحالية",
+  "localVerified": "محلي مؤكد",
+  "baseCurrency": "العملة الأساسية",
+  "baseCurrencySubtitle": "عملة عرض واحدة ثابتة",
+  "defaultEntryType": "نوع القيد الافتراضي",
+  "defaultEntryTypeSubtitle": "عمود التسجيل الأساسي",
+  "appearance": "المظهر",
+  "appearanceSubtitle": "نظام أو فاتح أو دفتر ليلي",
+  "dataSovereignty": "البيانات والسيادة",
+  "dataSovereigntySubtitle": "ملف SQLite على هذا الجهاز",
+  "export": "تصدير",
+  "bankSmsImport": "استيراد رسائل البنك",
+  "bankSmsImportSubtitle": "محلل تعبير نمطي محدد. بدون ذكاء اصطناعي.",
+  "readyToReview": "{count} للمراجعة",
+  "@readyToReview": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "upcomingModules": "وحدات الدفتر القادمة",
+  "phase2Plus": "المرحلة ٢+",
+  "categoryBudgets": "ميزانيات التصنيفات",
+  "categoryBudgetsSubtitle": "حدود تخصيص شهرية",
+  "phase3": "المرحلة ٣",
+  "multiCurrency": "دفتر متعدد العملات",
+  "multiCurrencySubtitle": "نسب تحويل يدوية",
+  "phase4": "المرحلة ٤",
+  "vaults": "الخزائن وصافي الثروة",
+  "vaultsSubtitle": "حسابات وأصول مجمّعة",
+  "phase5": "المرحلة ٥",
+  "resetLocalLedger": "إعادة تعيين دفتر الحساب المحلي",
+  "settingsFooter": "مصمم للتحكم اليدوي الكامل والمحاسبة المستقلة. بدون اعتماد على السحابة.",
+  "displayCurrency": "عملة العرض",
+  "currencySymbolOnly": "يغيّر الرمز فقط — لا تُحوَّل المبالغ.",
+  "noLedgerFile": "لا يوجد ملف دفتر للتصدير بعد",
+  "exportSubject": "تصدير دفتر Ledgr",
+  "couldNotExport": "تعذر التصدير: {error}",
+  "@couldNotExport": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "resetLedgerTitle": "إعادة تعيين الدفتر المحلي؟",
+  "resetLedgerMessage": "سيُحذف كل العمليات ورسائل الصندوق. التصنيفات والإعدادات تبقى.",
+  "reset": "إعادة تعيين",
+  "themeSystem": "النظام",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
+  "currencyEgp": "الجنيه المصري",
+  "currencyUsd": "الدولار الأمريكي",
+  "currencyEur": "اليورو",
+  "currencyGbp": "الجنيه الإسترليني",
+  "currencySar": "الريال السعودي",
+  "currencyAed": "الدرهم الإماراتي",
+  "categoryFoodDining": "طعام ومطاعم",
+  "categoryTransport": "مواصلات",
+  "categoryShopping": "تسوق",
+  "categoryBillsUtilities": "فواتير وخدمات",
+  "categoryHealth": "صحة",
+  "categoryEntertainment": "ترفيه",
+  "categoryTransfer": "تحويل",
+  "categoryOther": "أخرى",
+  "categorySalary": "راتب",
+  "categoryFreelance": "عمل حر",
+  "bankSms": "رسائل البنك",
+  "smsInboxSupported": "يقرأ Ledgr مرسلين بنكيين معروفين فقط. الوصول للرسائل للاستخدام الشخصي — متجر جوجل يقيّد هذا الإذن لتطبيقات المصروفات.",
+  "smsInboxUnsupported": "قراءة الصندوق غير متاحة على هذا الجهاز. الصق رسالة بنك أدناه.",
+  "pasteBankSms": "الصق رسالة بنك",
+  "parse": "تحليل",
+  "parsing": "جاري التحليل…",
+  "toReview": "للمراجعة",
+  "unmatched": "غير مطابقة",
+  "imported": "مستوردة",
+  "emptyToReview": "لا شيء للمراجعة — الصق رسالة بنك أو امسح الصندوق",
+  "emptyUnmatched": "لا رسائل غير مطابقة",
+  "emptyImported": "لا رسائل مستوردة بعد",
+  "skipSmsTitle": "تخطي هذه الرسالة؟",
+  "skipSmsMessage": "لن تُضاف إلى الدفتر.",
+  "skip": "تخطي",
+  "inboxAccessGranted": "تم منح الوصول للصندوق",
+  "allowSmsAccess": "اسمح بالوصول للرسائل لمسح رسائل البنك",
+  "scanInbox": "مسح الصندوق",
+  "scanning": "جاري المسح…",
+  "request": "طلب",
+  "confirmEntry": "تأكيد القيد",
+  "smsCurrencyMismatch": "عملة الرسالة {code} — تُحفظ بعملة العرض دون تحويل.",
+  "@smsCurrencyMismatch": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "noteOptional": "ملاحظة (اختياري)",
+  "alreadyInInbox": "موجودة مسبقاً في الصندوق",
+  "noNewBankMessages": "لا رسائل بنك جديدة",
+  "foundMessagesToReview": "{count, plural, =1{تم العثور على رسالة واحدة للمراجعة} =2{تم العثور على رسالتين للمراجعة} few{تم العثور على {count} رسائل للمراجعة} many{تم العثور على {count} رسالة للمراجعة} other{تم العثور على {count} رسالة للمراجعة}}",
+  "@foundMessagesToReview": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cancel": "إلغاء",
+  "delete": "حذف"
+}

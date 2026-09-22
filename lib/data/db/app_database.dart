@@ -5,6 +5,8 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../domain/models/app_locale.dart';
+import '../../domain/models/app_theme_mode.dart';
 import '../../domain/models/transaction_source.dart';
 import '../../domain/models/transaction_type.dart';
 import '../../domain/sms/sms_inbox_status.dart';
@@ -22,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -55,6 +57,13 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(settingsRows, settingsRows.smsLastScanAt);
           await m.createTable(smsInboxRows);
           await _createSmsInboxIndexes(m);
+        }
+        if (from < 4) {
+          await m.addColumn(settingsRows, settingsRows.themeMode);
+          await m.addColumn(settingsRows, settingsRows.defaultEntryType);
+        }
+        if (from < 5) {
+          await m.addColumn(settingsRows, settingsRows.localeCode);
         }
       },
     );
@@ -99,10 +108,16 @@ class AppDatabase extends _$AppDatabase {
   }
 }
 
+const ledgrDatabaseFileName = 'ledgr.sqlite';
+
+Future<File> ledgrDatabaseFile() async {
+  final dir = await getApplicationDocumentsDirectory();
+  return File(p.join(dir.path, ledgrDatabaseFileName));
+}
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'ledgr.sqlite'));
+    final file = await ledgrDatabaseFile();
     return NativeDatabase.createInBackground(file);
   });
 }

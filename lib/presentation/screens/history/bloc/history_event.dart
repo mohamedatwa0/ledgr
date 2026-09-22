@@ -27,3 +27,9 @@ class HistoryEntriesUpdated extends HistoryEvent {
 
   final List<TransactionEntry> entries;
 }
+
+class HistoryQueryChanged extends HistoryEvent {
+  const HistoryQueryChanged(this.query);
+
+  final String query;
+}

@@ -1,0 +1,251 @@
+{
+  "@@locale": "en",
+  "navDashboard": "Dashboard",
+  "navTransactions": "Transactions",
+  "navCategories": "Categories",
+  "navSettings": "Settings",
+  "newEntryTooltip": "New entry",
+  "ledgerBook": "LEDGER BOOK",
+  "thisMonth": "THIS MONTH",
+  "thisMonthLabel": "This month",
+  "credits": "Credits",
+  "debits": "Debits",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "depositCount": "{count, plural, =1{{count} deposit} other{{count} deposits}}",
+  "@depositCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "postingCount": "{count, plural, =1{{count} posting} other{{count} postings}}",
+  "@postingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "hiddenDebitsLookup": "Debits {amount}",
+  "@hiddenDebitsLookup": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "dailyOutlayPace": "Daily Outlay Pace",
+  "perDayAverage": "{symbol}{amount} / day average",
+  "@perDayAverage": {
+    "placeholders": {
+      "symbol": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "ledgerEntries": "LEDGER ENTRIES",
+  "postingsCount": "POSTINGS • {count}",
+  "@postingsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "emptyHomeTransactions": "No transactions yet — tap + to add your first one",
+  "searchHint": "Search by merchant, note, or amount...",
+  "filterAllRecords": "All Records",
+  "filterDebitsOut": "Debits (Out)",
+  "filterCreditsIn": "Credits (In)",
+  "entriesCount": "{count} ENTRIES",
+  "@entriesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "emptyHistory": "No transactions in this view",
+  "postItemsCount": "{count} post items",
+  "@postItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "deleteEntry": "Delete entry",
+  "deleteEntryMessage": "Remove this transaction from the ledger?",
+  "categoriesTitle": "Categories",
+  "ledgerNomenclature": "LEDGER NOMENCLATURE",
+  "add": "Add",
+  "debitCategories": "Debit Categories ({count})",
+  "@debitCategories": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "creditCategories": "Credit Categories ({count})",
+  "@creditCategories": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "defaultCategoriesProtected": "Default categories with recorded ledger entries are protected from deletion.",
+  "defaultBadge": "DEFAULT",
+  "newCategory": "New category",
+  "editCategory": "Edit category",
+  "addCategory": "Add Category",
+  "editCategoryTitle": "Edit Category",
+  "close": "Close",
+  "back": "Back",
+  "nameHint": "Name",
+  "icon": "Icon",
+  "color": "Color",
+  "preview": "Preview",
+  "deleteCategory": "Delete category",
+  "deleteThisCategory": "Delete this category?",
+  "entriesWillMoveToOther": "{count, plural, =1{{count} entry will move to Other.} other{{count} entries will move to Other.}}",
+  "@entriesWillMoveToOther": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "saveCategory": "Save category",
+  "newEntry": "New Entry",
+  "editEntry": "Edit Entry",
+  "entryValue": "ENTRY VALUE",
+  "ledgerAccount": "LEDGER ACCOUNT",
+  "categoriesCount": "{count} Categories",
+  "@categoriesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "addNew": "Add new",
+  "bookkeeperMemo": "BOOKKEEPER MEMO",
+  "noteHint": "Add note or counterparty (optional)...",
+  "transactionDate": "TRANSACTION DATE",
+  "change": "Change",
+  "missingAmountAndCategory": "Enter an amount and choose a category",
+  "saveEntry": "Save entry",
+  "offlineEntryNote": "Offline deterministic entry • No cloud sync",
+  "debit": "Debit",
+  "credit": "Credit",
+  "debitExpense": "Debit (Expense)",
+  "creditIncome": "Credit (Income)",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "todayWithDate": "Today, {date}",
+  "@todayWithDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "yesterdayWithDate": "Yesterday, {date}",
+  "@yesterdayWithDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "language": "Language",
+  "languageSubtitle": "English or Arabic interface",
+  "localeEn": "EN",
+  "localeAr": "ع",
+  "ledgrJournal": "Ledgr Journal",
+  "journal": "JOURNAL",
+  "physicalDriftStorage": "Physical drift SQLite storage",
+  "offlineChip": "100% Offline",
+  "zeroAiChip": "Zero AI / Cloud",
+  "activeConfiguration": "Active Configuration",
+  "localVerified": "LOCAL VERIFIED",
+  "baseCurrency": "Base Currency",
+  "baseCurrencySubtitle": "Deterministic single currency standard",
+  "defaultEntryType": "Default Entry Type",
+  "defaultEntryTypeSubtitle": "Primary recording column",
+  "appearance": "Appearance",
+  "appearanceSubtitle": "System, light, or nocturnal ledger",
+  "dataSovereignty": "Data & Sovereignty",
+  "dataSovereigntySubtitle": "SQLite file on this device",
+  "export": "Export",
+  "bankSmsImport": "Bank SMS Import",
+  "bankSmsImportSubtitle": "Deterministic regex parser. No AI/NLP.",
+  "readyToReview": "{count} to review",
+  "@readyToReview": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "upcomingModules": "Upcoming Ledger Modules",
+  "phase2Plus": "PHASE 2+",
+  "categoryBudgets": "Category Budgets",
+  "categoryBudgetsSubtitle": "Monthly allocation limits",
+  "phase3": "Phase 3",
+  "multiCurrency": "Multi-Currency Ledger",
+  "multiCurrencySubtitle": "Manual conversion ratios",
+  "phase4": "Phase 4",
+  "vaults": "Vaults & Sovereign Net Worth",
+  "vaultsSubtitle": "Aggregated accounts and assets",
+  "phase5": "Phase 5",
+  "resetLocalLedger": "Reset Local Ledger Journal",
+  "settingsFooter": "Architected for absolute manual agency and sovereign accounting. Zero cloud dependencies.",
+  "displayCurrency": "Display currency",
+  "currencySymbolOnly": "Changes the symbol only — amounts are not converted.",
+  "noLedgerFile": "No ledger file to export yet",
+  "exportSubject": "Ledgr journal export",
+  "couldNotExport": "Could not export: {error}",
+  "@couldNotExport": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "resetLedgerTitle": "Reset local ledger?",
+  "resetLedgerMessage": "This deletes all transactions and SMS inbox items. Categories and settings stay.",
+  "reset": "Reset",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "currencyEgp": "Egyptian Pound",
+  "currencyUsd": "US Dollar",
+  "currencyEur": "Euro",
+  "currencyGbp": "British Pound",
+  "currencySar": "Saudi Riyal",
+  "currencyAed": "UAE Dirham",
+  "categoryFoodDining": "Food & Dining",
+  "categoryTransport": "Transport",
+  "categoryShopping": "Shopping",
+  "categoryBillsUtilities": "Bills & Utilities",
+  "categoryHealth": "Health",
+  "categoryEntertainment": "Entertainment",
+  "categoryTransfer": "Transfer",
+  "categoryOther": "Other",
+  "categorySalary": "Salary",
+  "categoryFreelance": "Freelance",
+  "bankSms": "Bank SMS",
+  "smsInboxSupported": "Ledgr reads only known bank senders. SMS access is for personal/sideload use — Google Play restricts this permission for expense apps.",
+  "smsInboxUnsupported": "Inbox reading isn’t available on this device. Paste a bank SMS below.",
+  "pasteBankSms": "Paste a bank SMS",
+  "parse": "Parse",
+  "parsing": "Parsing…",
+  "toReview": "To review",
+  "unmatched": "Unmatched",
+  "imported": "Imported",
+  "emptyToReview": "Nothing to review — paste a bank SMS or scan the inbox",
+  "emptyUnmatched": "No unmatched messages",
+  "emptyImported": "No imported SMS yet",
+  "skipSmsTitle": "Skip this SMS?",
+  "skipSmsMessage": "It will not be added to the ledger.",
+  "skip": "Skip",
+  "inboxAccessGranted": "Inbox access granted",
+  "allowSmsAccess": "Allow SMS access to scan bank messages",
+  "scanInbox": "Scan inbox",
+  "scanning": "Scanning…",
+  "request": "Request",
+  "confirmEntry": "Confirm entry",
+  "smsCurrencyMismatch": "SMS currency {code} — stored as display currency, not converted.",
+  "@smsCurrencyMismatch": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "noteOptional": "Note (optional)",
+  "alreadyInInbox": "Already in the inbox",
+  "noNewBankMessages": "No new bank messages",
+  "foundMessagesToReview": "{count, plural, =1{Found {count} message to review} other{Found {count} messages to review}}",
+  "@foundMessagesToReview": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete"
+}

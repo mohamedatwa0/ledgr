@@ -2,19 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../domain/models/transaction_type.dart';
+import '../../../l10n/l10n.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/theme.dart';
 import '../../../theme/typography.dart';
+import '../../formatters/category_labels.dart';
 import '../../formatters/currencies.dart';
 import '../../formatters/date_labels.dart';
 import '../../formatters/money_input_formatter.dart';
 import '../../icons/tabler_icon.dart';
+import '../../router/app_router.dart';
 import '../../widgets/category_circle.dart';
 import '../../widgets/debit_credit_toggle.dart';
+import '../../widgets/directional_icon.dart';
 import '../../widgets/ledgr_app_bar.dart';
 import '../../widgets/ledgr_primary_button.dart';
+import '../../widgets/numeric_keypad.dart';
 import 'bloc/add_transaction_bloc.dart';
 import 'bloc/add_transaction_event.dart';
 import 'bloc/add_transaction_state.dart';
@@ -47,9 +53,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.dispose();
   }
 
+  void _setAmount(String value) {
+    _amount.text = value;
+    _amount.selection = TextSelection.collapsed(offset: value.length);
+    context.read<AddTransactionBloc>().add(AddTransactionAmountChanged(value));
+  }
+
   @override
   Widget build(BuildContext context) {
     final id = widget.transactionId;
+    final colors = context.colors;
+    final l10n = context.l10n;
 
     return BlocConsumer<AddTransactionBloc, AddTransactionState>(
       listener: (context, state) {
@@ -77,26 +91,29 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
         return Scaffold(
           appBar: LedgrAppBar(
-            title: id == null ? 'New entry' : 'Edit entry',
+            title: id == null ? l10n.newEntry : l10n.editEntry,
             leading: IconButton(
-              tooltip: 'Close',
+              tooltip: l10n.back,
               onPressed: () => context.pop(),
-              icon: const Icon(TablerIcons.x, color: paper, size: 19),
+              icon: DirectionalIcon(
+                TablerIcons.arrow_left,
+                color: colors.onSurface,
+                size: 22.r,
+              ),
             ),
           ),
           body: state.loading
-              ? const Center(
-                  child: CircularProgressIndicator(color: tealAccent),
-                )
+              ? Center(child: CircularProgressIndicator(color: colors.primary))
               : Column(
                   children: [
                     Expanded(
                       child: ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
                         children: [
                           DebitCreditToggle(
                             expenseSelected:
                                 state.type == TransactionType.expense,
+                            expanded: true,
                             onChanged: (expense) => bloc.add(
                               AddTransactionTypeChanged(
                                 expense
@@ -105,143 +122,354 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 26),
+                          SizedBox(height: 20.h),
+                          Text(
+                            l10n.entryValue,
+                            textAlign: TextAlign.center,
+                            style: uiStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: colors.secondary,
+                              letterSpacing: ltrLetterSpacing(context, 1.6),
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(symbol, style: amountStyle(fontSize: 40)),
-                              const SizedBox(width: 8),
+                              Text(
+                                symbol,
+                                style: amountStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w400,
+                                  color: colors.secondary,
+                                ),
+                              ),
+                              SizedBox(width: 6.w),
                               IntrinsicWidth(
                                 child: TextField(
                                   key: const Key('amount-field'),
                                   controller: _amount,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                                  inputFormatters: const [MoneyInputFormatter()],
-                                  textInputAction: TextInputAction.done,
+                                  keyboardType: TextInputType.none,
+                                  inputFormatters: const [
+                                    MoneyInputFormatter()
+                                  ],
                                   textAlign: TextAlign.center,
-                                  style: amountStyle(fontSize: 40),
-                                  cursorColor: tealAccent,
+                                  style: amountStyle(
+                                    fontSize: 28,
+                                    color: colors.onSurface,
+                                  ),
+                                  cursorColor: colors.primary,
                                   decoration: InputDecoration(
                                     isDense: true,
                                     border: InputBorder.none,
                                     hintText: '0.00',
                                     hintStyle: amountStyle(
-                                      fontSize: 40,
-                                      color: mutedInk,
+                                      fontSize: 28,
+                                      color: colors.secondary,
                                     ),
                                   ),
-                                  onChanged: (value) => bloc.add(
-                                    AddTransactionAmountChanged(value),
-                                  ),
+                                  onChanged: (value) => bloc
+                                      .add(AddTransactionAmountChanged(value)),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 26),
+                          Center(
+                            child: Container(
+                              width: 128.w,
+                              height: 2.h,
+                              margin: EdgeInsets.only(top: 8.h),
+                              color: state.type == TransactionType.expense
+                                  ? colors.ledgerRed
+                                  : colors.ledgerGreen,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 6.w,
+                            children: [
+                              for (final chip in const [5, 10, 25, 50])
+                                ActionChip(
+                                  label: Text('+$chip'),
+                                  onPressed: () => _setAmount(
+                                      addQuickAmount(_amount.text, chip)),
+                                  backgroundColor: colors.surfaceContainer,
+                                  labelStyle: uiStyle(
+                                    fontSize: 12,
+                                    color: colors.secondary,
+                                  ),
+                                  side: BorderSide.none,
+                                ),
+                              ActionChip(
+                                label: Icon(
+                                  TablerIcons.backspace,
+                                  size: 14.r,
+                                  color: colors.ledgerRed,
+                                ),
+                                onPressed: () =>
+                                    _setAmount(backspaceAmount(_amount.text)),
+                                backgroundColor: colors.surfaceContainerHigh,
+                                side: BorderSide.none,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          Row(
+                            children: [
+                              Text(
+                                l10n.ledgerAccount,
+                                style: uiStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.secondary,
+                                  letterSpacing: ltrLetterSpacing(context, 1.0),
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                l10n.categoriesCount(state.categories.length),
+                                style: uiStyle(
+                                    fontSize: 10, color: colors.secondary),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
                           if (state.categoriesLoading)
-                            const Center(
-                              child:
-                                  CircularProgressIndicator(color: tealAccent),
+                            Center(
+                              child: CircularProgressIndicator(
+                                  color: colors.primary),
                             )
                           else
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: state.categories.length + 1,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 0.85,
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: colors.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
-                              itemBuilder: (context, index) {
-                                if (index == state.categories.length) {
-                                  return CategoryCircle(
-                                    key: const Key('add-new-category'),
-                                    icon: TablerIcons.plus,
-                                    label: 'Add new',
-                                    onTap: () async {
-                                      final createdId = await context.push<int>(
-                                        '/categories/new?type=${state.type.name}',
-                                      );
-                                      if (createdId != null && context.mounted) {
-                                        bloc.add(
-                                          AddTransactionCategorySelected(
-                                            createdId,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  );
-                                }
-                                final category = state.categories[index];
-                                return CategoryCircle(
-                                  key: Key('category-${category.name}'),
-                                  icon: tablerIcon(category.iconCodePoint),
-                                  label: category.name,
-                                  selected: state.categoryId == category.id,
-                                  onTap: () => bloc.add(
-                                    AddTransactionCategorySelected(category.id),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w, vertical: 16.h),
+                                child: GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: state.categories.length + 1,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    mainAxisSpacing: 12.h,
+                                    crossAxisSpacing: 8.w,
+                                    childAspectRatio: 0.72,
                                   ),
-                                );
-                              },
-                            ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: _note,
-                            style: uiStyle(fontSize: 14),
-                            cursorColor: tealAccent,
-                            decoration: InputDecoration(
-                              hintText: 'Note (optional)',
-                              hintStyle: uiStyle(fontSize: 14, color: mutedInk),
-                              border: InputBorder.none,
-                            ),
-                            onChanged: (value) =>
-                                bloc.add(AddTransactionNoteChanged(value)),
-                          ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              border: Border(top: BorderSide(color: ruleColor)),
-                            ),
-                            padding: const EdgeInsets.only(top: 14),
-                            child: InkWell(
-                              onTap: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: state.date,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2100),
-                                  builder: (context, child) {
-                                    return DatePickerTheme(
-                                      data: ledgrDatePickerTheme,
-                                      child: child!,
+                                  itemBuilder: (context, index) {
+                                    if (index == state.categories.length) {
+                                      return CategoryCircle(
+                                        key: const Key('add-new-category'),
+                                        icon: TablerIcons.plus,
+                                        label: l10n.addNew,
+                                        size: 44.r,
+                                        onTap: () async {
+                                          final createdId =
+                                              await showCategoryFormSheet(
+                                            context,
+                                            type: state.type,
+                                          );
+                                          if (createdId != null &&
+                                              context.mounted) {
+                                            bloc.add(
+                                              AddTransactionCategorySelected(
+                                                  createdId),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    }
+                                    final category = state.categories[index];
+                                    return CategoryCircle(
+                                      key: Key('category-${category.name}'),
+                                      icon: tablerIcon(category.iconCodePoint),
+                                      label: localizedCategoryName(
+                                          l10n, category.name),
+                                      size: 44.r,
+                                      selected: state.categoryId == category.id,
+                                      iconColor: Color(category.colorValue),
+                                      onTap: () => bloc.add(
+                                        AddTransactionCategorySelected(
+                                            category.id),
+                                      ),
                                     );
                                   },
-                                );
-                                if (picked != null) {
-                                  bloc.add(AddTransactionDateChanged(picked));
-                                }
-                              },
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: 16.h),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: colors.paperLight,
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: IntrinsicHeight(
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  const Icon(
-                                    TablerIcons.calendar,
-                                    size: 18,
-                                    color: mutedInk,
+                                  Container(
+                                    width: 4.w,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          state.type == TransactionType.expense
+                                              ? colors.ledgerRed
+                                              : colors.ledgerGreen,
+                                      borderRadius:
+                                          BorderRadiusDirectional.only(
+                                        topStart: Radius.circular(8.r),
+                                        bottomStart: Radius.circular(8.r),
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    formatLedgerDate(state.date),
-                                    style:
-                                        uiStyle(fontSize: 13, color: mutedInk),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          12.w, 12.h, 12.w, 12.h),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                TablerIcons.notes,
+                                                size: 20.r,
+                                                color: colors.secondary,
+                                              ),
+                                              SizedBox(width: 8.w),
+                                              Expanded(
+                                                child: TextField(
+                                                  controller: _note,
+                                                  style: uiStyle(
+                                                    fontSize: 14,
+                                                    color: colors.onSurface,
+                                                  ),
+                                                  cursorColor: colors.primary,
+                                                  decoration: InputDecoration(
+                                                    labelText:
+                                                        l10n.bookkeeperMemo,
+                                                    labelStyle: uiStyle(
+                                                      fontSize: 10,
+                                                      color: colors.secondary,
+                                                      letterSpacing:
+                                                          ltrLetterSpacing(
+                                                              context, 0.8),
+                                                    ),
+                                                    hintText: l10n.noteHint,
+                                                    hintStyle: uiStyle(
+                                                      fontSize: 14,
+                                                      color: colors.secondary
+                                                          .withValues(
+                                                              alpha: 0.6),
+                                                    ),
+                                                    border: InputBorder.none,
+                                                    isDense: true,
+                                                  ),
+                                                  onChanged: (value) =>
+                                                      bloc.add(
+                                                    AddTransactionNoteChanged(
+                                                        value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(
+                                              color: colors.rule, height: 16.h),
+                                          InkWell(
+                                            onTap: () async {
+                                              final picked =
+                                                  await showDatePicker(
+                                                context: context,
+                                                initialDate: state.date,
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2100),
+                                                builder: (context, child) {
+                                                  return DatePickerTheme(
+                                                    data: ledgrDatePickerTheme(
+                                                        colors),
+                                                    child: child!,
+                                                  );
+                                                },
+                                              );
+                                              if (picked != null) {
+                                                bloc.add(
+                                                  AddTransactionDateChanged(
+                                                      picked),
+                                                );
+                                              }
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  TablerIcons.calendar,
+                                                  size: 20.r,
+                                                  color: colors.secondary,
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        l10n.transactionDate,
+                                                        style: uiStyle(
+                                                          fontSize: 10,
+                                                          color:
+                                                              colors.secondary,
+                                                          letterSpacing:
+                                                              ltrLetterSpacing(
+                                                            context,
+                                                            0.8,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        formatLedgerDate(
+                                                          state.date,
+                                                          l10n: l10n,
+                                                        ),
+                                                        style: uiStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              colors.onSurface,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  l10n.change,
+                                                  style: uiStyle(
+                                                    fontSize: 10,
+                                                    color: colors.primary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
+                          ),
+                          SizedBox(height: 16.h),
+                          NumericKeypad(
+                            onDigit: (digit) => _setAmount(
+                              appendAmountDigit(_amount.text, digit),
+                            ),
+                            onBackspace: () =>
+                                _setAmount(backspaceAmount(_amount.text)),
                           ),
                         ],
                       ),
@@ -249,25 +477,37 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     SafeArea(
                       top: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
                         child: Column(
                           children: [
                             if (state.missingRequiredFields)
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
+                                padding: EdgeInsets.only(bottom: 8.h),
                                 child: Text(
-                                  'Enter an amount and choose a category',
-                                  style: uiStyle(fontSize: 12, color: mutedInk),
+                                  l10n.missingAmountAndCategory,
+                                  textAlign: TextAlign.center,
+                                  style: uiStyle(
+                                    fontSize: 12,
+                                    color: colors.secondary,
+                                  ),
                                 ),
                               ),
                             LedgrPrimaryButton(
                               key: const Key('save-entry'),
-                              label: 'Save entry',
+                              label: l10n.saveEntry,
                               onPressed: state.canSave
                                   ? () => bloc.add(
                                         const AddTransactionSaveRequested(),
                                       )
                                   : null,
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              l10n.offlineEntryNote,
+                              style: uiStyle(
+                                fontSize: 12,
+                                color: colors.secondary,
+                              ),
                             ),
                           ],
                         ),

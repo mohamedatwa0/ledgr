@@ -116,11 +116,13 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
     emit(state.copyWith(categoryId: event.categoryId));
   }
 
-  void _onNoteChanged(SmsReviewNoteChanged event, Emitter<SmsReviewState> emit) {
+  void _onNoteChanged(
+      SmsReviewNoteChanged event, Emitter<SmsReviewState> emit) {
     emit(state.copyWith(note: event.note));
   }
 
-  void _onDateChanged(SmsReviewDateChanged event, Emitter<SmsReviewState> emit) {
+  void _onDateChanged(
+      SmsReviewDateChanged event, Emitter<SmsReviewState> emit) {
     emit(state.copyWith(date: dateOnly(event.date)));
   }
 

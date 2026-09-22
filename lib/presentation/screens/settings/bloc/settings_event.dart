@@ -1,3 +1,8 @@
+import '../../../../domain/models/app_locale.dart';
+import '../../../../domain/models/app_settings.dart';
+import '../../../../domain/models/app_theme_mode.dart';
+import '../../../../domain/models/transaction_type.dart';
+
 abstract class SettingsEvent {
   const SettingsEvent();
 }
@@ -12,10 +17,32 @@ class SettingsCurrencySelected extends SettingsEvent {
   final String currencyCode;
 }
 
-class SettingsCurrencyUpdated extends SettingsEvent {
-  const SettingsCurrencyUpdated(this.currencyCode);
+class SettingsThemeModeSelected extends SettingsEvent {
+  const SettingsThemeModeSelected(this.themeMode);
 
-  final String currencyCode;
+  final AppThemeMode themeMode;
+}
+
+class SettingsDefaultTypeSelected extends SettingsEvent {
+  const SettingsDefaultTypeSelected(this.type);
+
+  final TransactionType type;
+}
+
+class SettingsLocaleSelected extends SettingsEvent {
+  const SettingsLocaleSelected(this.locale);
+
+  final AppLocale locale;
+}
+
+class SettingsResetRequested extends SettingsEvent {
+  const SettingsResetRequested();
+}
+
+class SettingsUpdated extends SettingsEvent {
+  const SettingsUpdated(this.settings);
+
+  final AppSettings settings;
 }
 
 class SettingsReadyCountUpdated extends SettingsEvent {

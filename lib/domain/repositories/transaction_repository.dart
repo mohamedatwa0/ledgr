@@ -26,4 +26,6 @@ abstract class TransactionRepository {
   Future<void> update(LedgerTransaction transaction);
 
   Future<void> delete(int id);
+
+  Future<void> deleteAll();
 }

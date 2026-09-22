@@ -115,4 +115,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<void> delete(int id) {
     return (_db.delete(_db.transactionRows)..where((t) => t.id.equals(id))).go();
   }
+
+  @override
+  Future<void> deleteAll() {
+    return _db.delete(_db.transactionRows).go();
+  }
 }

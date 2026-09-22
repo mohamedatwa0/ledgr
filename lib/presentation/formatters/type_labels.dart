@@ -1,6 +1,7 @@
 import '../../domain/models/transaction_type.dart';
+import '../../l10n/app_localizations.dart';
 
 extension TransactionTypeUi on TransactionType {
-  String get ledgerLabel =>
-      this == TransactionType.expense ? 'Debit' : 'Credit';
+  String ledgerLabel(AppLocalizations l10n) =>
+      this == TransactionType.expense ? l10n.debit : l10n.credit;
 }

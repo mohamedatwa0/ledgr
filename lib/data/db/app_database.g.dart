@@ -842,7 +842,37 @@ class $SettingsRowsTable extends SettingsRows
       GeneratedColumn<DateTime>('sms_last_scan_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, currencyCode, smsLastScanAt];
+  late final GeneratedColumnWithTypeConverter<AppThemeMode, String> themeMode =
+      GeneratedColumn<String>('theme_mode', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('system'))
+          .withConverter<AppThemeMode>($SettingsRowsTable.$converterthemeMode);
+  @override
+  late final GeneratedColumnWithTypeConverter<TransactionType, String>
+      defaultEntryType = GeneratedColumn<String>(
+              'default_entry_type', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('expense'))
+          .withConverter<TransactionType>(
+              $SettingsRowsTable.$converterdefaultEntryType);
+  @override
+  late final GeneratedColumnWithTypeConverter<AppLocale, String> localeCode =
+      GeneratedColumn<String>('locale_code', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('en'))
+          .withConverter<AppLocale>($SettingsRowsTable.$converterlocaleCode);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        currencyCode,
+        smsLastScanAt,
+        themeMode,
+        defaultEntryType,
+        localeCode
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -883,6 +913,15 @@ class $SettingsRowsTable extends SettingsRows
           .read(DriftSqlType.string, data['${effectivePrefix}currency_code'])!,
       smsLastScanAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}sms_last_scan_at']),
+      themeMode: $SettingsRowsTable.$converterthemeMode.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}theme_mode'])!),
+      defaultEntryType: $SettingsRowsTable.$converterdefaultEntryType.fromSql(
+          attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}default_entry_type'])!),
+      localeCode: $SettingsRowsTable.$converterlocaleCode.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}locale_code'])!),
     );
   }
 
@@ -890,14 +929,30 @@ class $SettingsRowsTable extends SettingsRows
   $SettingsRowsTable createAlias(String alias) {
     return $SettingsRowsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<AppThemeMode, String, String> $converterthemeMode =
+      const EnumNameConverter<AppThemeMode>(AppThemeMode.values);
+  static JsonTypeConverter2<TransactionType, String, String>
+      $converterdefaultEntryType =
+      const EnumNameConverter<TransactionType>(TransactionType.values);
+  static JsonTypeConverter2<AppLocale, String, String> $converterlocaleCode =
+      const EnumNameConverter<AppLocale>(AppLocale.values);
 }
 
 class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final int id;
   final String currencyCode;
   final DateTime? smsLastScanAt;
+  final AppThemeMode themeMode;
+  final TransactionType defaultEntryType;
+  final AppLocale localeCode;
   const SettingsRow(
-      {required this.id, required this.currencyCode, this.smsLastScanAt});
+      {required this.id,
+      required this.currencyCode,
+      this.smsLastScanAt,
+      required this.themeMode,
+      required this.defaultEntryType,
+      required this.localeCode});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -905,6 +960,19 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['currency_code'] = Variable<String>(currencyCode);
     if (!nullToAbsent || smsLastScanAt != null) {
       map['sms_last_scan_at'] = Variable<DateTime>(smsLastScanAt);
+    }
+    {
+      map['theme_mode'] = Variable<String>(
+          $SettingsRowsTable.$converterthemeMode.toSql(themeMode));
+    }
+    {
+      map['default_entry_type'] = Variable<String>($SettingsRowsTable
+          .$converterdefaultEntryType
+          .toSql(defaultEntryType));
+    }
+    {
+      map['locale_code'] = Variable<String>(
+          $SettingsRowsTable.$converterlocaleCode.toSql(localeCode));
     }
     return map;
   }
@@ -916,6 +984,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       smsLastScanAt: smsLastScanAt == null && nullToAbsent
           ? const Value.absent()
           : Value(smsLastScanAt),
+      themeMode: Value(themeMode),
+      defaultEntryType: Value(defaultEntryType),
+      localeCode: Value(localeCode),
     );
   }
 
@@ -926,6 +997,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       id: serializer.fromJson<int>(json['id']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       smsLastScanAt: serializer.fromJson<DateTime?>(json['smsLastScanAt']),
+      themeMode: $SettingsRowsTable.$converterthemeMode
+          .fromJson(serializer.fromJson<String>(json['themeMode'])),
+      defaultEntryType: $SettingsRowsTable.$converterdefaultEntryType
+          .fromJson(serializer.fromJson<String>(json['defaultEntryType'])),
+      localeCode: $SettingsRowsTable.$converterlocaleCode
+          .fromJson(serializer.fromJson<String>(json['localeCode'])),
     );
   }
   @override
@@ -935,18 +1012,31 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'id': serializer.toJson<int>(id),
       'currencyCode': serializer.toJson<String>(currencyCode),
       'smsLastScanAt': serializer.toJson<DateTime?>(smsLastScanAt),
+      'themeMode': serializer.toJson<String>(
+          $SettingsRowsTable.$converterthemeMode.toJson(themeMode)),
+      'defaultEntryType': serializer.toJson<String>($SettingsRowsTable
+          .$converterdefaultEntryType
+          .toJson(defaultEntryType)),
+      'localeCode': serializer.toJson<String>(
+          $SettingsRowsTable.$converterlocaleCode.toJson(localeCode)),
     };
   }
 
   SettingsRow copyWith(
           {int? id,
           String? currencyCode,
-          Value<DateTime?> smsLastScanAt = const Value.absent()}) =>
+          Value<DateTime?> smsLastScanAt = const Value.absent(),
+          AppThemeMode? themeMode,
+          TransactionType? defaultEntryType,
+          AppLocale? localeCode}) =>
       SettingsRow(
         id: id ?? this.id,
         currencyCode: currencyCode ?? this.currencyCode,
         smsLastScanAt:
             smsLastScanAt.present ? smsLastScanAt.value : this.smsLastScanAt,
+        themeMode: themeMode ?? this.themeMode,
+        defaultEntryType: defaultEntryType ?? this.defaultEntryType,
+        localeCode: localeCode ?? this.localeCode,
       );
   SettingsRow copyWithCompanion(SettingsRowsCompanion data) {
     return SettingsRow(
@@ -957,6 +1047,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       smsLastScanAt: data.smsLastScanAt.present
           ? data.smsLastScanAt.value
           : this.smsLastScanAt,
+      themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
+      defaultEntryType: data.defaultEntryType.present
+          ? data.defaultEntryType.value
+          : this.defaultEntryType,
+      localeCode:
+          data.localeCode.present ? data.localeCode.value : this.localeCode,
     );
   }
 
@@ -965,56 +1061,84 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     return (StringBuffer('SettingsRow(')
           ..write('id: $id, ')
           ..write('currencyCode: $currencyCode, ')
-          ..write('smsLastScanAt: $smsLastScanAt')
+          ..write('smsLastScanAt: $smsLastScanAt, ')
+          ..write('themeMode: $themeMode, ')
+          ..write('defaultEntryType: $defaultEntryType, ')
+          ..write('localeCode: $localeCode')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, currencyCode, smsLastScanAt);
+  int get hashCode => Object.hash(
+      id, currencyCode, smsLastScanAt, themeMode, defaultEntryType, localeCode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SettingsRow &&
           other.id == this.id &&
           other.currencyCode == this.currencyCode &&
-          other.smsLastScanAt == this.smsLastScanAt);
+          other.smsLastScanAt == this.smsLastScanAt &&
+          other.themeMode == this.themeMode &&
+          other.defaultEntryType == this.defaultEntryType &&
+          other.localeCode == this.localeCode);
 }
 
 class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int> id;
   final Value<String> currencyCode;
   final Value<DateTime?> smsLastScanAt;
+  final Value<AppThemeMode> themeMode;
+  final Value<TransactionType> defaultEntryType;
+  final Value<AppLocale> localeCode;
   const SettingsRowsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.smsLastScanAt = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.defaultEntryType = const Value.absent(),
+    this.localeCode = const Value.absent(),
   });
   SettingsRowsCompanion.insert({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.smsLastScanAt = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.defaultEntryType = const Value.absent(),
+    this.localeCode = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
     Expression<String>? currencyCode,
     Expression<DateTime>? smsLastScanAt,
+    Expression<String>? themeMode,
+    Expression<String>? defaultEntryType,
+    Expression<String>? localeCode,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (currencyCode != null) 'currency_code': currencyCode,
       if (smsLastScanAt != null) 'sms_last_scan_at': smsLastScanAt,
+      if (themeMode != null) 'theme_mode': themeMode,
+      if (defaultEntryType != null) 'default_entry_type': defaultEntryType,
+      if (localeCode != null) 'locale_code': localeCode,
     });
   }
 
   SettingsRowsCompanion copyWith(
       {Value<int>? id,
       Value<String>? currencyCode,
-      Value<DateTime?>? smsLastScanAt}) {
+      Value<DateTime?>? smsLastScanAt,
+      Value<AppThemeMode>? themeMode,
+      Value<TransactionType>? defaultEntryType,
+      Value<AppLocale>? localeCode}) {
     return SettingsRowsCompanion(
       id: id ?? this.id,
       currencyCode: currencyCode ?? this.currencyCode,
       smsLastScanAt: smsLastScanAt ?? this.smsLastScanAt,
+      themeMode: themeMode ?? this.themeMode,
+      defaultEntryType: defaultEntryType ?? this.defaultEntryType,
+      localeCode: localeCode ?? this.localeCode,
     );
   }
 
@@ -1030,6 +1154,19 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     if (smsLastScanAt.present) {
       map['sms_last_scan_at'] = Variable<DateTime>(smsLastScanAt.value);
     }
+    if (themeMode.present) {
+      map['theme_mode'] = Variable<String>(
+          $SettingsRowsTable.$converterthemeMode.toSql(themeMode.value));
+    }
+    if (defaultEntryType.present) {
+      map['default_entry_type'] = Variable<String>($SettingsRowsTable
+          .$converterdefaultEntryType
+          .toSql(defaultEntryType.value));
+    }
+    if (localeCode.present) {
+      map['locale_code'] = Variable<String>(
+          $SettingsRowsTable.$converterlocaleCode.toSql(localeCode.value));
+    }
     return map;
   }
 
@@ -1038,7 +1175,10 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     return (StringBuffer('SettingsRowsCompanion(')
           ..write('id: $id, ')
           ..write('currencyCode: $currencyCode, ')
-          ..write('smsLastScanAt: $smsLastScanAt')
+          ..write('smsLastScanAt: $smsLastScanAt, ')
+          ..write('themeMode: $themeMode, ')
+          ..write('defaultEntryType: $defaultEntryType, ')
+          ..write('localeCode: $localeCode')
           ..write(')'))
         .toString();
   }
@@ -2661,12 +2801,18 @@ typedef $$SettingsRowsTableCreateCompanionBuilder = SettingsRowsCompanion
   Value<int> id,
   Value<String> currencyCode,
   Value<DateTime?> smsLastScanAt,
+  Value<AppThemeMode> themeMode,
+  Value<TransactionType> defaultEntryType,
+  Value<AppLocale> localeCode,
 });
 typedef $$SettingsRowsTableUpdateCompanionBuilder = SettingsRowsCompanion
     Function({
   Value<int> id,
   Value<String> currencyCode,
   Value<DateTime?> smsLastScanAt,
+  Value<AppThemeMode> themeMode,
+  Value<TransactionType> defaultEntryType,
+  Value<AppLocale> localeCode,
 });
 
 class $$SettingsRowsTableFilterComposer
@@ -2686,6 +2832,21 @@ class $$SettingsRowsTableFilterComposer
 
   ColumnFilters<DateTime> get smsLastScanAt => $composableBuilder(
       column: $table.smsLastScanAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<AppThemeMode, AppThemeMode, String>
+      get themeMode => $composableBuilder(
+          column: $table.themeMode,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<TransactionType, TransactionType, String>
+      get defaultEntryType => $composableBuilder(
+          column: $table.defaultEntryType,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<AppLocale, AppLocale, String> get localeCode =>
+      $composableBuilder(
+          column: $table.localeCode,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 }
 
 class $$SettingsRowsTableOrderingComposer
@@ -2707,6 +2868,16 @@ class $$SettingsRowsTableOrderingComposer
   ColumnOrderings<DateTime> get smsLastScanAt => $composableBuilder(
       column: $table.smsLastScanAt,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get themeMode => $composableBuilder(
+      column: $table.themeMode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get defaultEntryType => $composableBuilder(
+      column: $table.defaultEntryType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get localeCode => $composableBuilder(
+      column: $table.localeCode, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsRowsTableAnnotationComposer
@@ -2726,6 +2897,17 @@ class $$SettingsRowsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get smsLastScanAt => $composableBuilder(
       column: $table.smsLastScanAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AppThemeMode, String> get themeMode =>
+      $composableBuilder(column: $table.themeMode, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TransactionType, String>
+      get defaultEntryType => $composableBuilder(
+          column: $table.defaultEntryType, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<AppLocale, String> get localeCode =>
+      $composableBuilder(
+          column: $table.localeCode, builder: (column) => column);
 }
 
 class $$SettingsRowsTableTableManager extends RootTableManager<
@@ -2757,21 +2939,33 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
             Value<DateTime?> smsLastScanAt = const Value.absent(),
+            Value<AppThemeMode> themeMode = const Value.absent(),
+            Value<TransactionType> defaultEntryType = const Value.absent(),
+            Value<AppLocale> localeCode = const Value.absent(),
           }) =>
               SettingsRowsCompanion(
             id: id,
             currencyCode: currencyCode,
             smsLastScanAt: smsLastScanAt,
+            themeMode: themeMode,
+            defaultEntryType: defaultEntryType,
+            localeCode: localeCode,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
             Value<DateTime?> smsLastScanAt = const Value.absent(),
+            Value<AppThemeMode> themeMode = const Value.absent(),
+            Value<TransactionType> defaultEntryType = const Value.absent(),
+            Value<AppLocale> localeCode = const Value.absent(),
           }) =>
               SettingsRowsCompanion.insert(
             id: id,
             currencyCode: currencyCode,
             smsLastScanAt: smsLastScanAt,
+            themeMode: themeMode,
+            defaultEntryType: defaultEntryType,
+            localeCode: localeCode,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

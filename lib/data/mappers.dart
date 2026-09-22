@@ -41,6 +41,9 @@ AppSettings settingsFromRow(SettingsRow row) {
   return AppSettings(
     currencyCode: row.currencyCode,
     smsLastScanAt: row.smsLastScanAt,
+    themeMode: row.themeMode,
+    defaultEntryType: row.defaultEntryType,
+    locale: row.localeCode,
   );
 }
 
