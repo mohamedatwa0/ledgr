@@ -1066,6 +1066,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  /// No description provided for @discardEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this entry?'**
+  String get discardEntryTitle;
+
+  /// No description provided for @discardEntryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount you entered will be lost.'**
+  String get discardEntryMessage;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @duplicateCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'A category with that name already exists.'**
+  String get duplicateCategory;
+
+  /// No description provided for @defaultCategoryProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'Default categories cannot be changed or deleted.'**
+  String get defaultCategoryProtected;
+
+  /// No description provided for @smsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'That SMS is no longer in the inbox.'**
+  String get smsNotFound;
+
+  /// No description provided for @smsAlreadyImported.
+  ///
+  /// In en, this message translates to:
+  /// **'This SMS has already been added to the ledger.'**
+  String get smsAlreadyImported;
+
+  /// No description provided for @transactionNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry is no longer in the ledger.'**
+  String get transactionNotFound;
+
+  /// No description provided for @categoryNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This category is no longer available.'**
+  String get categoryNotFound;
+
+  /// No description provided for @enterCategoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a category name.'**
+  String get enterCategoryName;
+
+  /// No description provided for @amountMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than 0.'**
+  String get amountMustBePositive;
+
+  /// No description provided for @categoryTypeMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Category does not match Debit/Credit.'**
+  String get categoryTypeMismatch;
+
+  /// No description provided for @otherCategoryMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The Other category is missing.'**
+  String get otherCategoryMissing;
+
+  /// No description provided for @scanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not scan the inbox.'**
+  String get scanFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

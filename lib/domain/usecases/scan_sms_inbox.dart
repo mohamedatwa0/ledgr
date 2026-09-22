@@ -16,18 +16,22 @@ class ScanSmsInbox {
     final permitted = await _gateway.hasPermission();
     if (!permitted) return 0;
 
-    final settings = await _settings.get();
-    final messages = await _gateway.readSince(
-      settings.smsLastScanAt,
-      smsSenderAllowlist(),
-    );
-    var added = 0;
-    for (final message in messages) {
-      final result = await _ingest(message);
-      if (!result.duplicate) added++;
+    try {
+      final settings = await _settings.get();
+      final messages = await _gateway.readSince(
+        settings.smsLastScanAt,
+        smsSenderAllowlist(),
+      );
+      var added = 0;
+      for (final message in messages) {
+        final result = await _ingest(message);
+        if (!result.duplicate) added++;
+      }
+      await _settings.setSmsLastScanAt(DateTime.now());
+      return added;
+    } catch (_) {
+      return 0;
     }
-    await _settings.setSmsLastScanAt(DateTime.now());
-    return added;
   }
 }
 

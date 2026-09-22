@@ -7,7 +7,9 @@ import '../../l10n/l10n.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../formatters/currencies.dart';
+import '../formatters/date_labels.dart';
 import '../formatters/money_format.dart';
+import 'directional_icon.dart';
 
 class BalanceCard extends StatelessWidget {
   const BalanceCard({
@@ -73,7 +75,7 @@ class BalanceCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(minWidth: 32.w, minHeight: 32.h),
                 onPressed: onPreviousMonth,
-                icon: Icon(
+                icon: DirectionalIcon(
                   TablerIcons.chevron_left,
                   size: 16.r,
                   color: colors.secondary,
@@ -112,7 +114,7 @@ class BalanceCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(minWidth: 32.w, minHeight: 32.h),
                 onPressed: canGoForward ? onNextMonth : null,
-                icon: Icon(
+                icon: DirectionalIcon(
                   TablerIcons.chevron_right,
                   size: 16.r,
                   color: canGoForward
@@ -140,7 +142,7 @@ class BalanceCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.thisMonth,
+                            monthPageLabel(month, l10n: l10n).toUpperCase(),
                             style: uiStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -164,7 +166,8 @@ class BalanceCard extends StatelessWidget {
                               SizedBox(width: 6.w),
                               Flexible(
                                 child: Text(
-                                  formatSubtotal(balance.abs()),
+                                  formatSubtotal(balance),
+                                  key: const Key('month-balance'),
                                   style: amountStyle(
                                     fontSize: 32,
                                     color: colors.onSurface,
@@ -198,9 +201,7 @@ class BalanceCard extends StatelessWidget {
                                 child: _Subtotal(
                                   label: l10n.debits,
                                   signed: '-${formatSubtotal(debits)}',
-                                  hiddenLookup: l10n.hiddenDebitsLookup(
-                                    formatSubtotal(debits),
-                                  ),
+                                  signedKey: const Key('month-debits'),
                                   countLabel: l10n.postingCount(debitCount),
                                   color: colors.ledgerRed,
                                   icon: TablerIcons.arrow_down,
@@ -229,15 +230,15 @@ class _Subtotal extends StatelessWidget {
     required this.countLabel,
     required this.color,
     required this.icon,
-    this.hiddenLookup,
+    this.signedKey,
   });
 
   final String label;
   final String signed;
+  final Key? signedKey;
   final String countLabel;
   final Color color;
   final IconData icon;
-  final String? hiddenLookup;
 
   @override
   Widget build(BuildContext context) {
@@ -261,15 +262,11 @@ class _Subtotal extends StatelessWidget {
           ],
         ),
         SizedBox(height: 2.h),
-        Text(signed, style: amountStyle(fontSize: 18, color: color)),
-        if (hiddenLookup != null)
-          SizedBox(
-            height: 0.h,
-            child: OverflowBox(
-              maxHeight: 1.h,
-              child: Text(hiddenLookup!, style: const TextStyle(fontSize: 1)),
-            ),
-          ),
+        Text(
+          signed,
+          key: signedKey,
+          style: amountStyle(fontSize: 18, color: color),
+        ),
         Text(
           countLabel,
           style: uiStyle(fontSize: 12, color: colors.secondary),

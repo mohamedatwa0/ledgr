@@ -26,7 +26,7 @@ class HistoryScreen extends StatelessWidget {
     final colors = context.colors;
     return BlocBuilder<HistoryBloc, HistoryState>(
       builder: (context, state) {
-        final visible = state.visibleEntries;
+        final visible = state.visibleFor(context.l10n);
         final l10n = context.l10n;
         return Column(
           children: [
@@ -78,25 +78,46 @@ class HistoryScreen extends StatelessWidget {
             ),
             Container(
               color: colors.paperLight,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
               child: Row(
                 children: [
+                  IconButton(
+                    key: const Key('history-previous-month'),
+                    tooltip: l10n.previousMonth,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      context.read<HistoryBloc>().add(
+                            HistoryMonthChanged(
+                              DateTime(
+                                state.month.year,
+                                state.month.month - 1,
+                              ),
+                            ),
+                          );
+                    },
+                    icon: Icon(
+                      TablerIcons.chevron_left,
+                      size: 16.r,
+                      color: colors.secondary,
+                    ),
+                  ),
                   Icon(
                     TablerIcons.calendar,
                     size: 20.r,
                     color: colors.primaryContainer,
                   ),
                   SizedBox(width: 6.w),
-                  Text(
-                    DateFormat('MMMM y', l10n.localeName)
-                        .format(DateTime.now()),
-                    style: uiStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: colors.onSurface,
+                  Expanded(
+                    child: Text(
+                      DateFormat('MMMM y', l10n.localeName).format(state.month),
+                      key: const Key('history-month-label'),
+                      style: uiStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurface,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   Text(
                     l10n.entriesCount(visible.length),
                     style: uiStyle(
@@ -104,6 +125,30 @@ class HistoryScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: colors.secondary,
                       letterSpacing: ltrLetterSpacing(context, 0.8),
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('history-next-month'),
+                    tooltip: l10n.nextMonth,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: state.isCurrentMonth
+                        ? null
+                        : () {
+                            context.read<HistoryBloc>().add(
+                                  HistoryMonthChanged(
+                                    DateTime(
+                                      state.month.year,
+                                      state.month.month + 1,
+                                    ),
+                                  ),
+                                );
+                          },
+                    icon: Icon(
+                      TablerIcons.chevron_right,
+                      size: 16.r,
+                      color: state.isCurrentMonth
+                          ? colors.secondary.withValues(alpha: 0.35)
+                          : colors.secondary,
                     ),
                   ),
                 ],

@@ -1,8 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ledgr/app.dart';
 import 'package:ledgr/data/db/app_database.dart';
+
+import 'support/ledgr_harness.dart';
 
 void main() {
   late AppDatabase db;
@@ -15,32 +16,8 @@ void main() {
     await db.close();
   });
 
-  Future<void> pumpApp(WidgetTester tester) async {
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(390, 844);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPhysicalSize);
-    await tester.binding.setSurfaceSize(const Size(390, 844));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      LedgrApp(database: db, showLaunchScreen: false),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-  }
-
-  Future<void> settle(WidgetTester tester) async {
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-  }
-
-  Future<void> disposeApp(WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump(const Duration(milliseconds: 1));
-  }
-
   testWidgets('adding a transaction shows it on the home ledger', (tester) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
 
     await tester.tap(find.byKey(const Key('add-transaction-fab')));
     await settle(tester);
@@ -55,12 +32,16 @@ void main() {
 
     expect(find.text('Food & Dining'), findsWidgets);
     expect(find.text('-45.00'), findsWidgets);
-    expect(find.textContaining('Debits 45.00'), findsOneWidget);
+    expect(find.byKey(const Key('month-debits')), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('month-debits'))).data,
+      '-45.00',
+    );
     await disposeApp(tester);
   });
 
   testWidgets('deleting a transaction removes it from history', (tester) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
 
     await tester.tap(find.byKey(const Key('add-transaction-fab')));
     await settle(tester);
@@ -92,7 +73,7 @@ void main() {
   testWidgets('adding a custom category shows it in the category list', (
     tester,
   ) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
 
     await tester.tap(find.byKey(const Key('tab-categories')));
     await settle(tester);
@@ -111,30 +92,8 @@ void main() {
     await disposeApp(tester);
   });
 
-  const cibSms =
-      'CIB: Purchase of EGP 250.00 at STARBUCKS using card ending 1234 '
-      'on 15/09/2026. Available balance EGP 5,000.00';
-
-  Future<void> openSmsAndParse(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('tab-settings')));
-    await settle(tester);
-    expect(find.text('Language'), findsOneWidget);
-    await tester.dragUntilVisible(
-      find.byKey(const Key('settings-sms')),
-      find.byType(ListView),
-      const Offset(0, -200),
-    );
-    await tester.tap(find.byKey(const Key('settings-sms')));
-    await settle(tester);
-    await tester.enterText(find.byKey(const Key('sms-paste-field')), cibSms);
-    await tester.pump();
-    await tester.ensureVisible(find.byKey(const Key('sms-parse-button')));
-    await tester.tap(find.byKey(const Key('sms-parse-button')));
-    await settle(tester);
-  }
-
   testWidgets('pasting a bank SMS shows it in To review', (tester) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
     await openSmsAndParse(tester);
 
     expect(find.text('STARBUCKS'), findsOneWidget);
@@ -144,7 +103,7 @@ void main() {
   testWidgets('confirming a parsed SMS adds it to the home ledger', (
     tester,
   ) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
     await openSmsAndParse(tester);
 
     await tester.ensureVisible(find.text('STARBUCKS'));
@@ -166,13 +125,16 @@ void main() {
   testWidgets('dismissing a parsed SMS does not add it to the home ledger', (
     tester,
   ) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
     await openSmsAndParse(tester);
 
     await tester.ensureVisible(find.text('STARBUCKS'));
     await tester.tap(find.text('STARBUCKS'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('sms-dismiss')));
+    await settle(tester);
+    expect(find.text('Skip this SMS?'), findsOneWidget);
+    await tester.tap(find.text('Skip'));
     await settle(tester);
 
     await tester.tap(find.byTooltip('Back'));
@@ -187,7 +149,7 @@ void main() {
   testWidgets('duplicate paste does not create a second ready row', (
     tester,
   ) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
     await openSmsAndParse(tester);
 
     await tester.enterText(find.byKey(const Key('sms-paste-field')), cibSms);
@@ -202,7 +164,7 @@ void main() {
   });
 
   testWidgets('switching language to Arabic applies RTL', (tester) async {
-    await pumpApp(tester);
+    await pumpApp(tester, db: db);
 
     await tester.tap(find.byKey(const Key('tab-settings')));
     await settle(tester);

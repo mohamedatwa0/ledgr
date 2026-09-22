@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../domain/date_utils.dart';
 import '../../../../domain/models/transaction_entry.dart';
 import '../../../../domain/models/transaction_type.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
@@ -15,12 +16,13 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required DeleteTransaction deleteTransaction,
   })  : _transactions = transactions,
         _deleteTransaction = deleteTransaction,
-        super(HistoryState.initial) {
+        super(HistoryState.initial()) {
     on<HistoryStarted>(_onStarted);
     on<HistoryFilterChanged>(_onFilterChanged);
     on<HistoryDeleteRequested>(_onDeleteRequested);
     on<HistoryEntriesUpdated>(_onEntriesUpdated);
     on<HistoryQueryChanged>(_onQueryChanged);
+    on<HistoryMonthChanged>(_onMonthChanged);
   }
 
   final TransactionRepository _transactions;
@@ -28,7 +30,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   StreamSubscription<List<TransactionEntry>>? _subscription;
 
   void _onStarted(HistoryStarted event, Emitter<HistoryState> emit) {
-    _watch(state.filter);
+    _watch(filter: state.filter, month: state.month);
   }
 
   void _onFilterChanged(
@@ -37,7 +39,20 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   ) {
     if (event.filter == state.filter) return;
     emit(state.copyWith(filter: event.filter, loading: state.entries.isEmpty));
-    _watch(event.filter);
+    _watch(filter: event.filter, month: state.month);
+  }
+
+  void _onMonthChanged(HistoryMonthChanged event, Emitter<HistoryState> emit) {
+    final month = monthStart(event.month);
+    if (isSameMonth(month, state.month)) return;
+    emit(
+      state.copyWith(
+        month: month,
+        entries: const [],
+        loading: true,
+      ),
+    );
+    _watch(filter: state.filter, month: month);
   }
 
   Future<void> _onDeleteRequested(
@@ -61,7 +76,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     emit(state.copyWith(query: event.query));
   }
 
-  void _watch(HistoryFilter filter) {
+  void _watch({required HistoryFilter filter, required DateTime month}) {
     _subscription?.cancel();
     TransactionType? type;
     switch (filter) {
@@ -72,7 +87,13 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
       case HistoryFilter.debit:
         type = TransactionType.expense;
     }
-    _subscription = _transactions.watchEntries(type: type).listen((entries) {
+    _subscription = _transactions
+        .watchEntries(
+      type: type,
+      from: monthStart(month),
+      toExclusive: monthEndExclusive(month),
+    )
+        .listen((entries) {
       if (!isClosed) add(HistoryEntriesUpdated(entries));
     });
   }

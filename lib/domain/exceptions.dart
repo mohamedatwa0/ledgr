@@ -29,3 +29,13 @@ class SmsAlreadyImportedException extends LedgrException {
   const SmsAlreadyImportedException()
       : super('This SMS has already been added to the ledger.');
 }
+
+class TransactionNotFoundException extends LedgrException {
+  const TransactionNotFoundException()
+      : super('This entry is no longer in the ledger.');
+}
+
+class CategoryNotFoundException extends LedgrException {
+  const CategoryNotFoundException()
+      : super('This category is no longer available.');
+}

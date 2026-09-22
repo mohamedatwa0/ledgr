@@ -8,6 +8,7 @@ import '../../../domain/models/transaction_type.dart';
 import '../../../l10n/l10n.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
+import '../../formatters/error_labels.dart';
 import '../../widgets/category_choices.dart';
 import '../../widgets/category_circle.dart';
 import '../../widgets/debit_credit_toggle.dart';
@@ -71,9 +72,13 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
           context.pop(state.savedCategoryId);
           return;
         }
-        if (state.errorMessage != null) {
+        if (state.errorMessage != null && !state.notFound) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
+            SnackBar(
+              content: Text(
+                localizedLedgrErrorMessage(context.l10n, state.errorMessage!),
+              ),
+            ),
           );
         }
         final count = state.deletePromptCount;
@@ -134,6 +139,18 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final l10n = context.l10n;
     if (state.loading) {
       return Center(child: CircularProgressIndicator(color: colors.primary));
+    }
+    if (state.notFound) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Text(
+            l10n.categoryNotFound,
+            textAlign: TextAlign.center,
+            style: uiStyle(fontSize: 14, color: colors.secondary),
+          ),
+        ),
+      );
     }
     return Column(
       children: [

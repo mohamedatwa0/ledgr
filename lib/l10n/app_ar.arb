@@ -247,5 +247,19 @@
     }
   },
   "cancel": "إلغاء",
-  "delete": "حذف"
+  "delete": "حذف",
+  "discardEntryTitle": "تجاهل هذا القيد؟",
+  "discardEntryMessage": "سيُفقد المبلغ الذي أدخلته.",
+  "discard": "تجاهل",
+  "duplicateCategory": "يوجد تصنيف بهذا الاسم بالفعل.",
+  "defaultCategoryProtected": "لا يمكن تغيير التصنيفات الافتراضية أو حذفها.",
+  "smsNotFound": "هذه الرسالة لم تعد في الصندوق.",
+  "smsAlreadyImported": "هذه الرسالة أُضيفت إلى الدفتر مسبقاً.",
+  "transactionNotFound": "هذا القيد لم يعد في الدفتر.",
+  "categoryNotFound": "هذا التصنيف لم يعد متاحاً.",
+  "enterCategoryName": "أدخل اسم تصنيف.",
+  "amountMustBePositive": "يجب أن يكون المبلغ أكبر من صفر.",
+  "categoryTypeMismatch": "التصنيف لا يطابق مدين/دائن.",
+  "otherCategoryMissing": "تصنيف أخرى مفقود.",
+  "scanFailed": "تعذر مسح الصندوق."
 }

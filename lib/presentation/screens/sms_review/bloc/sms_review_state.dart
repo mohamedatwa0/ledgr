@@ -81,9 +81,9 @@ class SmsReviewState {
       loading: loading ?? this.loading,
       saving: saving ?? this.saving,
       categoriesLoading: categoriesLoading ?? this.categoriesLoading,
-      saved: saved ?? this.saved,
-      dismissed: dismissed ?? this.dismissed,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      saved: saved ?? false,
+      dismissed: dismissed ?? false,
+      errorMessage: clearError ? null : errorMessage,
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import '../../domain/sms/numeral.dart';
+
 class MoneyInputFormatter extends TextInputFormatter {
   const MoneyInputFormatter();
 
@@ -8,7 +10,8 @@ class MoneyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final normalized = newValue.text.replaceAll(',', '.');
+    final normalized =
+        easternToWesternDigits(newValue.text).replaceAll(',', '.');
     if (normalized.isEmpty) {
       return newValue.copyWith(text: '');
     }

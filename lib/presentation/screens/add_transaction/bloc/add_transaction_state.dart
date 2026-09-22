@@ -15,6 +15,8 @@ class AddTransactionState {
     this.saving = false,
     this.categoriesLoading = false,
     this.saved = false,
+    this.deleted = false,
+    this.notFound = false,
     this.errorMessage,
   });
 
@@ -29,6 +31,8 @@ class AddTransactionState {
   final List<Category> categories;
   final bool categoriesLoading;
   final bool saved;
+  final bool deleted;
+  final bool notFound;
   final String? errorMessage;
 
   bool get missingRequiredFields {
@@ -36,7 +40,10 @@ class AddTransactionState {
     return amount <= 0 || categoryId == null;
   }
 
-  bool get canSave => missingRequiredFields == false && !saving && !loading;
+  bool get canSave =>
+      missingRequiredFields == false && !saving && !loading && !notFound;
+
+  bool get isDirty => amountText.trim().isNotEmpty || note.trim().isNotEmpty;
 
   AddTransactionState copyWith({
     String? amountText,
@@ -50,6 +57,8 @@ class AddTransactionState {
     List<Category>? categories,
     bool? categoriesLoading,
     bool? saved,
+    bool? deleted,
+    bool? notFound,
     String? errorMessage,
     bool clearCategory = false,
     bool clearError = false,
@@ -65,8 +74,10 @@ class AddTransactionState {
       currencyCode: currencyCode ?? this.currencyCode,
       categories: categories ?? this.categories,
       categoriesLoading: categoriesLoading ?? this.categoriesLoading,
-      saved: saved ?? this.saved,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      saved: saved ?? false,
+      deleted: deleted ?? false,
+      notFound: notFound ?? this.notFound,
+      errorMessage: clearError ? null : errorMessage,
     );
   }
 }

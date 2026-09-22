@@ -12,11 +12,13 @@ import '../../../theme/typography.dart';
 import '../../formatters/category_labels.dart';
 import '../../formatters/currencies.dart';
 import '../../formatters/date_labels.dart';
+import '../../formatters/error_labels.dart';
 import '../../formatters/money_input_formatter.dart';
 import '../../icons/tabler_icon.dart';
 import '../../router/app_router.dart';
 import '../../widgets/category_circle.dart';
 import '../../widgets/debit_credit_toggle.dart';
+import '../../widgets/dialogs.dart';
 import '../../widgets/ledgr_app_bar.dart';
 import '../../widgets/ledgr_primary_button.dart';
 import 'bloc/sms_review_bloc.dart';
@@ -56,6 +58,16 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
     final colors = context.colors;
     final l10n = context.l10n;
     return BlocConsumer<SmsReviewBloc, SmsReviewState>(
+      listenWhen: (previous, current) {
+        if (!_hydrated && !current.loading) return true;
+        if (current.saved && !previous.saved) return true;
+        if (current.dismissed && !previous.dismissed) return true;
+        if (current.errorMessage != null &&
+            current.errorMessage != previous.errorMessage) {
+          return true;
+        }
+        return false;
+      },
       listener: (context, state) {
         if (!_hydrated && !state.loading) {
           _hydrated = true;
@@ -68,10 +80,15 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
         }
         if (state.saved || state.dismissed) {
           context.pop();
+          return;
         }
         if (state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
+            SnackBar(
+              content: Text(
+                localizedLedgrErrorMessage(l10n, state.errorMessage!),
+              ),
+            ),
           );
         }
       },
@@ -91,7 +108,17 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
               IconButton(
                 key: const Key('sms-dismiss'),
                 tooltip: l10n.skip,
-                onPressed: () => bloc.add(const SmsReviewDismissRequested()),
+                onPressed: () async {
+                  final confirmed = await showDeleteConfirmDialog(
+                    context: context,
+                    title: l10n.skipSmsTitle,
+                    message: l10n.skipSmsMessage,
+                    confirmLabel: l10n.skip,
+                  );
+                  if (confirmed && context.mounted) {
+                    bloc.add(const SmsReviewDismissRequested());
+                  }
+                },
                 icon: Icon(TablerIcons.trash,
                     color: colors.ledgerRed, size: 19.r),
               ),

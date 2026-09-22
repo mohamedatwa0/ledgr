@@ -12,6 +12,7 @@ import '../../../../domain/repositories/category_repository.dart';
 import '../../../../domain/repositories/settings_repository.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../domain/usecases/create_transaction.dart';
+import '../../../../domain/usecases/delete_transaction.dart';
 import '../../../../domain/usecases/update_transaction.dart';
 import 'add_transaction_event.dart';
 import 'add_transaction_state.dart';
@@ -24,12 +25,14 @@ class AddTransactionBloc
     required SettingsRepository settings,
     required CreateTransaction createTransaction,
     required UpdateTransaction updateTransaction,
+    required DeleteTransaction deleteTransaction,
     this.transactionId,
   })  : _transactions = transactions,
         _categories = categories,
         _settings = settings,
         _createTransaction = createTransaction,
         _updateTransaction = updateTransaction,
+        _deleteTransaction = deleteTransaction,
         super(
           AddTransactionState(
             amountText: '',
@@ -49,6 +52,7 @@ class AddTransactionBloc
     on<AddTransactionNoteChanged>(_onNoteChanged);
     on<AddTransactionDateChanged>(_onDateChanged);
     on<AddTransactionSaveRequested>(_onSaveRequested);
+    on<AddTransactionDeleteRequested>(_onDeleteRequested);
     on<AddTransactionCategoriesUpdated>(_onCategoriesUpdated);
     on<AddTransactionCurrencyUpdated>(_onCurrencyUpdated);
   }
@@ -58,6 +62,7 @@ class AddTransactionBloc
   final SettingsRepository _settings;
   final CreateTransaction _createTransaction;
   final UpdateTransaction _updateTransaction;
+  final DeleteTransaction _deleteTransaction;
   final int? transactionId;
 
   StreamSubscription<List<Category>>? _categorySub;
@@ -82,7 +87,17 @@ class AddTransactionBloc
     }
     _watchCategories(state.type);
     final tx = await _transactions.getById(id);
-    if (tx == null || isClosed) return;
+    if (isClosed) return;
+    if (tx == null) {
+      emit(
+        state.copyWith(
+          loading: false,
+          notFound: true,
+          errorMessage: const TransactionNotFoundException().message,
+        ),
+      );
+      return;
+    }
     emit(
       state.copyWith(
         amountText: minorToInput(tx.amount),
@@ -157,6 +172,23 @@ class AddTransactionBloc
         await _updateTransaction(id, command);
       }
       if (!isClosed) emit(state.copyWith(saving: false, saved: true));
+    } on LedgrException catch (e) {
+      if (!isClosed) {
+        emit(state.copyWith(saving: false, errorMessage: e.message));
+      }
+    }
+  }
+
+  Future<void> _onDeleteRequested(
+    AddTransactionDeleteRequested event,
+    Emitter<AddTransactionState> emit,
+  ) async {
+    final id = transactionId;
+    if (id == null) return;
+    emit(state.copyWith(saving: true, clearError: true));
+    try {
+      await _deleteTransaction(id);
+      if (!isClosed) emit(state.copyWith(saving: false, deleted: true));
     } on LedgrException catch (e) {
       if (!isClosed) {
         emit(state.copyWith(saving: false, errorMessage: e.message));

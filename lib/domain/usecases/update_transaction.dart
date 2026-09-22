@@ -1,4 +1,5 @@
 import '../date_utils.dart';
+import '../exceptions.dart';
 import '../models/ledger_transaction.dart';
 import '../models/transaction_command.dart';
 import '../repositories/category_repository.dart';
@@ -15,7 +16,7 @@ class UpdateTransaction {
     await validateTransactionCommand(command, _categories);
     final existing = await _transactions.getById(id);
     if (existing == null) {
-      throw StateError('Transaction not found.');
+      throw const TransactionNotFoundException();
     }
     await _transactions.update(
       LedgerTransaction(

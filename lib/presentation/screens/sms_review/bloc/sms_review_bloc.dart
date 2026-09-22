@@ -72,8 +72,14 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
     });
 
     final item = await _inbox.getById(inboxId);
-    if (item == null || isClosed) {
-      emit(state.copyWith(loading: false, errorMessage: 'SMS not found.'));
+    if (isClosed) return;
+    if (item == null) {
+      emit(
+        state.copyWith(
+          loading: false,
+          errorMessage: const SmsNotFoundException().message,
+        ),
+      );
       return;
     }
 

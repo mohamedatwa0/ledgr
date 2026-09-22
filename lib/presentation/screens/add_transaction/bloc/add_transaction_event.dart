@@ -43,6 +43,10 @@ class AddTransactionSaveRequested extends AddTransactionEvent {
   const AddTransactionSaveRequested();
 }
 
+class AddTransactionDeleteRequested extends AddTransactionEvent {
+  const AddTransactionDeleteRequested();
+}
+
 class AddTransactionCategoriesUpdated extends AddTransactionEvent {
   const AddTransactionCategoriesUpdated(this.categories);
 

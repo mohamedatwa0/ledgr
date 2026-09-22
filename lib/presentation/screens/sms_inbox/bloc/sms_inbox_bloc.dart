@@ -115,17 +115,28 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
     Emitter<SmsInboxState> emit,
   ) async {
     emit(state.copyWith(scanning: true, clearMessage: true));
-    final added = await _scanSmsInbox();
-    if (isClosed) return;
-    emit(
-      state.copyWith(
-        scanning: false,
-        flash: added == 0
-            ? SmsInboxFlash.noNewBankMessages
-            : SmsInboxFlash.foundMessages,
-        flashCount: added,
-      ),
-    );
+    try {
+      final added = await _scanSmsInbox();
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          scanning: false,
+          flash: added == 0
+              ? SmsInboxFlash.noNewBankMessages
+              : SmsInboxFlash.foundMessages,
+          flashCount: added,
+        ),
+      );
+    } catch (_) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            scanning: false,
+            message: 'Could not scan the inbox.',
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _onPermissionRequested(

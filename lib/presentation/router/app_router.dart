@@ -209,6 +209,7 @@ AddTransactionBloc _addTransactionBloc(
     settings: context.read<SettingsRepository>(),
     createTransaction: context.read<CreateTransaction>(),
     updateTransaction: context.read<UpdateTransaction>(),
+    deleteTransaction: context.read<DeleteTransaction>(),
     transactionId: transactionId,
   );
 }

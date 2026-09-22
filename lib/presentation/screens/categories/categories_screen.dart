@@ -72,12 +72,8 @@ class CategoriesScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
               child: FilterSegmentedControl(
                 labels: [
-                  l10n.debitCategories(
-                    debitSelected ? '${state.categories.length}' : '…',
-                  ),
-                  l10n.creditCategories(
-                    debitSelected ? '…' : '${state.categories.length}',
-                  ),
+                  l10n.debitCategories('${state.expenseCount}'),
+                  l10n.creditCategories('${state.incomeCount}'),
                 ],
                 selectedIndex: debitSelected ? 0 : 1,
                 onSelected: (i) {

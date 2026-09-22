@@ -33,3 +33,9 @@ class HistoryQueryChanged extends HistoryEvent {
 
   final String query;
 }
+
+class HistoryMonthChanged extends HistoryEvent {
+  const HistoryMonthChanged(this.month);
+
+  final DateTime month;
+}

@@ -28,6 +28,7 @@ void main() {
     importSms = ImportParsedSms(
       inbox,
       CreateTransaction(transactions, categories),
+      db,
     );
   });
 

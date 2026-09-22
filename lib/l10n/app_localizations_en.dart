@@ -551,4 +551,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get delete => 'Delete';
+
+  @override
+  String get discardEntryTitle => 'Discard this entry?';
+
+  @override
+  String get discardEntryMessage => 'The amount you entered will be lost.';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get duplicateCategory => 'A category with that name already exists.';
+
+  @override
+  String get defaultCategoryProtected => 'Default categories cannot be changed or deleted.';
+
+  @override
+  String get smsNotFound => 'That SMS is no longer in the inbox.';
+
+  @override
+  String get smsAlreadyImported => 'This SMS has already been added to the ledger.';
+
+  @override
+  String get transactionNotFound => 'This entry is no longer in the ledger.';
+
+  @override
+  String get categoryNotFound => 'This category is no longer available.';
+
+  @override
+  String get enterCategoryName => 'Enter a category name.';
+
+  @override
+  String get amountMustBePositive => 'Amount must be greater than 0.';
+
+  @override
+  String get categoryTypeMismatch => 'Category does not match Debit/Credit.';
+
+  @override
+  String get otherCategoryMissing => 'The Other category is missing.';
+
+  @override
+  String get scanFailed => 'Could not scan the inbox.';
 }

@@ -12,12 +12,14 @@ import '../../../theme/typography.dart';
 import '../../formatters/category_labels.dart';
 import '../../formatters/currencies.dart';
 import '../../formatters/date_labels.dart';
+import '../../formatters/error_labels.dart';
 import '../../formatters/money_input_formatter.dart';
 import '../../icons/tabler_icon.dart';
 import '../../router/app_router.dart';
 import '../../widgets/category_circle.dart';
 import '../../widgets/debit_credit_toggle.dart';
 import '../../widgets/directional_icon.dart';
+import '../../widgets/dialogs.dart';
 import '../../widgets/ledgr_app_bar.dart';
 import '../../widgets/ledgr_primary_button.dart';
 import '../../widgets/numeric_keypad.dart';
@@ -59,6 +61,39 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     context.read<AddTransactionBloc>().add(AddTransactionAmountChanged(value));
   }
 
+  Future<void> _onBack(
+    BuildContext context,
+    AddTransactionState state,
+    bool isNew,
+  ) async {
+    if (isNew && state.isDirty) {
+      final l10n = context.l10n;
+      final discard = await showDeleteConfirmDialog(
+        context: context,
+        title: l10n.discardEntryTitle,
+        message: l10n.discardEntryMessage,
+        confirmLabel: l10n.discard,
+      );
+      if (discard && context.mounted) context.pop();
+      return;
+    }
+    context.pop();
+  }
+
+  Future<void> _onDelete(BuildContext context) async {
+    final l10n = context.l10n;
+    final confirmed = await showDeleteConfirmDialog(
+      context: context,
+      title: l10n.deleteEntry,
+      message: l10n.deleteEntryMessage,
+    );
+    if (confirmed && context.mounted) {
+      context
+          .read<AddTransactionBloc>()
+          .add(const AddTransactionDeleteRequested());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final id = widget.transactionId;
@@ -66,6 +101,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final l10n = context.l10n;
 
     return BlocConsumer<AddTransactionBloc, AddTransactionState>(
+      listenWhen: (previous, current) {
+        if (!_hydrated && !current.loading) return true;
+        if (current.saved && !previous.saved) return true;
+        if (current.deleted && !previous.deleted) return true;
+        if (current.errorMessage != null &&
+            current.errorMessage != previous.errorMessage) {
+          return true;
+        }
+        return false;
+      },
       listener: (context, state) {
         if (!_hydrated && !state.loading) {
           _hydrated = true;
@@ -76,12 +121,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             _note.text = state.note;
           }
         }
-        if (state.saved) {
+        if (state.saved || state.deleted) {
           context.pop();
+          return;
         }
-        if (state.errorMessage != null) {
+        if (state.errorMessage != null && !state.notFound) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
+            SnackBar(
+              content: Text(
+                localizedLedgrErrorMessage(l10n, state.errorMessage!),
+              ),
+            ),
           );
         }
       },
@@ -94,17 +144,44 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             title: id == null ? l10n.newEntry : l10n.editEntry,
             leading: IconButton(
               tooltip: l10n.back,
-              onPressed: () => context.pop(),
+              onPressed: () => _onBack(context, state, id == null),
               icon: DirectionalIcon(
                 TablerIcons.arrow_left,
                 color: colors.onSurface,
                 size: 22.r,
               ),
             ),
+            actions: [
+              if (id != null && !state.notFound)
+                IconButton(
+                  key: const Key('delete-entry'),
+                  tooltip: l10n.deleteEntry,
+                  onPressed: () => _onDelete(context),
+                  icon: Icon(
+                    TablerIcons.trash,
+                    color: colors.ledgerRed,
+                    size: 19.r,
+                  ),
+                ),
+            ],
           ),
           body: state.loading
               ? Center(child: CircularProgressIndicator(color: colors.primary))
-              : Column(
+              : state.notFound
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Text(
+                          l10n.transactionNotFound,
+                          textAlign: TextAlign.center,
+                          style: uiStyle(
+                            fontSize: 14,
+                            color: colors.secondary,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Column(
                   children: [
                     Expanded(
                       child: ListView(
@@ -463,15 +540,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16.h),
-                          NumericKeypad(
-                            onDigit: (digit) => _setAmount(
-                              appendAmountDigit(_amount.text, digit),
-                            ),
-                            onBackspace: () =>
-                                _setAmount(backspaceAmount(_amount.text)),
-                          ),
                         ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 0.h),
+                      child: NumericKeypad(
+                        onDigit: (digit) => _setAmount(
+                          appendAmountDigit(_amount.text, digit),
+                        ),
+                        onBackspace: () =>
+                            _setAmount(backspaceAmount(_amount.text)),
                       ),
                     ),
                     SafeArea(

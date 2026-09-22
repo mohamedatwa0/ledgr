@@ -565,4 +565,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get delete => 'حذف';
+
+  @override
+  String get discardEntryTitle => 'تجاهل هذا القيد؟';
+
+  @override
+  String get discardEntryMessage => 'سيُفقد المبلغ الذي أدخلته.';
+
+  @override
+  String get discard => 'تجاهل';
+
+  @override
+  String get duplicateCategory => 'يوجد تصنيف بهذا الاسم بالفعل.';
+
+  @override
+  String get defaultCategoryProtected => 'لا يمكن تغيير التصنيفات الافتراضية أو حذفها.';
+
+  @override
+  String get smsNotFound => 'هذه الرسالة لم تعد في الصندوق.';
+
+  @override
+  String get smsAlreadyImported => 'هذه الرسالة أُضيفت إلى الدفتر مسبقاً.';
+
+  @override
+  String get transactionNotFound => 'هذا القيد لم يعد في الدفتر.';
+
+  @override
+  String get categoryNotFound => 'هذا التصنيف لم يعد متاحاً.';
+
+  @override
+  String get enterCategoryName => 'أدخل اسم تصنيف.';
+
+  @override
+  String get amountMustBePositive => 'يجب أن يكون المبلغ أكبر من صفر.';
+
+  @override
+  String get categoryTypeMismatch => 'التصنيف لا يطابق مدين/دائن.';
+
+  @override
+  String get otherCategoryMissing => 'تصنيف أخرى مفقود.';
+
+  @override
+  String get scanFailed => 'تعذر مسح الصندوق.';
 }

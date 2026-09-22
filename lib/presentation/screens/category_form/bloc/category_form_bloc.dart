@@ -61,7 +61,17 @@ class CategoryFormBloc extends Bloc<CategoryFormEvent, CategoryFormState> {
     final id = categoryId;
     if (id == null) return;
     final category = await _categories.getById(id);
-    if (category == null || isClosed) return;
+    if (isClosed) return;
+    if (category == null) {
+      emit(
+        state.copyWith(
+          loading: false,
+          notFound: true,
+          errorMessage: const CategoryNotFoundException().message,
+        ),
+      );
+      return;
+    }
     emit(
       CategoryFormState(
         name: category.name,

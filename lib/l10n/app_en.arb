@@ -247,5 +247,19 @@
     }
   },
   "cancel": "Cancel",
-  "delete": "Delete"
+  "delete": "Delete",
+  "discardEntryTitle": "Discard this entry?",
+  "discardEntryMessage": "The amount you entered will be lost.",
+  "discard": "Discard",
+  "duplicateCategory": "A category with that name already exists.",
+  "defaultCategoryProtected": "Default categories cannot be changed or deleted.",
+  "smsNotFound": "That SMS is no longer in the inbox.",
+  "smsAlreadyImported": "This SMS has already been added to the ledger.",
+  "transactionNotFound": "This entry is no longer in the ledger.",
+  "categoryNotFound": "This category is no longer available.",
+  "enterCategoryName": "Enter a category name.",
+  "amountMustBePositive": "Amount must be greater than 0.",
+  "categoryTypeMismatch": "Category does not match Debit/Credit.",
+  "otherCategoryMissing": "The Other category is missing.",
+  "scanFailed": "Could not scan the inbox."
 }

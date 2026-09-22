@@ -6,7 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../domain/models/transaction_type.dart';
 import '../../../domain/sms/sms_inbox_item.dart';
+import '../../../domain/sms/sms_inbox_status.dart';
 import '../../../l10n/l10n.dart';
+import '../../formatters/error_labels.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../formatters/date_labels.dart';
@@ -49,7 +51,8 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     return BlocConsumer<SmsInboxBloc, SmsInboxState>(
       listenWhen: (previous, current) =>
           (previous.message != current.message && current.message != null) ||
-          (previous.flash != current.flash && current.flash != null),
+          (previous.flash != current.flash && current.flash != null) ||
+          (current.pasteText.isEmpty && previous.pasteText.isNotEmpty),
       listener: (context, state) {
         if (state.pasteText.isEmpty && _paste.text.isNotEmpty) {
           _paste.clear();
@@ -64,7 +67,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
         };
         if (text != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(text)),
+            SnackBar(content: Text(localizedLedgrErrorMessage(l10n, text))),
           );
         }
       },
@@ -178,35 +181,46 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     final colors = context.colors;
     return [
       for (var i = 0; i < items.length; i++)
-        Dismissible(
-          key: ValueKey(items[i].id),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            alignment: AlignmentDirectional.centerEnd,
-            color: colors.ledgerRed,
-            padding: EdgeInsetsDirectional.only(end: 16.w),
-            child: Icon(TablerIcons.trash, color: colors.onPrimary, size: 20.r),
-          ),
-          confirmDismiss: (_) {
-            final l10n = context.l10n;
-            return showDeleteConfirmDialog(
-              context: context,
-              title: l10n.skipSmsTitle,
-              message: l10n.skipSmsMessage,
-              confirmLabel: l10n.skip,
-            );
-          },
-          onDismissed: (_) {
-            context
-                .read<SmsInboxBloc>()
-                .add(SmsInboxDismissRequested(items[i].id));
-          },
-          child: _SmsInboxRow(
+        if (items[i].status == SmsInboxStatus.imported)
+          _SmsInboxRow(
             item: items[i],
             showDivider: i != items.length - 1,
             onTap: () => context.push('/settings/sms/${items[i].id}'),
+          )
+        else
+          Dismissible(
+            key: ValueKey(items[i].id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: AlignmentDirectional.centerEnd,
+              color: colors.ledgerRed,
+              padding: EdgeInsetsDirectional.only(end: 16.w),
+              child: Icon(
+                TablerIcons.trash,
+                color: colors.onPrimary,
+                size: 20.r,
+              ),
+            ),
+            confirmDismiss: (_) {
+              final l10n = context.l10n;
+              return showDeleteConfirmDialog(
+                context: context,
+                title: l10n.skipSmsTitle,
+                message: l10n.skipSmsMessage,
+                confirmLabel: l10n.skip,
+              );
+            },
+            onDismissed: (_) {
+              context
+                  .read<SmsInboxBloc>()
+                  .add(SmsInboxDismissRequested(items[i].id));
+            },
+            child: _SmsInboxRow(
+              item: items[i],
+              showDivider: i != items.length - 1,
+              onTap: () => context.push('/settings/sms/${items[i].id}'),
+            ),
           ),
-        ),
     ];
   }
 }

@@ -9,7 +9,7 @@ class DeleteCategory {
   Future<void> call(int id) async {
     final category = await _categories.getById(id);
     if (category == null) {
-      throw const ValidationException('Category not found.');
+      throw const CategoryNotFoundException();
     }
     if (category.isDefault) {
       throw const DefaultCategoryException();

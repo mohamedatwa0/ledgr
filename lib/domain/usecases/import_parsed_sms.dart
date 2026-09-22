@@ -1,3 +1,4 @@
+import '../../data/db/app_database.dart';
 import '../exceptions.dart';
 import '../models/ledger_transaction.dart';
 import '../models/transaction_command.dart';
@@ -8,10 +9,11 @@ import '../sms/sms_inbox_status.dart';
 import 'create_transaction.dart';
 
 class ImportParsedSms {
-  const ImportParsedSms(this._inbox, this._createTransaction);
+  const ImportParsedSms(this._inbox, this._createTransaction, this._db);
 
   final SmsInboxRepository _inbox;
   final CreateTransaction _createTransaction;
+  final AppDatabase _db;
 
   Future<LedgerTransaction> call({
     required int inboxId,
@@ -27,17 +29,19 @@ class ImportParsedSms {
       throw const SmsAlreadyImportedException();
     }
 
-    final created = await _createTransaction(
-      TransactionCommand(
-        amount: amount,
-        type: type,
-        categoryId: categoryId,
-        note: note,
-        date: date,
-        source: TransactionSource.sms,
-      ),
-    );
-    await _inbox.markImported(id: inboxId, transactionId: created.id);
-    return created;
+    return _db.transaction(() async {
+      final created = await _createTransaction(
+        TransactionCommand(
+          amount: amount,
+          type: type,
+          categoryId: categoryId,
+          note: note,
+          date: date,
+          source: TransactionSource.sms,
+        ),
+      );
+      await _inbox.markImported(id: inboxId, transactionId: created.id);
+      return created;
+    });
   }
 }

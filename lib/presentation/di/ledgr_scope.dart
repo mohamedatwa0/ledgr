@@ -111,6 +111,7 @@ class _LedgrScopeState extends State<LedgrScope> {
           create: (context) => ImportParsedSms(
             context.read<SmsInboxRepository>(),
             context.read<CreateTransaction>(),
+            context.read<AppDatabase>(),
           ),
         ),
         RepositoryProvider<DismissSms>(

@@ -18,7 +18,7 @@ class RuledTransactionRow extends StatelessWidget {
     this.showDivider = true,
     this.onTap,
     this.compact = false,
-    this.showTime = true,
+    this.showTime = false,
   });
 
   final TransactionEntry entry;

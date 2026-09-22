@@ -22,6 +22,11 @@ void main() {
       expect(parseMinorUnits('45.004'), 4500);
     });
 
+    test('parses Arabic-Indic digits', () {
+      expect(parseMinorUnits('٤٥'), 4500);
+      expect(parseMinorUnits('٤٥.٥٠'), 4550);
+    });
+
     test('returns null for empty or invalid input', () {
       expect(parseMinorUnits(''), isNull);
       expect(parseMinorUnits('   '), isNull);

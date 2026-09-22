@@ -11,6 +11,7 @@ class CategoryFormState {
     this.saving = false,
     this.saved = false,
     this.deleted = false,
+    this.notFound = false,
     this.deletePromptCount,
     this.errorMessage,
     this.savedCategoryId,
@@ -25,12 +26,17 @@ class CategoryFormState {
   final bool saving;
   final bool saved;
   final bool deleted;
+  final bool notFound;
   final int? deletePromptCount;
   final String? errorMessage;
   final int? savedCategoryId;
 
   bool get canSave =>
-      name.trim().isNotEmpty && !saving && !loading && !isDefault;
+      name.trim().isNotEmpty &&
+      !saving &&
+      !loading &&
+      !isDefault &&
+      !notFound;
 
   CategoryFormState copyWith({
     String? name,
@@ -42,6 +48,7 @@ class CategoryFormState {
     bool? saving,
     bool? saved,
     bool? deleted,
+    bool? notFound,
     int? deletePromptCount,
     String? errorMessage,
     int? savedCategoryId,
@@ -56,12 +63,13 @@ class CategoryFormState {
       isDefault: isDefault ?? this.isDefault,
       loading: loading ?? this.loading,
       saving: saving ?? this.saving,
-      saved: saved ?? this.saved,
-      deleted: deleted ?? this.deleted,
+      saved: saved ?? false,
+      deleted: deleted ?? false,
+      notFound: notFound ?? this.notFound,
       deletePromptCount: clearDeletePrompt
           ? null
           : (deletePromptCount ?? this.deletePromptCount),
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      errorMessage: clearError ? null : errorMessage,
       savedCategoryId: savedCategoryId ?? this.savedCategoryId,
     );
   }

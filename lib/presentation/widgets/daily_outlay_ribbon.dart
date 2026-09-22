@@ -17,24 +17,28 @@ class DailyOutlayRibbon extends StatelessWidget {
     required this.entries,
     required this.month,
     required this.currencyCode,
+    this.now,
   });
 
   final List<TransactionEntry> entries;
   final DateTime month;
   final String currencyCode;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final bars = _dailyDebits(entries, month);
-    final days = _daysElapsed(month);
+    final clock = now ?? DateTime.now();
+    final bars = _dailyDebits(entries, month, clock);
+    final days = _daysElapsed(month, clock);
     final totalDebits = entries
         .where((e) => e.transaction.type == TransactionType.expense)
         .fold<int>(0, (sum, e) => sum + e.transaction.amount);
     final average = days == 0 ? 0 : totalDebits ~/ days;
     final symbol = currencyByCode(currencyCode).symbol;
     final maxBar = bars.fold<int>(0, (m, v) => v > m ? v : m);
+    final highlightIndex = bars.isEmpty ? -1 : bars.length - 1;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0.h),
@@ -88,9 +92,12 @@ class DailyOutlayRibbon extends StatelessWidget {
                     for (var i = 0; i < bars.length; i++) ...[
                       if (i > 0) SizedBox(width: 4.w),
                       _Bar(
+                        key: i == highlightIndex
+                            ? const Key('outlay-bar-highlight')
+                            : Key('outlay-bar-$i'),
                         value: bars[i],
                         max: maxBar,
-                        highlight: i == bars.length - 1,
+                        highlight: i == highlightIndex,
                       ),
                     ],
                   ],
@@ -106,6 +113,7 @@ class DailyOutlayRibbon extends StatelessWidget {
 
 class _Bar extends StatelessWidget {
   const _Bar({
+    super.key,
     required this.value,
     required this.max,
     required this.highlight,
@@ -130,28 +138,34 @@ class _Bar extends StatelessWidget {
   }
 }
 
-List<int> _dailyDebits(List<TransactionEntry> entries, DateTime month) {
+List<int> _dailyDebits(
+  List<TransactionEntry> entries,
+  DateTime month,
+  DateTime now,
+) {
   final start = monthStart(month);
-  final today = dateOnly(DateTime.now());
+  final today = dateOnly(now);
   final end = isSameMonth(month, today)
       ? today
       : monthEndExclusive(month).subtract(const Duration(days: 1));
+  if (end.isBefore(start)) return const [];
   final from = end.subtract(const Duration(days: 6));
   final first = from.isBefore(start) ? start : from;
-  final totals = List<int>.filled(7, 0);
+  final dayCount = end.difference(first).inDays + 1;
+  final totals = List<int>.filled(dayCount, 0);
   for (final entry in entries) {
     if (entry.transaction.type != TransactionType.expense) continue;
     final day = dateOnly(entry.transaction.date);
     final index = day.difference(first).inDays;
-    if (index >= 0 && index < 7) {
+    if (index >= 0 && index < dayCount) {
       totals[index] += entry.transaction.amount;
     }
   }
   return totals;
 }
 
-int _daysElapsed(DateTime month) {
-  final today = dateOnly(DateTime.now());
+int _daysElapsed(DateTime month, DateTime now) {
+  final today = dateOnly(now);
   if (isSameMonth(month, today)) return today.day;
   return DateTime(month.year, month.month + 1, 0).day;
 }

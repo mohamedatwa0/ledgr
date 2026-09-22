@@ -152,6 +152,7 @@ class HomeScreen extends StatelessWidget {
           RuledTransactionRow(
             entry: entry,
             showDivider: true,
+            showTime: false,
             onTap: () => context.push('/transaction/${entry.transaction.id}'),
           ),
         );
