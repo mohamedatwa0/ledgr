@@ -147,7 +147,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultBadge => 'DEFAULT';
 
   @override
-  String get newCategory => 'New category';
+  String get newCategory => 'New Category';
+
+  @override
+  String get accountType => 'Account type';
+
+  @override
+  String get categoryName => 'Category name';
+
+  @override
+  String get categoryIcon => 'Category icon';
+
+  @override
+  String get colorTone => 'Color tone';
+
+  @override
+  String get expenseDebit => 'Expense (Debit)';
+
+  @override
+  String get incomeCredit => 'Income (Credit)';
 
   @override
   String get editCategory => 'Edit category';
@@ -165,7 +183,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
-  String get nameHint => 'Name';
+  String get nameHint => 'e.g. Coffee, Freelance, Books';
 
   @override
   String get icon => 'Icon';

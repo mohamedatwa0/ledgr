@@ -21,7 +21,6 @@ class LedgrShell extends StatelessWidget {
     final sections = [
       l10n.navDashboard,
       l10n.navTransactions,
-      l10n.navCategories,
       l10n.navSettings,
     ];
     return Scaffold(
@@ -31,7 +30,7 @@ class LedgrShell extends StatelessWidget {
           Expanded(child: navigationShell),
         ],
       ),
-      floatingActionButton: index == 3
+      floatingActionButton: index == 2
           ? null
           : SizedBox(
               width: 56.w,

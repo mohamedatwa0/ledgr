@@ -31,7 +31,7 @@ class CategoryFormBloc extends Bloc<CategoryFormEvent, CategoryFormState> {
           CategoryFormState(
             name: '',
             type: type,
-            iconCodePoint: TablerIcons.dots.codePoint,
+            iconCodePoint: TablerIcons.coffee.codePoint,
             colorValue: categoryColorChoices.first,
             loading: categoryId != null,
           ),

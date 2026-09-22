@@ -158,6 +158,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get newCategory => 'تصنيف جديد';
 
   @override
+  String get accountType => 'نوع الحساب';
+
+  @override
+  String get categoryName => 'اسم التصنيف';
+
+  @override
+  String get categoryIcon => 'أيقونة التصنيف';
+
+  @override
+  String get colorTone => 'درجة اللون';
+
+  @override
+  String get expenseDebit => 'مصروف (مدين)';
+
+  @override
+  String get incomeCredit => 'دخل (دائن)';
+
+  @override
   String get editCategory => 'تعديل التصنيف';
 
   @override
@@ -173,7 +191,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get back => 'رجوع';
 
   @override
-  String get nameHint => 'الاسم';
+  String get nameHint => 'مثال: قهوة، عمل حر، كتب';
 
   @override
   String get icon => 'الأيقونة';

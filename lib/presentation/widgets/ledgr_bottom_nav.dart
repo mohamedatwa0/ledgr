@@ -28,11 +28,6 @@ class LedgrBottomNav extends StatelessWidget {
         key: 'tab-transactions'
       ),
       (
-        icon: TablerIcons.layout_grid,
-        label: l10n.navCategories,
-        key: 'tab-categories'
-      ),
-      (
         icon: TablerIcons.adjustments,
         label: l10n.navSettings,
         key: 'tab-settings'

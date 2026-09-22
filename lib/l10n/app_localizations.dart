@@ -314,8 +314,44 @@ abstract class AppLocalizations {
   /// No description provided for @newCategory.
   ///
   /// In en, this message translates to:
-  /// **'New category'**
+  /// **'New Category'**
   String get newCategory;
+
+  /// No description provided for @accountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type'**
+  String get accountType;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryName;
+
+  /// No description provided for @categoryIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Category icon'**
+  String get categoryIcon;
+
+  /// No description provided for @colorTone.
+  ///
+  /// In en, this message translates to:
+  /// **'Color tone'**
+  String get colorTone;
+
+  /// No description provided for @expenseDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense (Debit)'**
+  String get expenseDebit;
+
+  /// No description provided for @incomeCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Income (Credit)'**
+  String get incomeCredit;
 
   /// No description provided for @editCategory.
   ///
@@ -350,7 +386,7 @@ abstract class AppLocalizations {
   /// No description provided for @nameHint.
   ///
   /// In en, this message translates to:
-  /// **'Name'**
+  /// **'e.g. Coffee, Freelance, Books'**
   String get nameHint;
 
   /// No description provided for @icon.

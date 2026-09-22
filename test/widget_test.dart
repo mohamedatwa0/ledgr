@@ -70,15 +70,18 @@ void main() {
     await disposeApp(tester);
   });
 
-  testWidgets('adding a custom category shows it in the category list', (
+  testWidgets('adding a custom category shows it on a new entry', (
     tester,
   ) async {
     await pumpApp(tester, db: db);
 
-    await tester.tap(find.byKey(const Key('tab-categories')));
+    await tester.tap(find.byKey(const Key('add-transaction-fab')));
     await settle(tester);
-
-    await tester.tap(find.byKey(const Key('add-category-cell')));
+    final addCategory = find.byKey(const Key('add-new-category'));
+    await tester.ensureVisible(addCategory);
+    await tester.drag(find.byType(ListView), const Offset(0, -180));
+    await tester.pumpAndSettle();
+    await tester.tap(addCategory);
     await settle(tester);
 
     await tester.enterText(find.byKey(const Key('category-name-field')), 'Pets');

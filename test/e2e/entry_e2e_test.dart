@@ -47,9 +47,13 @@ void main() {
 
   testWidgets('duplicate category snackbar shows once', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('tab-categories')));
+    await tester.tap(find.byKey(const Key('add-transaction-fab')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('add-category-cell')));
+    final addCategory = find.byKey(const Key('add-new-category'));
+    await tester.ensureVisible(addCategory);
+    await tester.drag(find.byType(ListView), const Offset(0, -180));
+    await tester.pumpAndSettle();
+    await tester.tap(addCategory);
     await settle(tester);
 
     await tester.enterText(
@@ -93,18 +97,6 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.text('This entry is no longer in the ledger.'), findsOneWidget);
-    await disposeApp(tester);
-  });
-
-  testWidgets('missing category shows an error not a spinner', (tester) async {
-    await pumpApp(tester, db: db);
-    await pushRoute(tester, '/categories/999');
-
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(
-      find.text('This category is no longer available.'),
-      findsOneWidget,
-    );
     await disposeApp(tester);
   });
 
@@ -172,16 +164,6 @@ void main() {
     await disposeApp(tester);
   });
 
-  testWidgets('both category tabs show a count', (tester) async {
-    await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('tab-categories')));
-    await settle(tester);
-
-    expect(find.text('Debit Categories (8)'), findsOneWidget);
-    expect(find.text('Credit Categories (4)'), findsOneWidget);
-    await disposeApp(tester);
-  });
-
   testWidgets('duplicate category is localized in Arabic', (tester) async {
     await pumpApp(tester, db: db);
     await tester.tap(find.byKey(const Key('tab-settings')));
@@ -189,9 +171,15 @@ void main() {
     await tester.tap(find.byKey(const Key('settings-locale-ar')));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('tab-categories')));
+    await tester.tap(find.byKey(const Key('tab-dashboard')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('add-category-cell')));
+    await tester.tap(find.byKey(const Key('add-transaction-fab')));
+    await settle(tester);
+    final addCategory = find.byKey(const Key('add-new-category'));
+    await tester.ensureVisible(addCategory);
+    await tester.drag(find.byType(ListView), const Offset(0, -180));
+    await tester.pumpAndSettle();
+    await tester.tap(addCategory);
     await settle(tester);
 
     await tester.enterText(

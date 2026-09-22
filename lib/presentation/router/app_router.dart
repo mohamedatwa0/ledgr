@@ -22,9 +22,6 @@ import '../../domain/usecases/update_transaction.dart';
 import '../screens/add_transaction/add_transaction_screen.dart';
 import '../screens/add_transaction/bloc/add_transaction_bloc.dart';
 import '../screens/add_transaction/bloc/add_transaction_event.dart';
-import '../screens/categories/bloc/categories_bloc.dart';
-import '../screens/categories/bloc/categories_event.dart';
-import '../screens/categories/categories_screen.dart';
 import '../screens/category_form/bloc/category_form_bloc.dart';
 import '../screens/category_form/bloc/category_form_event.dart';
 import '../screens/category_form/category_form_screen.dart';
@@ -88,19 +85,6 @@ GoRouter createAppRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/categories',
-                builder: (context, state) => BlocProvider(
-                  create: (context) => CategoriesBloc(
-                    categories: context.read<CategoryRepository>(),
-                  )..add(const CategoriesStarted()),
-                  child: const CategoriesScreen(),
-                ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: '/settings',
                 builder: (context, state) => BlocProvider(
                   create: (context) => SettingsBloc(
@@ -144,33 +128,6 @@ GoRouter createAppRouter() {
               dismissSms: context.read<DismissSms>(),
             )..add(const SmsReviewStarted()),
             child: SmsReviewScreen(inboxId: id),
-          );
-        },
-      ),
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/categories/new',
-        builder: (context, state) {
-          final typeName = state.uri.queryParameters['type'];
-          final type = typeName == TransactionType.income.name
-              ? TransactionType.income
-              : TransactionType.expense;
-          return BlocProvider(
-            create: (context) => _categoryFormBloc(context, type: type)
-              ..add(const CategoryFormStarted()),
-            child: CategoryFormScreen(type: type),
-          );
-        },
-      ),
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/categories/:id',
-        builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return BlocProvider(
-            create: (context) => _categoryFormBloc(context, categoryId: id)
-              ..add(const CategoryFormStarted()),
-            child: CategoryFormScreen(categoryId: id),
           );
         },
       ),
@@ -239,6 +196,7 @@ Future<int?> showCategoryFormSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    backgroundColor: Colors.transparent,
     builder: (sheetContext) {
       return BlocProvider(
         create: (_) => _categoryFormBloc(
@@ -249,7 +207,6 @@ Future<int?> showCategoryFormSheet(
         child: CategoryFormScreen(
           categoryId: categoryId,
           type: type,
-          asSheet: true,
         ),
       );
     },
