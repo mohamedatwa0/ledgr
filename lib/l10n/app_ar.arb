@@ -5,6 +5,12 @@
   "navCategories": "التصنيفات",
   "navSettings": "الإعدادات",
   "newEntryTooltip": "قيد جديد",
+  "manualEntryTooltip": "اكتب قيداً",
+  "voiceEntryTooltip": "قل قيداً",
+  "voiceListening": "جارٍ الاستماع…",
+  "voiceUnavailable": "الإدخال الصوتي غير متاح على هذا الجهاز.",
+  "voicePermissionDenied": "يلزم إذن الميكروفون للإدخال الصوتي.",
+  "voiceEmptyResult": "لم يُسمع شيء. حاول مرة أخرى.",
   "ledgerBook": "دفتر الحساب",
   "thisMonth": "هذا الشهر",
   "thisMonthLabel": "هذا الشهر",
@@ -160,9 +166,6 @@
   "defaultEntryTypeSubtitle": "عمود التسجيل الأساسي",
   "appearance": "المظهر",
   "appearanceSubtitle": "نظام أو فاتح أو دفتر ليلي",
-  "dataSovereignty": "البيانات والسيادة",
-  "dataSovereigntySubtitle": "ملف SQLite على هذا الجهاز",
-  "export": "تصدير",
   "bankSmsImport": "استيراد رسائل البنك",
   "bankSmsImportSubtitle": "محلل تعبير نمطي محدد. بدون ذكاء اصطناعي.",
   "readyToReview": "{count} للمراجعة",
@@ -186,14 +189,6 @@
   "settingsFooter": "مصمم للتحكم اليدوي الكامل والمحاسبة المستقلة. بدون اعتماد على السحابة.",
   "displayCurrency": "عملة العرض",
   "currencySymbolOnly": "يغيّر الرمز فقط — لا تُحوَّل المبالغ.",
-  "noLedgerFile": "لا يوجد ملف دفتر للتصدير بعد",
-  "exportSubject": "تصدير دفتر Ledgr",
-  "couldNotExport": "تعذر التصدير: {error}",
-  "@couldNotExport": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
   "resetLedgerTitle": "إعادة تعيين الدفتر المحلي؟",
   "resetLedgerMessage": "سيُحذف كل العمليات ورسائل الصندوق. التصنيفات والإعدادات تبقى.",
   "reset": "إعادة تعيين",

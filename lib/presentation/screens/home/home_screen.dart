@@ -154,6 +154,11 @@ class HomeScreen extends StatelessWidget {
             showDivider: true,
             showTime: false,
             onTap: () => context.push('/transaction/${entry.transaction.id}'),
+            onDelete: () {
+              context
+                  .read<HomeBloc>()
+                  .add(HomeDeleteRequested(entry.transaction.id));
+            },
           ),
         );
       }

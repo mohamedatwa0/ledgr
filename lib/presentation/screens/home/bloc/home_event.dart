@@ -25,3 +25,9 @@ class HomeCurrencyUpdated extends HomeEvent {
 
   final String currencyCode;
 }
+
+class HomeDeleteRequested extends HomeEvent {
+  const HomeDeleteRequested(this.id);
+
+  final int id;
+}

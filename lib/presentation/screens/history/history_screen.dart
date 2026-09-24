@@ -11,7 +11,6 @@ import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../formatters/date_labels.dart';
 import '../../widgets/debit_credit_toggle.dart';
-import '../../widgets/dialogs.dart';
 import '../../widgets/ledgr_empty_state.dart';
 import '../../widgets/ruled_transaction_row.dart';
 import 'bloc/history_bloc.dart';
@@ -245,37 +244,16 @@ class HistoryScreen extends StatelessWidget {
       for (var i = 0; i < group.items.length; i++) {
         final entry = group.items[i];
         widgets.add(
-          Dismissible(
-            key: ValueKey(entry.transaction.id),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              alignment: AlignmentDirectional.centerEnd,
-              color: colors.ledgerRed,
-              padding: EdgeInsetsDirectional.only(end: 16.w),
-              child:
-                  Icon(TablerIcons.trash, color: colors.onPrimary, size: 20.r),
-            ),
-            confirmDismiss: (_) {
-              return showDeleteConfirmDialog(
-                context: context,
-                title: l10n.deleteEntry,
-                message: l10n.deleteEntryMessage,
-              );
-            },
-            onDismissed: (_) {
+          RuledTransactionRow(
+            entry: entry,
+            showDivider: true,
+            leadingInset: 24,
+            onTap: () => context.push('/transaction/${entry.transaction.id}'),
+            onDelete: () {
               context
                   .read<HistoryBloc>()
                   .add(HistoryDeleteRequested(entry.transaction.id));
             },
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(start: 24.w),
-              child: RuledTransactionRow(
-                entry: entry,
-                showDivider: true,
-                onTap: () =>
-                    context.push('/transaction/${entry.transaction.id}'),
-              ),
-            ),
           ),
         );
       }

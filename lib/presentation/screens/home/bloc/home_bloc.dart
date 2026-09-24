@@ -8,6 +8,7 @@ import '../../../../domain/models/monthly_summary.dart';
 import '../../../../domain/models/transaction_entry.dart';
 import '../../../../domain/repositories/settings_repository.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../domain/usecases/delete_transaction.dart';
 import '../../../../domain/usecases/get_monthly_summary.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -16,17 +17,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
     required TransactionRepository transactions,
     required SettingsRepository settings,
+    required DeleteTransaction deleteTransaction,
   })  : _transactions = transactions,
         _settings = settings,
+        _deleteTransaction = deleteTransaction,
         super(HomeState.initial()) {
     on<HomeStarted>(_onStarted);
     on<HomeMonthChanged>(_onMonthChanged);
     on<HomeEntriesUpdated>(_onEntriesUpdated);
     on<HomeCurrencyUpdated>(_onCurrencyUpdated);
+    on<HomeDeleteRequested>(_onDeleteRequested);
   }
 
   final TransactionRepository _transactions;
   final SettingsRepository _settings;
+  final DeleteTransaction _deleteTransaction;
   StreamSubscription<List<TransactionEntry>>? _entriesSub;
   StreamSubscription<AppSettings>? _settingsSub;
 
@@ -66,6 +71,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onCurrencyUpdated(HomeCurrencyUpdated event, Emitter<HomeState> emit) {
     emit(state.copyWith(currencyCode: event.currencyCode));
+  }
+
+  Future<void> _onDeleteRequested(
+    HomeDeleteRequested event,
+    Emitter<HomeState> emit,
+  ) {
+    return _deleteTransaction(event.id);
   }
 
   void _watchMonth(DateTime month) {

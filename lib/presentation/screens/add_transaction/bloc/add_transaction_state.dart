@@ -18,6 +18,10 @@ class AddTransactionState {
     this.deleted = false,
     this.notFound = false,
     this.errorMessage,
+    this.requestedCategoryName,
+    this.createIfMissing = false,
+    this.pendingCategoryName,
+    this.userPickedCategory = false,
   });
 
   final String amountText;
@@ -34,10 +38,17 @@ class AddTransactionState {
   final bool deleted;
   final bool notFound;
   final String? errorMessage;
+  final String? requestedCategoryName;
+  final bool createIfMissing;
+  final String? pendingCategoryName;
+  final bool userPickedCategory;
+
+  bool get hasPendingCategory =>
+      pendingCategoryName != null && pendingCategoryName!.isNotEmpty;
 
   bool get missingRequiredFields {
     final amount = parseMinorUnits(amountText) ?? 0;
-    return amount <= 0 || categoryId == null;
+    return amount <= 0 || (categoryId == null && !hasPendingCategory);
   }
 
   bool get canSave =>
@@ -60,8 +71,13 @@ class AddTransactionState {
     bool? deleted,
     bool? notFound,
     String? errorMessage,
+    String? requestedCategoryName,
+    bool? createIfMissing,
+    String? pendingCategoryName,
+    bool? userPickedCategory,
     bool clearCategory = false,
     bool clearError = false,
+    bool clearPending = false,
   }) {
     return AddTransactionState(
       amountText: amountText ?? this.amountText,
@@ -78,6 +94,11 @@ class AddTransactionState {
       deleted: deleted ?? false,
       notFound: notFound ?? this.notFound,
       errorMessage: clearError ? null : errorMessage,
+      requestedCategoryName: requestedCategoryName ?? this.requestedCategoryName,
+      createIfMissing: createIfMissing ?? this.createIfMissing,
+      pendingCategoryName:
+          clearPending ? null : (pendingCategoryName ?? this.pendingCategoryName),
+      userPickedCategory: userPickedCategory ?? this.userPickedCategory,
     );
   }
 }

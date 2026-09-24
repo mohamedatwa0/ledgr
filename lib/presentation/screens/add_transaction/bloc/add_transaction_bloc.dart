@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 import '../../../../domain/date_utils.dart';
 import '../../../../domain/exceptions.dart';
@@ -11,9 +12,12 @@ import '../../../../domain/models/transaction_type.dart';
 import '../../../../domain/repositories/category_repository.dart';
 import '../../../../domain/repositories/settings_repository.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../domain/usecases/create_category.dart';
 import '../../../../domain/usecases/create_transaction.dart';
 import '../../../../domain/usecases/delete_transaction.dart';
 import '../../../../domain/usecases/update_transaction.dart';
+import '../../../../domain/voice/parse_voice_entry.dart';
+import '../../../widgets/category_choices.dart';
 import 'add_transaction_event.dart';
 import 'add_transaction_state.dart';
 
@@ -26,13 +30,16 @@ class AddTransactionBloc
     required CreateTransaction createTransaction,
     required UpdateTransaction updateTransaction,
     required DeleteTransaction deleteTransaction,
+    required CreateCategory createCategory,
     this.transactionId,
+    this.voiceDraft,
   })  : _transactions = transactions,
         _categories = categories,
         _settings = settings,
         _createTransaction = createTransaction,
         _updateTransaction = updateTransaction,
         _deleteTransaction = deleteTransaction,
+        _createCategory = createCategory,
         super(
           AddTransactionState(
             amountText: '',
@@ -49,6 +56,7 @@ class AddTransactionBloc
     on<AddTransactionAmountChanged>(_onAmountChanged);
     on<AddTransactionTypeChanged>(_onTypeChanged);
     on<AddTransactionCategorySelected>(_onCategorySelected);
+    on<AddTransactionPendingCategorySelected>(_onPendingCategorySelected);
     on<AddTransactionNoteChanged>(_onNoteChanged);
     on<AddTransactionDateChanged>(_onDateChanged);
     on<AddTransactionSaveRequested>(_onSaveRequested);
@@ -63,7 +71,9 @@ class AddTransactionBloc
   final CreateTransaction _createTransaction;
   final UpdateTransaction _updateTransaction;
   final DeleteTransaction _deleteTransaction;
+  final CreateCategory _createCategory;
   final int? transactionId;
+  final ParsedVoiceEntry? voiceDraft;
 
   StreamSubscription<List<Category>>? _categorySub;
   StreamSubscription<AppSettings>? _settingsSub;
@@ -81,6 +91,22 @@ class AddTransactionBloc
     if (id == null) {
       final settings = await _settings.get();
       if (isClosed) return;
+      final draft = voiceDraft;
+      if (draft != null) {
+        final type = draft.type ?? settings.defaultEntryType;
+        emit(
+          state.copyWith(
+            type: type,
+            amountText:
+                draft.amountMinor == null ? '' : minorToInput(draft.amountMinor!),
+            note: draft.transcript,
+            requestedCategoryName: draft.categoryName,
+            createIfMissing: draft.createIfMissing,
+          ),
+        );
+        _watchCategories(type);
+        return;
+      }
       emit(state.copyWith(type: settings.defaultEntryType));
       _watchCategories(settings.defaultEntryType);
       return;
@@ -123,7 +149,13 @@ class AddTransactionBloc
     Emitter<AddTransactionState> emit,
   ) {
     if (state.type == event.type) return;
-    emit(state.copyWith(type: event.type, clearCategory: true));
+    emit(
+      state.copyWith(
+        type: event.type,
+        clearCategory: true,
+        userPickedCategory: false,
+      ),
+    );
     _watchCategories(event.type);
   }
 
@@ -131,7 +163,28 @@ class AddTransactionBloc
     AddTransactionCategorySelected event,
     Emitter<AddTransactionState> emit,
   ) {
-    emit(state.copyWith(categoryId: event.categoryId));
+    emit(
+      state.copyWith(
+        categoryId: event.categoryId,
+        userPickedCategory: true,
+        clearPending: true,
+      ),
+    );
+  }
+
+  void _onPendingCategorySelected(
+    AddTransactionPendingCategorySelected event,
+    Emitter<AddTransactionState> emit,
+  ) {
+    final name = state.requestedCategoryName;
+    if (name == null || name.isEmpty) return;
+    emit(
+      state.copyWith(
+        pendingCategoryName: name,
+        userPickedCategory: true,
+        clearCategory: true,
+      ),
+    );
   }
 
   void _onNoteChanged(
@@ -153,18 +206,37 @@ class AddTransactionBloc
     Emitter<AddTransactionState> emit,
   ) async {
     final amount = parseMinorUnits(state.amountText) ?? 0;
-    final categoryId = state.categoryId;
-    if (amount <= 0 || categoryId == null) return;
+    var categoryId = state.categoryId;
+    if (amount <= 0) return;
+    if (categoryId == null && !state.hasPendingCategory) return;
 
     emit(state.copyWith(saving: true, saved: false, clearError: true));
-    final command = TransactionCommand(
-      amount: amount,
-      type: state.type,
-      categoryId: categoryId,
-      note: state.note,
-      date: state.date,
-    );
     try {
+      if (categoryId == null) {
+        final pendingName = state.pendingCategoryName!;
+        final existing = await _categories.findByNameAndType(
+          pendingName,
+          state.type,
+        );
+        if (existing != null) {
+          categoryId = existing.id;
+        } else {
+          final created = await _createCategory(
+            name: pendingName,
+            type: state.type,
+            iconCodePoint: TablerIcons.tag.codePoint,
+            colorValue: _nextCategoryColor(state.categories),
+          );
+          categoryId = created.id;
+        }
+      }
+      final command = TransactionCommand(
+        amount: amount,
+        type: state.type,
+        categoryId: categoryId,
+        note: state.note,
+        date: state.date,
+      );
       final id = transactionId;
       if (id == null) {
         await _createTransaction(command);
@@ -200,12 +272,39 @@ class AddTransactionBloc
     AddTransactionCategoriesUpdated event,
     Emitter<AddTransactionState> emit,
   ) {
-    emit(
-      state.copyWith(
-        categories: event.categories,
-        categoriesLoading: false,
-      ),
+    emit(_resolvedCategoryState(event.categories));
+  }
+
+  AddTransactionState _resolvedCategoryState(List<Category> categories) {
+    final next = state.copyWith(
+      categories: categories,
+      categoriesLoading: false,
     );
+    if (state.userPickedCategory) return next;
+    final name = state.requestedCategoryName;
+    if (name == null || name.isEmpty) return next;
+    for (final category in categories) {
+      if (category.name.toLowerCase() == name.toLowerCase()) {
+        return next.copyWith(categoryId: category.id, clearPending: true);
+      }
+    }
+    if (state.createIfMissing) {
+      return next.copyWith(pendingCategoryName: name, clearCategory: true);
+    }
+    for (final category in categories) {
+      if (category.isFallback) {
+        return next.copyWith(categoryId: category.id, clearPending: true);
+      }
+    }
+    return next;
+  }
+
+  int _nextCategoryColor(List<Category> categories) {
+    final used = categories.map((category) => category.colorValue).toSet();
+    for (final color in categoryColorChoices) {
+      if (!used.contains(color)) return color;
+    }
+    return categoryColorChoices[categories.length % categoryColorChoices.length];
   }
 
   void _onCurrencyUpdated(

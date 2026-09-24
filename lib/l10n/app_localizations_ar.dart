@@ -24,6 +24,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get newEntryTooltip => 'قيد جديد';
 
   @override
+  String get manualEntryTooltip => 'اكتب قيداً';
+
+  @override
+  String get voiceEntryTooltip => 'قل قيداً';
+
+  @override
+  String get voiceListening => 'جارٍ الاستماع…';
+
+  @override
+  String get voiceUnavailable => 'الإدخال الصوتي غير متاح على هذا الجهاز.';
+
+  @override
+  String get voicePermissionDenied => 'يلزم إذن الميكروفون للإدخال الصوتي.';
+
+  @override
+  String get voiceEmptyResult => 'لم يُسمع شيء. حاول مرة أخرى.';
+
+  @override
   String get ledgerBook => 'دفتر الحساب';
 
   @override
@@ -346,15 +364,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appearanceSubtitle => 'نظام أو فاتح أو دفتر ليلي';
 
   @override
-  String get dataSovereignty => 'البيانات والسيادة';
-
-  @override
-  String get dataSovereigntySubtitle => 'ملف SQLite على هذا الجهاز';
-
-  @override
-  String get export => 'تصدير';
-
-  @override
   String get bankSmsImport => 'استيراد رسائل البنك';
 
   @override
@@ -409,17 +418,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get currencySymbolOnly => 'يغيّر الرمز فقط — لا تُحوَّل المبالغ.';
-
-  @override
-  String get noLedgerFile => 'لا يوجد ملف دفتر للتصدير بعد';
-
-  @override
-  String get exportSubject => 'تصدير دفتر Ledgr';
-
-  @override
-  String couldNotExport(String error) {
-    return 'تعذر التصدير: $error';
-  }
 
   @override
   String get resetLedgerTitle => 'إعادة تعيين الدفتر المحلي؟';

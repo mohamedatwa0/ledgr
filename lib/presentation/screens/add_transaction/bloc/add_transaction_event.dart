@@ -27,6 +27,10 @@ class AddTransactionCategorySelected extends AddTransactionEvent {
   final int categoryId;
 }
 
+class AddTransactionPendingCategorySelected extends AddTransactionEvent {
+  const AddTransactionPendingCategorySelected();
+}
+
 class AddTransactionNoteChanged extends AddTransactionEvent {
   const AddTransactionNoteChanged(this.note);
 

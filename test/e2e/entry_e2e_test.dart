@@ -47,8 +47,7 @@ void main() {
 
   testWidgets('duplicate category snackbar shows once', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
     await tester.ensureVisible(addCategory);
     await tester.drag(find.byType(ListView), const Offset(0, -180));
@@ -102,8 +101,7 @@ void main() {
 
   testWidgets('saving an entry returns to the dashboard once', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     await tester.enterText(find.byKey(const Key('amount-field')), '45');
     await tester.tap(find.byKey(const Key('category-Food & Dining')));
     FocusManager.instance.primaryFocus?.unfocus();
@@ -137,8 +135,7 @@ void main() {
 
   testWidgets('back with a typed amount asks before discarding', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     await tester.enterText(find.byKey(const Key('amount-field')), '45');
     await tester.pump();
 
@@ -155,8 +152,7 @@ void main() {
 
   testWidgets('keypad is on screen with the amount field', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
 
     expect(find.byKey(const Key('amount-field')), findsOneWidget);
     expect(find.text('1'), findsWidgets);
@@ -173,8 +169,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('tab-dashboard')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
     await tester.ensureVisible(addCategory);
     await tester.drag(find.byType(ListView), const Offset(0, -180));
@@ -198,8 +193,7 @@ void main() {
 
   testWidgets('amount field accepts Arabic-Indic digits', (tester) async {
     await pumpApp(tester, db: db);
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
 
     await tester.enterText(find.byKey(const Key('amount-field')), '٤٥');
     await tester.pump();

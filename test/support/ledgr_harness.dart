@@ -43,6 +43,13 @@ Future<void> settle(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 400));
 }
 
+Future<void> openNewEntry(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('add-transaction-fab')));
+  await settle(tester);
+  await tester.tap(find.byKey(const Key('add-entry-manual')));
+  await settle(tester);
+}
+
 Future<void> disposeApp(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump(const Duration(milliseconds: 1));

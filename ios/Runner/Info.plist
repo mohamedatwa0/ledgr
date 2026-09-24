@@ -52,5 +52,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Ledgr uses the microphone to fill a new ledger entry from your voice.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Ledgr uses speech recognition to turn a spoken entry into amount, type, and category.</string>
 	</dict>
 </plist>

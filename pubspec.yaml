@@ -23,9 +23,9 @@ dependencies:
   flutter_tabler_icons: ^1.43.0
   package_info_plus: ^8.1.2
   crypto: ^3.0.6
-  share_plus: ^10.1.4
   flutter_svg: ^2.1.0
   flutter_screenutil: ^5.9.3
+  speech_to_text: ^7.0.0
 
 dev_dependencies:
   flutter_test:

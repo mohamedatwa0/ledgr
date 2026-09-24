@@ -330,7 +330,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 child: GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: state.categories.length + 1,
+                                  itemCount: state.categories.length +
+                                      (state.hasPendingCategory ? 1 : 0) +
+                                      1,
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 4,
@@ -339,41 +341,58 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                     childAspectRatio: 0.72,
                                   ),
                                   itemBuilder: (context, index) {
-                                    if (index == state.categories.length) {
+                                    if (index < state.categories.length) {
+                                      final category = state.categories[index];
                                       return CategoryCircle(
-                                        key: const Key('add-new-category'),
-                                        icon: TablerIcons.plus,
-                                        label: l10n.addNew,
+                                        key: Key('category-${category.name}'),
+                                        icon:
+                                            tablerIcon(category.iconCodePoint),
+                                        label: localizedCategoryName(
+                                            l10n, category.name),
                                         size: 44.r,
-                                        onTap: () async {
-                                          final createdId =
-                                              await showCategoryFormSheet(
-                                            context,
-                                            type: state.type,
-                                          );
-                                          if (createdId != null &&
-                                              context.mounted) {
-                                            bloc.add(
-                                              AddTransactionCategorySelected(
-                                                  createdId),
-                                            );
-                                          }
-                                        },
+                                        selected:
+                                            state.categoryId == category.id,
+                                        iconColor: Color(category.colorValue),
+                                        onTap: () => bloc.add(
+                                          AddTransactionCategorySelected(
+                                              category.id),
+                                        ),
                                       );
                                     }
-                                    final category = state.categories[index];
+                                    if (state.hasPendingCategory &&
+                                        index == state.categories.length) {
+                                      return CategoryCircle(
+                                        key: Key(
+                                          'pending-category-${state.pendingCategoryName}',
+                                        ),
+                                        icon: TablerIcons.tag,
+                                        label: state.pendingCategoryName!,
+                                        size: 44.r,
+                                        selected: state.categoryId == null,
+                                        onTap: () => bloc.add(
+                                          const AddTransactionPendingCategorySelected(),
+                                        ),
+                                      );
+                                    }
                                     return CategoryCircle(
-                                      key: Key('category-${category.name}'),
-                                      icon: tablerIcon(category.iconCodePoint),
-                                      label: localizedCategoryName(
-                                          l10n, category.name),
+                                      key: const Key('add-new-category'),
+                                      icon: TablerIcons.plus,
+                                      label: l10n.addNew,
                                       size: 44.r,
-                                      selected: state.categoryId == category.id,
-                                      iconColor: Color(category.colorValue),
-                                      onTap: () => bloc.add(
-                                        AddTransactionCategorySelected(
-                                            category.id),
-                                      ),
+                                      onTap: () async {
+                                        final createdId =
+                                            await showCategoryFormSheet(
+                                          context,
+                                          type: state.type,
+                                        );
+                                        if (createdId != null &&
+                                            context.mounted) {
+                                          bloc.add(
+                                            AddTransactionCategorySelected(
+                                                createdId),
+                                          );
+                                        }
+                                      },
                                     );
                                   },
                                 ),

@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../data/db/app_database.dart' show ledgrDatabaseFile;
 import '../../../domain/models/app_locale.dart';
 import '../../../domain/models/app_theme_mode.dart';
 import '../../../domain/models/transaction_type.dart';
@@ -236,21 +234,6 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             SettingsRow(
-              key: const Key('settings-export'),
-              icon: TablerIcons.database,
-              label: l10n.dataSovereignty,
-              subtitle: l10n.dataSovereigntySubtitle,
-              trailing: Text(
-                l10n.export,
-                style: uiStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: colors.primary,
-                ),
-              ),
-              onTap: () => _exportLedger(context),
-            ),
-            SettingsRow(
               key: const Key('settings-sms'),
               icon: TablerIcons.message,
               label: l10n.bankSmsImport,
@@ -423,31 +406,6 @@ class SettingsScreen extends StatelessWidget {
     );
     if (selected != null && selected != current && context.mounted) {
       context.read<SettingsBloc>().add(SettingsThemeModeSelected(selected));
-    }
-  }
-
-  Future<void> _exportLedger(BuildContext context) async {
-    final l10n = context.l10n;
-    try {
-      final file = await ledgrDatabaseFile();
-      if (!file.existsSync()) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.noLedgerFile)),
-          );
-        }
-        return;
-      }
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: l10n.exportSubject,
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.couldNotExport('$e'))),
-        );
-      }
     }
   }
 

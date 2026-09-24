@@ -19,6 +19,7 @@ import '../../domain/usecases/reset_ledger.dart';
 import '../../domain/usecases/scan_sms_inbox.dart';
 import '../../domain/usecases/update_category.dart';
 import '../../domain/usecases/update_transaction.dart';
+import '../../domain/voice/parse_voice_entry.dart';
 import '../screens/add_transaction/add_transaction_screen.dart';
 import '../screens/add_transaction/bloc/add_transaction_bloc.dart';
 import '../screens/add_transaction/bloc/add_transaction_event.dart';
@@ -62,6 +63,7 @@ GoRouter createAppRouter() {
                   create: (context) => HomeBloc(
                     transactions: context.read<TransactionRepository>(),
                     settings: context.read<SettingsRepository>(),
+                    deleteTransaction: context.read<DeleteTransaction>(),
                   )..add(const HomeStarted()),
                   child: const HomeScreen(),
                 ),
@@ -134,11 +136,16 @@ GoRouter createAppRouter() {
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: '/transaction/new',
-        builder: (context, state) => BlocProvider(
-          create: (context) =>
-              _addTransactionBloc(context)..add(const AddTransactionStarted()),
-          child: const AddTransactionScreen(),
-        ),
+        builder: (context, state) {
+          final extra = state.extra;
+          return BlocProvider(
+            create: (context) => _addTransactionBloc(
+              context,
+              voiceDraft: extra is ParsedVoiceEntry ? extra : null,
+            )..add(const AddTransactionStarted()),
+            child: const AddTransactionScreen(),
+          );
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
@@ -159,6 +166,7 @@ GoRouter createAppRouter() {
 AddTransactionBloc _addTransactionBloc(
   BuildContext context, {
   int? transactionId,
+  ParsedVoiceEntry? voiceDraft,
 }) {
   return AddTransactionBloc(
     transactions: context.read<TransactionRepository>(),
@@ -167,7 +175,9 @@ AddTransactionBloc _addTransactionBloc(
     createTransaction: context.read<CreateTransaction>(),
     updateTransaction: context.read<UpdateTransaction>(),
     deleteTransaction: context.read<DeleteTransaction>(),
+    createCategory: context.read<CreateCategory>(),
     transactionId: transactionId,
+    voiceDraft: voiceDraft,
   );
 }
 

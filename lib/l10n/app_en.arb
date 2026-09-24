@@ -5,6 +5,12 @@
   "navCategories": "Categories",
   "navSettings": "Settings",
   "newEntryTooltip": "New entry",
+  "manualEntryTooltip": "Type an entry",
+  "voiceEntryTooltip": "Speak an entry",
+  "voiceListening": "Listening…",
+  "voiceUnavailable": "Voice entry is not available on this device.",
+  "voicePermissionDenied": "Microphone permission is needed for voice entry.",
+  "voiceEmptyResult": "Nothing was heard. Try again.",
   "ledgerBook": "LEDGER BOOK",
   "thisMonth": "THIS MONTH",
   "thisMonthLabel": "This month",
@@ -160,9 +166,6 @@
   "defaultEntryTypeSubtitle": "Primary recording column",
   "appearance": "Appearance",
   "appearanceSubtitle": "System, light, or nocturnal ledger",
-  "dataSovereignty": "Data & Sovereignty",
-  "dataSovereigntySubtitle": "SQLite file on this device",
-  "export": "Export",
   "bankSmsImport": "Bank SMS Import",
   "bankSmsImportSubtitle": "Deterministic regex parser. No AI/NLP.",
   "readyToReview": "{count} to review",
@@ -186,14 +189,6 @@
   "settingsFooter": "Architected for absolute manual agency and sovereign accounting. Zero cloud dependencies.",
   "displayCurrency": "Display currency",
   "currencySymbolOnly": "Changes the symbol only — amounts are not converted.",
-  "noLedgerFile": "No ledger file to export yet",
-  "exportSubject": "Ledgr journal export",
-  "couldNotExport": "Could not export: {error}",
-  "@couldNotExport": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
   "resetLedgerTitle": "Reset local ledger?",
   "resetLedgerMessage": "This deletes all transactions and SMS inbox items. Categories and settings stay.",
   "reset": "Reset",

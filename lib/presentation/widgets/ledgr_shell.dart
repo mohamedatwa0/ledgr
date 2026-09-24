@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../l10n/l10n.dart';
 import '../../theme/colors.dart';
+import 'add_entry_fab.dart';
 import 'ledgr_bottom_nav.dart';
 import 'ledgr_header.dart';
 
@@ -30,18 +29,7 @@ class LedgrShell extends StatelessWidget {
           Expanded(child: navigationShell),
         ],
       ),
-      floatingActionButton: index == 2
-          ? null
-          : SizedBox(
-              width: 56.w,
-              height: 56.h,
-              child: FloatingActionButton(
-                key: const Key('add-transaction-fab'),
-                tooltip: l10n.newEntryTooltip,
-                onPressed: () => context.push('/transaction/new'),
-                child: Icon(TablerIcons.plus, size: 28.r),
-              ),
-            ),
+      floatingActionButton: index == 2 ? null : const AddEntryFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: LedgrBottomNav(
         currentIndex: index,

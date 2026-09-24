@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -10,6 +11,7 @@ import '../../theme/typography.dart';
 import '../formatters/category_labels.dart';
 import '../formatters/money_format.dart';
 import '../icons/tabler_icon.dart';
+import 'dialogs.dart';
 
 class RuledTransactionRow extends StatelessWidget {
   const RuledTransactionRow({
@@ -17,15 +19,19 @@ class RuledTransactionRow extends StatelessWidget {
     required this.entry,
     this.showDivider = true,
     this.onTap,
+    this.onDelete,
     this.compact = false,
     this.showTime = false,
+    this.leadingInset = 0,
   });
 
   final TransactionEntry entry;
   final bool showDivider;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
   final bool compact;
   final bool showTime;
+  final double leadingInset;
 
   @override
   Widget build(BuildContext context) {
@@ -37,90 +43,116 @@ class RuledTransactionRow extends StatelessWidget {
     final time =
         DateFormat('h:mm a', l10n.localeName).format(entry.transaction.date);
 
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: compact ? 10 : 12,
-          horizontal: compact ? 0 : 16,
-        ),
-        decoration: BoxDecoration(
-          color: colors.paperLight,
-          border: showDivider
-              ? Border(bottom: BorderSide(color: colors.rule, width: 1.w))
-              : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36.w,
-              height: 36.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isIncome
-                    ? colors.surfaceContainerHighest
-                    : colors.secondaryContainer.withValues(alpha: 0.6),
+    final row = Padding(
+      padding: EdgeInsetsDirectional.only(start: leadingInset.w),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: compact ? 10 : 12,
+            horizontal: compact ? 0 : 16,
+          ),
+          decoration: BoxDecoration(
+            color: colors.paperLight,
+            border: showDivider
+                ? Border(bottom: BorderSide(color: colors.rule, width: 1.w))
+                : null,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36.w,
+                height: 36.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isIncome
+                      ? colors.surfaceContainerHighest
+                      : colors.secondaryContainer.withValues(alpha: 0.6),
+                ),
+                child: Icon(
+                  tablerIcon(entry.category.iconCodePoint),
+                  size: 18.r,
+                  color: isIncome ? colors.ledgerGreen : colors.primary,
+                ),
               ),
-              child: Icon(
-                tablerIcon(entry.category.iconCodePoint),
-                size: 18.r,
-                color: isIncome ? colors.ledgerGreen : colors.primary,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: uiStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: colors.onSurface,
-                    ),
-                  ),
-                  if (note != null && note.isNotEmpty)
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      note,
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: uiStyle(fontSize: 12, color: colors.secondary),
-                    )
-                  else
+                      style: uiStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    if (note != null && note.isNotEmpty)
+                      Text(
+                        note,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: uiStyle(fontSize: 12, color: colors.secondary),
+                      )
+                    else
+                      Text(
+                        isIncome ? l10n.credit : l10n.debit,
+                        style: uiStyle(fontSize: 12, color: colors.secondary),
+                      ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatSignedAmount(
+                      entry.transaction.amount,
+                      entry.transaction.type,
+                    ),
+                    textAlign: TextAlign.right,
+                    style: amountStyle(
+                      fontSize: 18,
+                      color: isIncome ? colors.ledgerGreen : colors.ledgerRed,
+                    ),
+                  ),
+                  if (showTime)
                     Text(
-                      isIncome ? l10n.credit : l10n.debit,
-                      style: uiStyle(fontSize: 12, color: colors.secondary),
+                      time,
+                      style: uiStyle(fontSize: 10, color: colors.secondary),
                     ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatSignedAmount(
-                    entry.transaction.amount,
-                    entry.transaction.type,
-                  ),
-                  textAlign: TextAlign.right,
-                  style: amountStyle(
-                    fontSize: 18,
-                    color: isIncome ? colors.ledgerGreen : colors.ledgerRed,
-                  ),
-                ),
-                if (showTime)
-                  Text(
-                    time,
-                    style: uiStyle(fontSize: 10, color: colors.secondary),
-                  ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+
+    final delete = onDelete;
+    if (delete == null) return row;
+
+    return Dismissible(
+      key: ValueKey(entry.transaction.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        color: colors.ledgerRed,
+        padding: EdgeInsetsDirectional.only(end: 16.w),
+        child: Icon(TablerIcons.trash, color: colors.onPrimary, size: 20.r),
+      ),
+      confirmDismiss: (_) {
+        return showDeleteConfirmDialog(
+          context: context,
+          title: l10n.deleteEntry,
+          message: l10n.deleteEntryMessage,
+        );
+      },
+      onDismissed: (_) => delete(),
+      child: row,
     );
   }
 }

@@ -24,6 +24,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newEntryTooltip => 'New entry';
 
   @override
+  String get manualEntryTooltip => 'Type an entry';
+
+  @override
+  String get voiceEntryTooltip => 'Speak an entry';
+
+  @override
+  String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceUnavailable => 'Voice entry is not available on this device.';
+
+  @override
+  String get voicePermissionDenied => 'Microphone permission is needed for voice entry.';
+
+  @override
+  String get voiceEmptyResult => 'Nothing was heard. Try again.';
+
+  @override
   String get ledgerBook => 'LEDGER BOOK';
 
   @override
@@ -335,15 +353,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceSubtitle => 'System, light, or nocturnal ledger';
 
   @override
-  String get dataSovereignty => 'Data & Sovereignty';
-
-  @override
-  String get dataSovereigntySubtitle => 'SQLite file on this device';
-
-  @override
-  String get export => 'Export';
-
-  @override
   String get bankSmsImport => 'Bank SMS Import';
 
   @override
@@ -398,17 +407,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currencySymbolOnly => 'Changes the symbol only — amounts are not converted.';
-
-  @override
-  String get noLedgerFile => 'No ledger file to export yet';
-
-  @override
-  String get exportSubject => 'Ledgr journal export';
-
-  @override
-  String couldNotExport(String error) {
-    return 'Could not export: $error';
-  }
 
   @override
   String get resetLedgerTitle => 'Reset local ledger?';

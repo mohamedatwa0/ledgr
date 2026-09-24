@@ -16,11 +16,11 @@ void main() {
     await db.close();
   });
 
-  testWidgets('adding a transaction shows it on the home ledger', (tester) async {
+  testWidgets('adding a transaction shows it on the home ledger',
+      (tester) async {
     await pumpApp(tester, db: db);
 
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
 
     await tester.enterText(find.byKey(const Key('amount-field')), '45');
     await tester.tap(find.byKey(const Key('category-Food & Dining')));
@@ -40,11 +40,38 @@ void main() {
     await disposeApp(tester);
   });
 
+  testWidgets('swiping an entry on the dashboard deletes it', (tester) async {
+    await pumpApp(tester, db: db);
+
+    await openNewEntry(tester);
+    await tester.enterText(find.byKey(const Key('amount-field')), '45');
+    await tester.tap(find.byKey(const Key('category-Food & Dining')));
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('save-entry')));
+    await settle(tester);
+
+    final entry = find.byType(Dismissible);
+    await tester.ensureVisible(entry);
+    await tester.drag(entry, const Offset(-500, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Delete entry'), findsOneWidget);
+    await tester.tap(find.text('Delete'));
+    await settle(tester);
+
+    expect(
+      find.text('No transactions yet — tap + to add your first one'),
+      findsOneWidget,
+    );
+    await disposeApp(tester);
+  });
+
   testWidgets('deleting a transaction removes it from history', (tester) async {
     await pumpApp(tester, db: db);
 
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     await tester.enterText(find.byKey(const Key('amount-field')), '45');
     await tester.tap(find.byKey(const Key('category-Food & Dining')));
     FocusManager.instance.primaryFocus?.unfocus();
@@ -75,8 +102,7 @@ void main() {
   ) async {
     await pumpApp(tester, db: db);
 
-    await tester.tap(find.byKey(const Key('add-transaction-fab')));
-    await settle(tester);
+    await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
     await tester.ensureVisible(addCategory);
     await tester.drag(find.byType(ListView), const Offset(0, -180));
@@ -84,7 +110,8 @@ void main() {
     await tester.tap(addCategory);
     await settle(tester);
 
-    await tester.enterText(find.byKey(const Key('category-name-field')), 'Pets');
+    await tester.enterText(
+        find.byKey(const Key('category-name-field')), 'Pets');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pump();
     await tester.ensureVisible(find.byKey(const Key('save-category')));
@@ -177,7 +204,8 @@ void main() {
 
     expect(find.text('اللغة'), findsWidgets);
     expect(
-      Directionality.of(tester.element(find.byKey(const Key('settings-locale')))),
+      Directionality.of(
+          tester.element(find.byKey(const Key('settings-locale')))),
       TextDirection.rtl,
     );
     await disposeApp(tester);

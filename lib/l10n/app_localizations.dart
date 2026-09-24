@@ -125,6 +125,42 @@ abstract class AppLocalizations {
   /// **'New entry'**
   String get newEntryTooltip;
 
+  /// No description provided for @manualEntryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Type an entry'**
+  String get manualEntryTooltip;
+
+  /// No description provided for @voiceEntryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak an entry'**
+  String get voiceEntryTooltip;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice entry is not available on this device.'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voicePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission is needed for voice entry.'**
+  String get voicePermissionDenied;
+
+  /// No description provided for @voiceEmptyResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was heard. Try again.'**
+  String get voiceEmptyResult;
+
   /// No description provided for @ledgerBook.
   ///
   /// In en, this message translates to:
@@ -659,24 +695,6 @@ abstract class AppLocalizations {
   /// **'System, light, or nocturnal ledger'**
   String get appearanceSubtitle;
 
-  /// No description provided for @dataSovereignty.
-  ///
-  /// In en, this message translates to:
-  /// **'Data & Sovereignty'**
-  String get dataSovereignty;
-
-  /// No description provided for @dataSovereigntySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'SQLite file on this device'**
-  String get dataSovereigntySubtitle;
-
-  /// No description provided for @export.
-  ///
-  /// In en, this message translates to:
-  /// **'Export'**
-  String get export;
-
   /// No description provided for @bankSmsImport.
   ///
   /// In en, this message translates to:
@@ -784,24 +802,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changes the symbol only — amounts are not converted.'**
   String get currencySymbolOnly;
-
-  /// No description provided for @noLedgerFile.
-  ///
-  /// In en, this message translates to:
-  /// **'No ledger file to export yet'**
-  String get noLedgerFile;
-
-  /// No description provided for @exportSubject.
-  ///
-  /// In en, this message translates to:
-  /// **'Ledgr journal export'**
-  String get exportSubject;
-
-  /// No description provided for @couldNotExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not export: {error}'**
-  String couldNotExport(String error);
 
   /// No description provided for @resetLedgerTitle.
   ///
