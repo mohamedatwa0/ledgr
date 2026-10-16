@@ -5,6 +5,7 @@ import '../../domain/sms/sms_message.dart';
 
 class AndroidSmsGateway implements SmsGateway {
   AndroidSmsGateway({
+    this.shareImport = false,
     MethodChannel channel = const MethodChannel('ledgr/sms'),
     EventChannel incoming = const EventChannel('ledgr/sms/incoming'),
     EventChannel share = const EventChannel('ledgr/sms/share'),
@@ -16,6 +17,9 @@ class AndroidSmsGateway implements SmsGateway {
   final EventChannel _incoming;
   final EventChannel _share;
   Future<bool>? _pluginReady;
+
+  @override
+  final bool shareImport;
 
   @override
   bool get inboxSupported => true;
@@ -38,6 +42,8 @@ class AndroidSmsGateway implements SmsGateway {
     } on MissingPluginException {
       _pluginReady = Future.value(false);
       return null;
+    } on PlatformException {
+      return null;
     }
   }
 
@@ -56,12 +62,34 @@ class AndroidSmsGateway implements SmsGateway {
     DateTime? since,
     Set<String> senders,
   ) async {
-    final raw = await _invoke<List<dynamic>>('readSince', {
-      'sinceMs': since?.millisecondsSinceEpoch,
-      'senders': senders.toList(),
-    });
-    if (raw == null) return const [];
-    return raw.map(_mapRawSms).toList();
+    if (!await _isPluginReady()) return const [];
+    try {
+      final raw = await _channel.invokeMethod<Object?>(
+        'readSince',
+        {
+          'sinceMs': since?.millisecondsSinceEpoch,
+          'senders': senders.toList(),
+        },
+      );
+      if (raw is! List) return const [];
+      return [for (final item in raw) _mapRawSms(item)];
+    } on MissingPluginException {
+      _pluginReady = Future.value(false);
+      return const [];
+    } on PlatformException {
+      return const [];
+    }
+  }
+
+  @override
+  Future<void> acknowledge(List<String> queueIds) async {
+    if (queueIds.isEmpty) return;
+    await _invoke<bool>('acknowledge', {'ids': queueIds});
+  }
+
+  @override
+  Future<bool> openImportSetup() async {
+    return await _invoke<bool>('openImportSetup') ?? false;
   }
 
   @override
@@ -89,10 +117,12 @@ class AndroidSmsGateway implements SmsGateway {
     final map = Map<String, dynamic>.from(item as Map);
     return RawSms(
       platformMessageId: map['id']?.toString(),
+      queueId: map['queueId']?.toString(),
       sender: map['sender'] as String? ?? '',
       body: map['body'] as String? ?? '',
       receivedAt: DateTime.fromMillisecondsSinceEpoch(
-        (map['dateMs'] as num?)?.toInt() ?? DateTime.now().millisecondsSinceEpoch,
+        (map['dateMs'] as num?)?.toInt() ??
+            DateTime.now().millisecondsSinceEpoch,
       ),
     );
   }

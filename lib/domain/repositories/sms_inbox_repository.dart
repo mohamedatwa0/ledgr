@@ -9,5 +9,6 @@ abstract class SmsInboxRepository {
   Future<SmsInboxItem> insert(SmsInboxInsert row);
   Future<void> markImported({required int id, required int transactionId});
   Future<void> markDismissed(int id);
+  Future<SmsInboxItem> revive(int id, SmsInboxInsert row);
   Future<void> deleteAll();
 }

@@ -8,6 +8,9 @@ class NoOpSmsGateway implements SmsGateway {
   bool get inboxSupported => false;
 
   @override
+  bool get shareImport => false;
+
+  @override
   Future<bool> hasPermission() async => false;
 
   @override
@@ -17,6 +20,12 @@ class NoOpSmsGateway implements SmsGateway {
   Future<List<RawSms>> readSince(DateTime? since, Set<String> senders) async {
     return const [];
   }
+
+  @override
+  Future<void> acknowledge(List<String> queueIds) async {}
+
+  @override
+  Future<bool> openImportSetup() async => false;
 
   @override
   Stream<RawSms> get incoming => const Stream.empty();

@@ -124,6 +124,7 @@
     }
   },
   "addNew": "إضافة جديد",
+  "holdCategoryToEdit": "اضغط مطولاً على تصنيف لتعديله أو حذفه",
   "bookkeeperMemo": "ملاحظة المحاسب",
   "noteHint": "أضف ملاحظة أو طرفاً مقابلاً (اختياري)...",
   "transactionDate": "تاريخ العملية",
@@ -153,6 +154,15 @@
   "languageSubtitle": "واجهة إنجليزية أو عربية",
   "localeEn": "EN",
   "localeAr": "ع",
+  "appLock": "قفل التطبيق",
+  "appLockSubtitle": "فتح ليدجر ببصمة الوجه أو الإصبع",
+  "appLockEnableReason": "أكّد هويتك لتفعيل قفل التطبيق",
+  "appLockDisableReason": "أكّد هويتك لإيقاف قفل التطبيق",
+  "appLockUnlockReason": "افتح ليدجر",
+  "appLockUnlock": "فتح",
+  "appLockPrompt": "ليدجر مقفل",
+  "appLockUnavailableTitle": "البصمة غير متاحة",
+  "appLockUnavailableMessage": "فعّل بصمة الوجه أو الإصبع على هذا الجهاز، ثم أعد تشغيل قفل التطبيق.",
   "ledgrJournal": "دفتر Ledgr",
   "journal": "دفتر",
   "physicalDriftStorage": "تخزين SQLite محلي على الجهاز",
@@ -241,6 +251,7 @@
   "noteOptional": "ملاحظة (اختياري)",
   "alreadyInInbox": "موجودة مسبقاً في الصندوق",
   "noNewBankMessages": "لا رسائل بنك جديدة",
+  "noSharedBankMessages": "لا توجد رسائل مشتركة بانتظار الاستيراد. من الرسائل، شارك نص بنك أو محفظة مع Ledgr ثم اضغط استيراد الرسائل.",
   "foundMessagesToReview": "{count, plural, =1{تم العثور على رسالة واحدة للمراجعة} =2{تم العثور على رسالتين للمراجعة} few{تم العثور على {count} رسائل للمراجعة} many{تم العثور على {count} رسالة للمراجعة} other{تم العثور على {count} رسالة للمراجعة}}",
   "@foundMessagesToReview": {
     "placeholders": {
@@ -262,5 +273,14 @@
   "amountMustBePositive": "يجب أن يكون المبلغ أكبر من صفر.",
   "categoryTypeMismatch": "التصنيف لا يطابق مدين/دائن.",
   "otherCategoryMissing": "تصنيف أخرى مفقود.",
-  "scanFailed": "تعذر مسح الصندوق."
+  "scanFailed": "تعذر مسح الصندوق.",
+  "smsInboxIos": "الآيفون لا يسمح للتطبيقات بقراءة صندوق الرسائل. شارك رسالة بنك أو محفظة ذكية مع Ledgr، أو أرسلها من الاختصارات. الرسائل الشخصية تُتجاهل. لا يُضاف شيء إلى معاملاتك قبل أن تراجعه هنا.",
+  "smsImportSteps": "في الرسائل، المس رسالة البنك أو المحفظة مطولاً، ثم مشاركة، ثم Ledgr. تظهر في هذه القائمة. افتحها لإضافتها أو تخطّها. للرسائل الجديدة: أتمتة في الاختصارات عند استلام رسالة تحتوي عبارة البنك، وشغّل Import Bank Message ومرّر نص الرسالة.",
+  "allowSmsImportIos": "تفعيل استيراد رسائل البنك والمحفظة",
+  "turnOnSmsImport": "تفعيل",
+  "smsImportEnabled": "الاستيراد مفعّل. شارك رسالة بنك أو محفظة لتظهر هنا.",
+  "importSharedMessages": "استيراد الرسائل",
+  "openShortcutsSetup": "إعداد الاختصارات",
+  "onlyBankOrWallet": "تُستورد رسائل البنك والمحفظة الذكية فقط.",
+  "shortcutsUnavailable": "تعذر فتح الاختصارات."
 }

@@ -23,6 +23,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<SettingsThemeModeSelected>(_onThemeModeSelected);
     on<SettingsDefaultTypeSelected>(_onDefaultTypeSelected);
     on<SettingsLocaleSelected>(_onLocaleSelected);
+    on<SettingsBiometricLockSelected>(_onBiometricLockSelected);
     on<SettingsResetRequested>(_onResetRequested);
     on<SettingsUpdated>(_onUpdated);
     on<SettingsReadyCountUpdated>(_onReadyCountUpdated);
@@ -73,6 +74,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     return _settings.setLocale(event.locale);
   }
 
+  Future<void> _onBiometricLockSelected(
+    SettingsBiometricLockSelected event,
+    Emitter<SettingsState> emit,
+  ) {
+    return _settings.setBiometricLockEnabled(event.enabled);
+  }
+
   Future<void> _onResetRequested(
     SettingsResetRequested event,
     Emitter<SettingsState> emit,
@@ -87,6 +95,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         themeMode: event.settings.themeMode,
         defaultEntryType: event.settings.defaultEntryType,
         locale: event.settings.locale,
+        biometricLockEnabled: event.settings.biometricLockEnabled,
         loading: false,
       ),
     );

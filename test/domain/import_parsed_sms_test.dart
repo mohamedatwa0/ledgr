@@ -49,6 +49,10 @@ class _FailingMarkImportedInbox implements SmsInboxRepository {
   Future<void> markDismissed(int id) => _inner.markDismissed(id);
 
   @override
+  Future<SmsInboxItem> revive(int id, SmsInboxInsert row) =>
+      _inner.revive(id, row);
+
+  @override
   Future<void> deleteAll() => _inner.deleteAll();
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../domain/exceptions.dart';
 import '../../../../domain/repositories/sms_inbox_repository.dart';
+import '../../../../domain/sms/bank_message_filter.dart';
 import '../../../../domain/sms/sms_gateway.dart';
 import '../../../../domain/sms/sms_inbox_item.dart';
 import '../../../../domain/sms/sms_inbox_status.dart';
@@ -31,6 +32,7 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
             items: const [],
             pasteText: '',
             inboxSupported: gateway.inboxSupported,
+            shareImport: gateway.shareImport,
             hasPermission: false,
             loading: true,
           ),
@@ -41,6 +43,7 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
     on<SmsInboxParseRequested>(_onParseRequested);
     on<SmsInboxScanRequested>(_onScanRequested);
     on<SmsInboxPermissionRequested>(_onPermissionRequested);
+    on<SmsInboxSetupRequested>(_onSetupRequested);
     on<SmsInboxDismissRequested>(_onDismissRequested);
     on<SmsInboxItemsUpdated>(_onItemsUpdated);
     on<SmsInboxPermissionUpdated>(_onPermissionUpdated);
@@ -89,6 +92,15 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
         ? event.text.trim()
         : state.pasteText.trim();
     if (body.isEmpty) return;
+    if (!isBankOrWalletMessage(sender: 'paste', body: body)) {
+      emit(
+        state.copyWith(
+          parsing: false,
+          flash: SmsInboxFlash.notBankOrWallet,
+        ),
+      );
+      return;
+    }
     emit(state.copyWith(parsing: true, clearMessage: true));
     try {
       final result = await _ingestSms(pasteRawSms(body));
@@ -147,6 +159,16 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
     if (isClosed) return;
     emit(state.copyWith(hasPermission: granted));
     if (granted) await _scanSmsInbox();
+  }
+
+  Future<void> _onSetupRequested(
+    SmsInboxSetupRequested event,
+    Emitter<SmsInboxState> emit,
+  ) async {
+    final opened = await _gateway.openImportSetup();
+    if (!opened && !isClosed) {
+      emit(state.copyWith(flash: SmsInboxFlash.shortcutsUnavailable));
+    }
   }
 
   Future<void> _onDismissRequested(

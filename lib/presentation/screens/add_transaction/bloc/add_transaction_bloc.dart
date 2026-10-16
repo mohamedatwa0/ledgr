@@ -48,7 +48,7 @@ class AddTransactionBloc
             date: dateOnly(DateTime.now()),
             currencyCode: 'EGP',
             categories: const [],
-            loading: transactionId != null,
+            loading: transactionId != null || voiceDraft != null,
             categoriesLoading: true,
           ),
         ) {
@@ -94,14 +94,24 @@ class AddTransactionBloc
       final draft = voiceDraft;
       if (draft != null) {
         final type = draft.type ?? settings.defaultEntryType;
+        final categoryId = await _categoryIdForVoice(draft, type);
+        if (isClosed) return;
         emit(
           state.copyWith(
             type: type,
-            amountText:
-                draft.amountMinor == null ? '' : minorToInput(draft.amountMinor!),
+            amountText: draft.amountMinor == null
+                ? ''
+                : minorToInput(draft.amountMinor!),
             note: draft.transcript,
+            categoryId: categoryId,
             requestedCategoryName: draft.categoryName,
-            createIfMissing: draft.createIfMissing,
+            createIfMissing: draft.createIfMissing && categoryId == null,
+            pendingCategoryName: draft.createIfMissing && categoryId == null
+                ? draft.categoryName
+                : null,
+            clearPending: categoryId != null,
+            userPickedCategory: categoryId != null,
+            loading: false,
           ),
         );
         _watchCategories(type);
@@ -272,7 +282,38 @@ class AddTransactionBloc
     AddTransactionCategoriesUpdated event,
     Emitter<AddTransactionState> emit,
   ) {
-    emit(_resolvedCategoryState(event.categories));
+    final resolved = _resolvedCategoryState(event.categories);
+    final id = resolved.categoryId;
+    final stillThere =
+        id != null && event.categories.any((category) => category.id == id);
+    emit(
+      id == null || stillThere
+          ? resolved
+          : resolved.copyWith(clearCategory: true),
+    );
+  }
+
+  Future<int?> _categoryIdForVoice(
+    ParsedVoiceEntry draft,
+    TransactionType type,
+  ) async {
+    final name = draft.categoryName.trim();
+    if (name.isEmpty) {
+      return (await _categories.findOther(type))?.id;
+    }
+    final existing = await _categories.findByNameAndType(name, type);
+    if (existing != null) return existing.id;
+    if (draft.createIfMissing) {
+      final current = await _categories.watchByType(type).first;
+      final created = await _createCategory(
+        name: name,
+        type: type,
+        iconCodePoint: TablerIcons.tag.codePoint,
+        colorValue: _nextCategoryColor(current),
+      );
+      return created.id;
+    }
+    return (await _categories.findOther(type))?.id;
   }
 
   AddTransactionState _resolvedCategoryState(List<Category> categories) {
@@ -304,7 +345,8 @@ class AddTransactionBloc
     for (final color in categoryColorChoices) {
       if (!used.contains(color)) return color;
     }
-    return categoryColorChoices[categories.length % categoryColorChoices.length];
+    return categoryColorChoices[
+        categories.length % categoryColorChoices.length];
   }
 
   void _onCurrencyUpdated(

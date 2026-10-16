@@ -48,70 +48,86 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final media = MediaQuery.of(context);
-    final sheetHeight = (media.size.height - media.viewInsets.bottom) * 0.9;
+    final viewInsets = MediaQuery.viewInsetsOf(context);
     return Padding(
-      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-          child: SizedBox(
-            height: sheetHeight,
-            child: ScaffoldMessenger(
-              child: Scaffold(
-                backgroundColor: colors.paperLight,
-                body: BlocConsumer<CategoryFormBloc, CategoryFormState>(
-                  listenWhen: (previous, current) {
-                    return current.saved ||
-                        current.deleted ||
-                        current.errorMessage != previous.errorMessage ||
-                        (current.deletePromptCount != null &&
-                            previous.deletePromptCount == null) ||
-                        (previous.loading && !current.loading && !_hydrated);
-                  },
-                  listener: (context, state) async {
-                    if (!_hydrated && !state.loading && state.name.isNotEmpty) {
-                      _hydrated = true;
-                      _name.text = state.name;
-                    }
-                    if (state.saved || state.deleted) {
-                      context.pop(state.savedCategoryId);
-                      return;
-                    }
-                    if (state.errorMessage != null && !state.notFound) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            localizedLedgrErrorMessage(
-                                context.l10n, state.errorMessage!),
-                          ),
-                        ),
-                      );
-                    }
-                    final count = state.deletePromptCount;
-                    if (count == null) return;
-                    final l10n = context.l10n;
-                    final confirmed = await showDeleteConfirmDialog(
-                      context: context,
-                      title: l10n.deleteCategory,
-                      message: count == 0
-                          ? l10n.deleteThisCategory
-                          : l10n.entriesWillMoveToOther(count),
-                    );
-                    if (!context.mounted) return;
-                    final bloc = context.read<CategoryFormBloc>();
-                    if (confirmed) {
-                      bloc.add(const CategoryFormDeleteConfirmed());
-                    } else {
-                      bloc.add(const CategoryFormDeleteDismissed());
-                    }
-                  },
-                  builder: (context, state) => _form(context, state, colors),
+      padding: EdgeInsets.only(bottom: viewInsets.bottom),
+      child: MediaQuery.removeViewInsets(
+        context: context,
+        removeBottom: true,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final sheetHeight = constraints.maxHeight * 0.92;
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+                child: SizedBox(
+                  height: sheetHeight,
+                  child: ScaffoldMessenger(
+                    child: Scaffold(
+                      backgroundColor: colors.paperLight,
+                      // The sheet is already lifted above the keyboard. A second
+                      // inset here parks the save button in the middle of the sheet.
+                      resizeToAvoidBottomInset: false,
+                      body: BlocConsumer<CategoryFormBloc, CategoryFormState>(
+                        listenWhen: (previous, current) {
+                          return current.saved ||
+                              current.deleted ||
+                              current.errorMessage != previous.errorMessage ||
+                              (current.deletePromptCount != null &&
+                                  previous.deletePromptCount == null) ||
+                              (previous.loading &&
+                                  !current.loading &&
+                                  !_hydrated);
+                        },
+                        listener: (context, state) async {
+                          if (!_hydrated &&
+                              !state.loading &&
+                              state.name.isNotEmpty) {
+                            _hydrated = true;
+                            _name.text = state.name;
+                          }
+                          if (state.saved || state.deleted) {
+                            context.pop(state.savedCategoryId);
+                            return;
+                          }
+                          if (state.errorMessage != null && !state.notFound) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  localizedLedgrErrorMessage(
+                                      context.l10n, state.errorMessage!),
+                                ),
+                              ),
+                            );
+                          }
+                          final count = state.deletePromptCount;
+                          if (count == null) return;
+                          final l10n = context.l10n;
+                          final confirmed = await showDeleteConfirmDialog(
+                            context: context,
+                            title: l10n.deleteCategory,
+                            message: count == 0
+                                ? l10n.deleteThisCategory
+                                : l10n.entriesWillMoveToOther(count),
+                          );
+                          if (!context.mounted) return;
+                          final bloc = context.read<CategoryFormBloc>();
+                          if (confirmed) {
+                            bloc.add(const CategoryFormDeleteConfirmed());
+                          } else {
+                            bloc.add(const CategoryFormDeleteDismissed());
+                          }
+                        },
+                        builder: (context, state) =>
+                            _form(context, state, colors),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -296,58 +312,69 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                     ),
                 ],
               ),
-              if (widget.categoryId != null && !state.isDefault) ...[
-                SizedBox(height: 8.h),
-                TextButton(
-                  key: const Key('delete-category'),
-                  onPressed: () => bloc.add(const CategoryFormDeletePressed()),
-                  child: Text(
-                    l10n.deleteCategory,
-                    style: uiStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: colors.ledgerRed,
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
         SafeArea(
           top: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52.h,
-              child: FilledButton.icon(
-                key: const Key('save-category'),
-                onPressed: state.canSave
-                    ? () => bloc.add(const CategoryFormSaveRequested())
-                    : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  disabledBackgroundColor:
-                      colors.primary.withValues(alpha: 0.4),
-                  foregroundColor: colors.onPrimary,
-                  disabledForegroundColor:
-                      colors.onPrimary.withValues(alpha: 0.8),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
+            padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 12.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.categoryId != null && !state.isDefault)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44.h,
+                    child: TextButton(
+                      key: const Key('delete-category'),
+                      onPressed: () =>
+                          bloc.add(const CategoryFormDeletePressed()),
+                      child: Text(
+                        l10n.deleteCategory,
+                        style: uiStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: colors.ledgerRed,
+                        ),
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52.h,
+                  child: FilledButton.icon(
+                    key: const Key('save-category'),
+                    onPressed: state.canSave
+                        ? () => bloc.add(const CategoryFormSaveRequested())
+                        : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      disabledBackgroundColor:
+                          colors.primary.withValues(alpha: 0.4),
+                      foregroundColor: colors.onPrimary,
+                      disabledForegroundColor:
+                          colors.onPrimary.withValues(alpha: 0.8),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                    ),
+                    icon: Icon(
+                      creating ? TablerIcons.plus : TablerIcons.check,
+                      size: 18.r,
+                    ),
+                    label: Text(
+                      creating ? l10n.addCategory : l10n.saveCategory,
+                      style: uiStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: colors.onPrimary,
+                      ),
+                    ),
                   ),
                 ),
-                icon: Icon(TablerIcons.plus, size: 18.r),
-                label: Text(
-                  creating ? l10n.addCategory : l10n.saveCategory,
-                  style: uiStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: colors.onPrimary,
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
         ),

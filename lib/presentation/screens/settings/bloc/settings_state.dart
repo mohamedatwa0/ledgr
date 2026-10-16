@@ -8,6 +8,7 @@ class SettingsState {
     this.themeMode = AppThemeMode.system,
     this.defaultEntryType = TransactionType.expense,
     this.locale = AppLocale.en,
+    this.biometricLockEnabled = false,
     this.readyCount = 0,
     this.loading = false,
   });
@@ -16,6 +17,7 @@ class SettingsState {
   final AppThemeMode themeMode;
   final TransactionType defaultEntryType;
   final AppLocale locale;
+  final bool biometricLockEnabled;
   final int readyCount;
   final bool loading;
 
@@ -26,6 +28,7 @@ class SettingsState {
     AppThemeMode? themeMode,
     TransactionType? defaultEntryType,
     AppLocale? locale,
+    bool? biometricLockEnabled,
     int? readyCount,
     bool? loading,
   }) {
@@ -34,6 +37,7 @@ class SettingsState {
       themeMode: themeMode ?? this.themeMode,
       defaultEntryType: defaultEntryType ?? this.defaultEntryType,
       locale: locale ?? this.locale,
+      biometricLockEnabled: biometricLockEnabled ?? this.biometricLockEnabled,
       readyCount: readyCount ?? this.readyCount,
       loading: loading ?? this.loading,
     );

@@ -1,5 +1,5 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -36,7 +36,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceUnavailable => 'Voice entry is not available on this device.';
 
   @override
-  String get voicePermissionDenied => 'Microphone permission is needed for voice entry.';
+  String get voicePermissionDenied =>
+      'Microphone permission is needed for voice entry.';
 
   @override
   String get voiceEmptyResult => 'Nothing was heard. Try again.';
@@ -106,7 +107,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get emptyHomeTransactions => 'No transactions yet — tap + to add your first one';
+  String get emptyHomeTransactions =>
+      'No transactions yet — tap + to add your first one';
 
   @override
   String get searchHint => 'Search by merchant, note, or amount...';
@@ -159,7 +161,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get defaultCategoriesProtected => 'Default categories with recorded ledger entries are protected from deletion.';
+  String get defaultCategoriesProtected =>
+      'Default categories with recorded ledger entries are protected from deletion.';
 
   @override
   String get defaultBadge => 'DEFAULT';
@@ -253,6 +256,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNew => 'Add new';
 
   @override
+  String get holdCategoryToEdit => 'Hold a category to edit or delete it';
+
+  @override
   String get bookkeeperMemo => 'BOOKKEEPER MEMO';
 
   @override
@@ -265,7 +271,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get change => 'Change';
 
   @override
-  String get missingAmountAndCategory => 'Enter an amount and choose a category';
+  String get missingAmountAndCategory =>
+      'Enter an amount and choose a category';
 
   @override
   String get saveEntry => 'Save entry';
@@ -312,6 +319,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localeAr => 'ع';
+
+  @override
+  String get appLock => 'App Lock';
+
+  @override
+  String get appLockSubtitle => 'Face ID or fingerprint to open Ledgr';
+
+  @override
+  String get appLockEnableReason => 'Confirm it\'s you to turn on app lock';
+
+  @override
+  String get appLockDisableReason => 'Confirm it\'s you to turn off app lock';
+
+  @override
+  String get appLockUnlockReason => 'Unlock Ledgr';
+
+  @override
+  String get appLockUnlock => 'Unlock';
+
+  @override
+  String get appLockPrompt => 'Ledgr is locked';
+
+  @override
+  String get appLockUnavailableTitle => 'Biometrics unavailable';
+
+  @override
+  String get appLockUnavailableMessage =>
+      'Set up Face ID or a fingerprint on this device, then turn on app lock.';
 
   @override
   String get ledgrJournal => 'Ledgr Journal';
@@ -400,19 +435,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetLocalLedger => 'Reset Local Ledger Journal';
 
   @override
-  String get settingsFooter => 'Architected for absolute manual agency and sovereign accounting. Zero cloud dependencies.';
+  String get settingsFooter =>
+      'Architected for absolute manual agency and sovereign accounting. Zero cloud dependencies.';
 
   @override
   String get displayCurrency => 'Display currency';
 
   @override
-  String get currencySymbolOnly => 'Changes the symbol only — amounts are not converted.';
+  String get currencySymbolOnly =>
+      'Changes the symbol only — amounts are not converted.';
 
   @override
   String get resetLedgerTitle => 'Reset local ledger?';
 
   @override
-  String get resetLedgerMessage => 'This deletes all transactions and SMS inbox items. Categories and settings stay.';
+  String get resetLedgerMessage =>
+      'This deletes all transactions and SMS inbox items. Categories and settings stay.';
 
   @override
   String get reset => 'Reset';
@@ -478,10 +516,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bankSms => 'Bank SMS';
 
   @override
-  String get smsInboxSupported => 'Ledgr reads only known bank senders. SMS access is for personal/sideload use — Google Play restricts this permission for expense apps.';
+  String get smsInboxSupported =>
+      'Ledgr reads only known bank senders. SMS access is for personal/sideload use — Google Play restricts this permission for expense apps.';
 
   @override
-  String get smsInboxUnsupported => 'Inbox reading isn’t available on this device. Paste a bank SMS below.';
+  String get smsInboxUnsupported =>
+      'Inbox reading isn’t available on this device. Paste a bank SMS below.';
 
   @override
   String get pasteBankSms => 'Paste a bank SMS';
@@ -502,7 +542,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imported => 'Imported';
 
   @override
-  String get emptyToReview => 'Nothing to review — paste a bank SMS or scan the inbox';
+  String get emptyToReview =>
+      'Nothing to review — paste a bank SMS or scan the inbox';
 
   @override
   String get emptyUnmatched => 'No unmatched messages';
@@ -552,6 +593,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNewBankMessages => 'No new bank messages';
 
   @override
+  String get noSharedBankMessages =>
+      'No shared messages are waiting. In Messages, share a bank or wallet text to Ledgr, then tap Import messages.';
+
+  @override
   String foundMessagesToReview(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -581,13 +626,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get duplicateCategory => 'A category with that name already exists.';
 
   @override
-  String get defaultCategoryProtected => 'Default categories cannot be changed or deleted.';
+  String get defaultCategoryProtected =>
+      'Default categories cannot be changed or deleted.';
 
   @override
   String get smsNotFound => 'That SMS is no longer in the inbox.';
 
   @override
-  String get smsAlreadyImported => 'This SMS has already been added to the ledger.';
+  String get smsAlreadyImported =>
+      'This SMS has already been added to the ledger.';
 
   @override
   String get transactionNotFound => 'This entry is no longer in the ledger.';
@@ -609,4 +656,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanFailed => 'Could not scan the inbox.';
+
+  @override
+  String get smsInboxIos =>
+      'iPhone does not let apps read the Messages inbox. Share a bank or smart-wallet text with Ledgr, or send it from Shortcuts. Personal messages are ignored. Nothing is added to your transactions until you review it here.';
+
+  @override
+  String get smsImportSteps =>
+      'In Messages, touch and hold a bank or wallet text, tap Share, then Ledgr. It appears in this list. Open one to add it, or skip it. For new texts, add a Shortcuts automation: when a message contains a bank phrase, run Import Bank Message and pass the message text.';
+
+  @override
+  String get allowSmsImportIos => 'Turn on bank and wallet import';
+
+  @override
+  String get turnOnSmsImport => 'Turn on';
+
+  @override
+  String get smsImportEnabled =>
+      'Import is on. Share a bank or wallet message to add it here.';
+
+  @override
+  String get importSharedMessages => 'Import messages';
+
+  @override
+  String get openShortcutsSetup => 'Shortcuts setup';
+
+  @override
+  String get onlyBankOrWallet =>
+      'Only bank and smart wallet messages are imported.';
+
+  @override
+  String get shortcutsUnavailable => 'Could not open Shortcuts.';
 }

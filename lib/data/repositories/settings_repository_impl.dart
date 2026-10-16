@@ -62,4 +62,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       SettingsRowsCompanion(localeCode: Value(locale)),
     );
   }
+
+  @override
+  Future<void> setBiometricLockEnabled(bool enabled) {
+    return (_db.update(_db.settingsRows)..where((s) => s.id.equals(1))).write(
+      SettingsRowsCompanion(biometricLockEnabled: Value(enabled)),
+    );
+  }
 }

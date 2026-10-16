@@ -4,9 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/sms/bank_message_filter.dart';
 import '../../domain/sms/sms_gateway.dart';
-import '../../domain/sms/sms_normalize.dart';
-import '../../domain/sms/templates/template_registry.dart';
+import '../../domain/sms/sms_message.dart';
 import '../../domain/usecases/ingest_sms.dart';
 import '../../domain/usecases/scan_sms_inbox.dart';
 
@@ -35,8 +35,7 @@ class _SmsIntakeHostState extends State<SmsIntakeHost>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _listen();
-      _scanIfAllowed();
-      _takeShared();
+      _importPending();
     });
   }
 
@@ -51,41 +50,56 @@ class _SmsIntakeHostState extends State<SmsIntakeHost>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _scanIfAllowed();
+      _importPending();
     }
   }
 
   void _listen() {
     final gateway = context.read<SmsGateway>();
     final ingest = context.read<IngestSms>();
-    final allowlist = smsSenderAllowlist();
     _incoming = gateway.incoming.listen(
       (sms) {
-        if (!senderMatchesAllowlist(sms.sender, allowlist)) return;
+        if (!isBankOrWalletMessage(sender: sms.sender, body: sms.body)) return;
         ingest(sms);
       },
       onError: (_) {},
     );
-    _share = gateway.sharedText.listen(_ingestShared, onError: (_) {});
+    _share = gateway.sharedText.listen((text) {
+      if (text == kSmsImportSignal) {
+        _importPending();
+        return;
+      }
+      _ingestShared(text);
+    }, onError: (_) {});
   }
 
-  Future<void> _takeShared() async {
-    final text = await context.read<SmsGateway>().takeInitialSharedText();
-    if (text != null && text.trim().isNotEmpty) {
-      await _ingestShared(text);
+  Future<void> _importPending() async {
+    if (!mounted) return;
+    final gateway = context.read<SmsGateway>();
+    final scan = context.read<ScanSmsInbox>();
+    final pending = await gateway.takeInitialSharedText();
+    if (!mounted) return;
+    await scan();
+    if (!mounted || pending == null || pending.trim().isEmpty) return;
+    if (pending == kSmsImportSignal) {
+      _openInbox();
+      return;
     }
+    await _ingestShared(pending);
+  }
+
+  void _openInbox() {
+    final path = widget.router.state.uri.path;
+    if (path == '/settings/sms' || path.startsWith('/settings/sms/')) return;
+    widget.router.push('/settings/sms');
   }
 
   Future<void> _ingestShared(String text) async {
     if (!mounted) return;
+    if (!isBankOrWalletMessage(sender: 'share', body: text)) return;
     await context.read<IngestSms>()(pasteRawSms(text, sender: 'share'));
     if (!mounted) return;
-    widget.router.go('/settings/sms');
-  }
-
-  Future<void> _scanIfAllowed() async {
-    if (!mounted) return;
-    await context.read<ScanSmsInbox>()();
+    _openInbox();
   }
 
   @override

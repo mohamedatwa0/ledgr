@@ -35,6 +35,12 @@ class SettingsLocaleSelected extends SettingsEvent {
   final AppLocale locale;
 }
 
+class SettingsBiometricLockSelected extends SettingsEvent {
+  const SettingsBiometricLockSelected(this.enabled);
+
+  final bool enabled;
+}
+
 class SettingsResetRequested extends SettingsEvent {
   const SettingsResetRequested();
 }

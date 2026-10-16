@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../domain/biometric/biometric_authenticator.dart';
 import '../../../domain/models/app_locale.dart';
 import '../../../domain/models/app_theme_mode.dart';
 import '../../../domain/models/transaction_type.dart';
+import '../../app_lock/app_lock_session.dart';
 import '../../../l10n/l10n.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
@@ -233,6 +235,7 @@ class SettingsScreen extends StatelessWidget {
                 },
               ),
             ),
+            _AppLockRow(enabled: state.biometricLockEnabled),
             SettingsRow(
               key: const Key('settings-sms'),
               icon: TablerIcons.message,
@@ -420,6 +423,99 @@ class SettingsScreen extends StatelessWidget {
     if (confirmed && context.mounted) {
       context.read<SettingsBloc>().add(const SettingsResetRequested());
     }
+  }
+}
+
+class _AppLockRow extends StatefulWidget {
+  const _AppLockRow({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  State<_AppLockRow> createState() => _AppLockRowState();
+}
+
+class _AppLockRowState extends State<_AppLockRow> {
+  var _busy = false;
+
+  Future<void> _toggle(bool enabled) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final l10n = context.l10n;
+    final auth = context.read<BiometricAuthenticator>();
+    final session = context.read<AppLockSession>();
+    try {
+      if (enabled) {
+        final availability = await auth.availability();
+        if (!mounted) return;
+        if (availability != BiometricAvailability.available) {
+          await _showUnavailable();
+          return;
+        }
+      }
+      final ok = await session.authenticate(
+        auth,
+        reason: enabled ? l10n.appLockEnableReason : l10n.appLockDisableReason,
+      );
+      if (!ok || !mounted) return;
+      context
+          .read<SettingsBloc>()
+          .add(SettingsBiometricLockSelected(enabled));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _showUnavailable() {
+    final colors = context.colors;
+    final l10n = context.l10n;
+    return showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: colors.paperLight,
+          title: Text(
+            l10n.appLockUnavailableTitle,
+            style: uiStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: colors.onSurface,
+            ),
+          ),
+          content: Text(
+            l10n.appLockUnavailableMessage,
+            style: uiStyle(fontSize: 14, color: colors.secondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                l10n.close,
+                style: uiStyle(fontSize: 14, color: colors.primary),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final l10n = context.l10n;
+    return SettingsRow(
+      key: const Key('settings-app-lock'),
+      icon: TablerIcons.fingerprint,
+      label: l10n.appLock,
+      subtitle: l10n.appLockSubtitle,
+      onTap: _busy ? null : () => _toggle(!widget.enabled),
+      trailing: Switch.adaptive(
+        value: widget.enabled,
+        activeTrackColor: colors.primary,
+        onChanged: _busy ? null : _toggle,
+      ),
+    );
   }
 }
 

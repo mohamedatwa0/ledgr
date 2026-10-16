@@ -129,18 +129,31 @@ class _AddEntryFabState extends State<AddEntryFab> {
   Future<String?> _localeIdFor(SpeechToText speech, AppLocale appLocale) async {
     final locales = await speech.locales();
     String key(String id) => id.replaceAll('-', '_').toLowerCase();
-    final system = await speech.systemLocale();
-    if (system != null) return system.localeId;
-    final prefix = appLocale == AppLocale.ar ? 'ar' : 'en';
-    final preferred = appLocale == AppLocale.ar ? 'ar_eg' : 'en_us';
-    for (final locale in locales) {
-      if (key(locale.localeId) == preferred) return locale.localeId;
+
+    String? match(List<String> preferred, String prefix) {
+      for (final want in preferred) {
+        for (final locale in locales) {
+          if (key(locale.localeId) == want) return locale.localeId;
+        }
+      }
+      for (final locale in locales) {
+        final id = key(locale.localeId);
+        if (id == prefix || id.startsWith('${prefix}_')) return locale.localeId;
+      }
+      return null;
     }
-    for (final locale in locales) {
-      final id = key(locale.localeId);
-      if (id == prefix || id.startsWith('${prefix}_')) return locale.localeId;
+
+    const arabicIds = ['ar_eg', 'ar_sa', 'ar'];
+    const englishIds = ['en_us', 'en_gb', 'en'];
+    if (appLocale == AppLocale.ar) {
+      return match(arabicIds, 'ar') ??
+          (await speech.systemLocale())?.localeId ??
+          match(englishIds, 'en');
     }
-    return null;
+    // Arabic speech pack first: this ledger is used in Arabic even when the UI is English.
+    return match(arabicIds, 'ar') ??
+        match(englishIds, 'en') ??
+        (await speech.systemLocale())?.localeId;
   }
 
   String _bestTranscript() {
@@ -165,7 +178,8 @@ class _AddEntryFabState extends State<AddEntryFab> {
       _showMessage(l10n.voiceEmptyResult);
       return;
     }
-    context.push('/transaction/new', extra: parseVoiceEntry(transcript));
+    final draft = parseVoiceEntry(transcript);
+    context.push(voiceEntryLocation(draft), extra: draft);
   }
 
   void _finishListen({required String message}) {

@@ -52,6 +52,8 @@ class SettingsRows extends Table {
       textEnum<TransactionType>().withDefault(const Constant('expense'))();
   TextColumn get localeCode =>
       textEnum<AppLocale>().withDefault(const Constant('en'))();
+  BoolColumn get biometricLockEnabled =>
+      boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

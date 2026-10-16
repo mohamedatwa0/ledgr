@@ -6,5 +6,6 @@ import 'noop_sms_gateway.dart';
 
 SmsGateway createSmsGateway() {
   if (Platform.isAndroid) return AndroidSmsGateway();
+  if (Platform.isIOS) return AndroidSmsGateway(shareImport: true);
   return const NoOpSmsGateway();
 }

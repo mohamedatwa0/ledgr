@@ -267,11 +267,21 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
                                       onTap: () => bloc.add(
                                         SmsReviewCategorySelected(category.id),
                                       ),
+                                      onLongPress: () => editExistingCategory(
+                                        context,
+                                        category: category,
+                                      ),
                                     );
                                   },
                                 ),
                               ),
                             ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            l10n.holdCategoryToEdit,
+                            style:
+                                uiStyle(fontSize: 11, color: colors.secondary),
+                          ),
                           SizedBox(height: 16.h),
                           TextField(
                             controller: _note,

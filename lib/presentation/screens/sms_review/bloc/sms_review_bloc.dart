@@ -173,8 +173,15 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
     SmsReviewCategoriesUpdated event,
     Emitter<SmsReviewState> emit,
   ) {
+    final id = state.categoryId;
+    final stillThere =
+        id != null && event.categories.any((category) => category.id == id);
     emit(
-      state.copyWith(categories: event.categories, categoriesLoading: false),
+      state.copyWith(
+        categories: event.categories,
+        categoriesLoading: false,
+        clearCategory: id != null && !stillThere,
+      ),
     );
   }
 

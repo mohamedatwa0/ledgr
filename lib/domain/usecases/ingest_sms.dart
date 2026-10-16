@@ -30,33 +30,35 @@ class IngestSms {
   Future<IngestResult> call(RawSms sms) async {
     final fingerprint = smsFingerprint(sms);
     final existing = await _inbox.findByFingerprint(fingerprint);
-    if (existing != null) {
-      return IngestResult(item: existing, duplicate: true);
-    }
-
     final parsed = _parser.parse(sms);
     final suggestedId =
         parsed == null ? null : await _suggestedCategoryId(sms, parsed);
     final valueDate = parsed?.valueDate;
-    final item = await _inbox.insert(
-      SmsInboxInsert(
-        fingerprint: fingerprint,
-        platformMessageId: sms.platformMessageId,
-        sender: sms.sender,
-        body: sms.body,
-        receivedAt: sms.receivedAt,
-        status:
-            parsed == null ? SmsInboxStatus.unmatched : SmsInboxStatus.ready,
-        bankId: parsed?.bankId,
-        templateId: parsed?.templateId,
-        amount: parsed?.amount,
-        type: parsed?.type,
-        suggestedCategoryId: suggestedId,
-        note: parsed?.merchant,
-        valueDate: valueDate == null ? null : dateOnly(valueDate),
-        currencyCode: parsed?.currencyCode,
-      ),
+    final row = SmsInboxInsert(
+      fingerprint: fingerprint,
+      platformMessageId: sms.platformMessageId,
+      sender: sms.sender,
+      body: sms.body,
+      receivedAt: sms.receivedAt,
+      status: parsed == null ? SmsInboxStatus.unmatched : SmsInboxStatus.ready,
+      bankId: parsed?.bankId,
+      templateId: parsed?.templateId,
+      amount: parsed?.amount,
+      type: parsed?.type,
+      suggestedCategoryId: suggestedId,
+      note: parsed?.merchant,
+      valueDate: valueDate == null ? null : dateOnly(valueDate),
+      currencyCode: parsed?.currencyCode,
     );
+    if (existing != null) {
+      if (existing.status != SmsInboxStatus.dismissed) {
+        return IngestResult(item: existing, duplicate: true);
+      }
+      final revived = await _inbox.revive(existing.id, row);
+      return IngestResult(item: revived, duplicate: false);
+    }
+
+    final item = await _inbox.insert(row);
     return IngestResult(item: item, duplicate: false);
   }
 

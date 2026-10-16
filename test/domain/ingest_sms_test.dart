@@ -8,6 +8,7 @@ import 'package:ledgr/domain/models/transaction_source.dart';
 import 'package:ledgr/domain/sms/sms_inbox_status.dart';
 import 'package:ledgr/domain/sms/sms_message.dart';
 import 'package:ledgr/domain/usecases/create_transaction.dart';
+import 'package:ledgr/domain/usecases/dismiss_sms.dart';
 import 'package:ledgr/domain/usecases/import_parsed_sms.dart';
 import 'package:ledgr/domain/usecases/ingest_sms.dart';
 
@@ -49,6 +50,20 @@ void main() {
     expect(second.duplicate, isTrue);
     expect(second.item.id, first.item.id);
     expect(first.item.status, SmsInboxStatus.ready);
+  });
+
+  test('a dismissed message can be pasted again', () async {
+    final inbox = SmsInboxRepositoryImpl(db);
+    final first = await ingest(paste());
+    await DismissSms(inbox)(first.item.id);
+
+    final again = await ingest(paste());
+    expect(again.duplicate, isFalse);
+    expect(again.item.id, first.item.id);
+    expect(again.item.status, SmsInboxStatus.ready);
+
+    final visible = await inbox.watchByStatus(SmsInboxStatus.ready).first;
+    expect(visible.map((item) => item.id), contains(first.item.id));
   });
 
   test('ImportParsedSms writes CreateTransaction with source sms', () async {

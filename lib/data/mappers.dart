@@ -44,6 +44,7 @@ AppSettings settingsFromRow(SettingsRow row) {
     themeMode: row.themeMode,
     defaultEntryType: row.defaultEntryType,
     locale: row.localeCode,
+    biometricLockEnabled: row.biometricLockEnabled,
   );
 }
 

@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +84,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -503,6 +506,12 @@ abstract class AppLocalizations {
   /// **'Add new'**
   String get addNew;
 
+  /// No description provided for @holdCategoryToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a category to edit or delete it'**
+  String get holdCategoryToEdit;
+
   /// No description provided for @bookkeeperMemo.
   ///
   /// In en, this message translates to:
@@ -616,6 +625,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ع'**
   String get localeAr;
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App Lock'**
+  String get appLock;
+
+  /// No description provided for @appLockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Face ID or fingerprint to open Ledgr'**
+  String get appLockSubtitle;
+
+  /// No description provided for @appLockEnableReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you to turn on app lock'**
+  String get appLockEnableReason;
+
+  /// No description provided for @appLockDisableReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you to turn off app lock'**
+  String get appLockDisableReason;
+
+  /// No description provided for @appLockUnlockReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Ledgr'**
+  String get appLockUnlockReason;
+
+  /// No description provided for @appLockUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlock;
+
+  /// No description provided for @appLockPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledgr is locked'**
+  String get appLockPrompt;
+
+  /// No description provided for @appLockUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics unavailable'**
+  String get appLockUnavailableTitle;
+
+  /// No description provided for @appLockUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Face ID or a fingerprint on this device, then turn on app lock.'**
+  String get appLockUnavailableMessage;
 
   /// No description provided for @ledgrJournal.
   ///
@@ -1085,6 +1148,12 @@ abstract class AppLocalizations {
   /// **'No new bank messages'**
   String get noNewBankMessages;
 
+  /// No description provided for @noSharedBankMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared messages are waiting. In Messages, share a bank or wallet text to Ledgr, then tap Import messages.'**
+  String get noSharedBankMessages;
+
   /// No description provided for @foundMessagesToReview.
   ///
   /// In en, this message translates to:
@@ -1186,9 +1255,64 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not scan the inbox.'**
   String get scanFailed;
+
+  /// No description provided for @smsInboxIos.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone does not let apps read the Messages inbox. Share a bank or smart-wallet text with Ledgr, or send it from Shortcuts. Personal messages are ignored. Nothing is added to your transactions until you review it here.'**
+  String get smsInboxIos;
+
+  /// No description provided for @smsImportSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'In Messages, touch and hold a bank or wallet text, tap Share, then Ledgr. It appears in this list. Open one to add it, or skip it. For new texts, add a Shortcuts automation: when a message contains a bank phrase, run Import Bank Message and pass the message text.'**
+  String get smsImportSteps;
+
+  /// No description provided for @allowSmsImportIos.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on bank and wallet import'**
+  String get allowSmsImportIos;
+
+  /// No description provided for @turnOnSmsImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get turnOnSmsImport;
+
+  /// No description provided for @smsImportEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Import is on. Share a bank or wallet message to add it here.'**
+  String get smsImportEnabled;
+
+  /// No description provided for @importSharedMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Import messages'**
+  String get importSharedMessages;
+
+  /// No description provided for @openShortcutsSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts setup'**
+  String get openShortcutsSetup;
+
+  /// No description provided for @onlyBankOrWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Only bank and smart wallet messages are imported.'**
+  String get onlyBankOrWallet;
+
+  /// No description provided for @shortcutsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open Shortcuts.'**
+  String get shortcutsUnavailable;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1197,25 +1321,25 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'en': return AppLocalizationsEn();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'en':
+      return AppLocalizationsEn();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

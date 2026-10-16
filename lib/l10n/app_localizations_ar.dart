@@ -1,5 +1,5 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -167,7 +167,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get defaultCategoriesProtected => 'التصنيفات الافتراضية التي لها قيود مسجّلة محمية من الحذف.';
+  String get defaultCategoriesProtected =>
+      'التصنيفات الافتراضية التي لها قيود مسجّلة محمية من الحذف.';
 
   @override
   String get defaultBadge => 'افتراضي';
@@ -264,6 +265,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addNew => 'إضافة جديد';
 
   @override
+  String get holdCategoryToEdit => 'اضغط مطولاً على تصنيف لتعديله أو حذفه';
+
+  @override
   String get bookkeeperMemo => 'ملاحظة المحاسب';
 
   @override
@@ -325,6 +329,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get localeAr => 'ع';
 
   @override
+  String get appLock => 'قفل التطبيق';
+
+  @override
+  String get appLockSubtitle => 'فتح ليدجر ببصمة الوجه أو الإصبع';
+
+  @override
+  String get appLockEnableReason => 'أكّد هويتك لتفعيل قفل التطبيق';
+
+  @override
+  String get appLockDisableReason => 'أكّد هويتك لإيقاف قفل التطبيق';
+
+  @override
+  String get appLockUnlockReason => 'افتح ليدجر';
+
+  @override
+  String get appLockUnlock => 'فتح';
+
+  @override
+  String get appLockPrompt => 'ليدجر مقفل';
+
+  @override
+  String get appLockUnavailableTitle => 'البصمة غير متاحة';
+
+  @override
+  String get appLockUnavailableMessage =>
+      'فعّل بصمة الوجه أو الإصبع على هذا الجهاز، ثم أعد تشغيل قفل التطبيق.';
+
+  @override
   String get ledgrJournal => 'دفتر Ledgr';
 
   @override
@@ -367,7 +399,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bankSmsImport => 'استيراد رسائل البنك';
 
   @override
-  String get bankSmsImportSubtitle => 'محلل تعبير نمطي محدد. بدون ذكاء اصطناعي.';
+  String get bankSmsImportSubtitle =>
+      'محلل تعبير نمطي محدد. بدون ذكاء اصطناعي.';
 
   @override
   String readyToReview(int count) {
@@ -411,7 +444,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetLocalLedger => 'إعادة تعيين دفتر الحساب المحلي';
 
   @override
-  String get settingsFooter => 'مصمم للتحكم اليدوي الكامل والمحاسبة المستقلة. بدون اعتماد على السحابة.';
+  String get settingsFooter =>
+      'مصمم للتحكم اليدوي الكامل والمحاسبة المستقلة. بدون اعتماد على السحابة.';
 
   @override
   String get displayCurrency => 'عملة العرض';
@@ -423,7 +457,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetLedgerTitle => 'إعادة تعيين الدفتر المحلي؟';
 
   @override
-  String get resetLedgerMessage => 'سيُحذف كل العمليات ورسائل الصندوق. التصنيفات والإعدادات تبقى.';
+  String get resetLedgerMessage =>
+      'سيُحذف كل العمليات ورسائل الصندوق. التصنيفات والإعدادات تبقى.';
 
   @override
   String get reset => 'إعادة تعيين';
@@ -489,10 +524,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bankSms => 'رسائل البنك';
 
   @override
-  String get smsInboxSupported => 'يقرأ Ledgr مرسلين بنكيين معروفين فقط. الوصول للرسائل للاستخدام الشخصي — متجر جوجل يقيّد هذا الإذن لتطبيقات المصروفات.';
+  String get smsInboxSupported =>
+      'يقرأ Ledgr مرسلين بنكيين معروفين فقط. الوصول للرسائل للاستخدام الشخصي — متجر جوجل يقيّد هذا الإذن لتطبيقات المصروفات.';
 
   @override
-  String get smsInboxUnsupported => 'قراءة الصندوق غير متاحة على هذا الجهاز. الصق رسالة بنك أدناه.';
+  String get smsInboxUnsupported =>
+      'قراءة الصندوق غير متاحة على هذا الجهاز. الصق رسالة بنك أدناه.';
 
   @override
   String get pasteBankSms => 'الصق رسالة بنك';
@@ -513,7 +550,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get imported => 'مستوردة';
 
   @override
-  String get emptyToReview => 'لا شيء للمراجعة — الصق رسالة بنك أو امسح الصندوق';
+  String get emptyToReview =>
+      'لا شيء للمراجعة — الصق رسالة بنك أو امسح الصندوق';
 
   @override
   String get emptyUnmatched => 'لا رسائل غير مطابقة';
@@ -563,6 +601,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noNewBankMessages => 'لا رسائل بنك جديدة';
 
   @override
+  String get noSharedBankMessages =>
+      'لا توجد رسائل مشتركة بانتظار الاستيراد. من الرسائل، شارك نص بنك أو محفظة مع Ledgr ثم اضغط استيراد الرسائل.';
+
+  @override
   String foundMessagesToReview(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -595,7 +637,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get duplicateCategory => 'يوجد تصنيف بهذا الاسم بالفعل.';
 
   @override
-  String get defaultCategoryProtected => 'لا يمكن تغيير التصنيفات الافتراضية أو حذفها.';
+  String get defaultCategoryProtected =>
+      'لا يمكن تغيير التصنيفات الافتراضية أو حذفها.';
 
   @override
   String get smsNotFound => 'هذه الرسالة لم تعد في الصندوق.';
@@ -623,4 +666,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get scanFailed => 'تعذر مسح الصندوق.';
+
+  @override
+  String get smsInboxIos =>
+      'الآيفون لا يسمح للتطبيقات بقراءة صندوق الرسائل. شارك رسالة بنك أو محفظة ذكية مع Ledgr، أو أرسلها من الاختصارات. الرسائل الشخصية تُتجاهل. لا يُضاف شيء إلى معاملاتك قبل أن تراجعه هنا.';
+
+  @override
+  String get smsImportSteps =>
+      'في الرسائل، المس رسالة البنك أو المحفظة مطولاً، ثم مشاركة، ثم Ledgr. تظهر في هذه القائمة. افتحها لإضافتها أو تخطّها. للرسائل الجديدة: أتمتة في الاختصارات عند استلام رسالة تحتوي عبارة البنك، وشغّل Import Bank Message ومرّر نص الرسالة.';
+
+  @override
+  String get allowSmsImportIos => 'تفعيل استيراد رسائل البنك والمحفظة';
+
+  @override
+  String get turnOnSmsImport => 'تفعيل';
+
+  @override
+  String get smsImportEnabled =>
+      'الاستيراد مفعّل. شارك رسالة بنك أو محفظة لتظهر هنا.';
+
+  @override
+  String get importSharedMessages => 'استيراد الرسائل';
+
+  @override
+  String get openShortcutsSetup => 'إعداد الاختصارات';
+
+  @override
+  String get onlyBankOrWallet => 'تُستورد رسائل البنك والمحفظة الذكية فقط.';
+
+  @override
+  String get shortcutsUnavailable => 'تعذر فتح الاختصارات.';
 }

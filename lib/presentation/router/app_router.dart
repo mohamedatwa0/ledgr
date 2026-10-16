@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/models/category.dart';
 import '../../domain/models/transaction_type.dart';
+import '../../l10n/l10n.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/repositories/sms_inbox_repository.dart';
@@ -138,10 +140,13 @@ GoRouter createAppRouter() {
         path: '/transaction/new',
         builder: (context, state) {
           final extra = state.extra;
+          final draft = extra is ParsedVoiceEntry
+              ? extra
+              : voiceDraftFromQuery(state.uri.queryParameters);
           return BlocProvider(
             create: (context) => _addTransactionBloc(
               context,
-              voiceDraft: extra is ParsedVoiceEntry ? extra : null,
+              voiceDraft: draft,
             )..add(const AddTransactionStarted()),
             child: const AddTransactionScreen(),
           );
@@ -194,6 +199,23 @@ CategoryFormBloc _categoryFormBloc(
     deleteCategory: context.read<DeleteCategory>(),
     categoryId: categoryId,
     type: type,
+  );
+}
+
+Future<void> editExistingCategory(
+  BuildContext context, {
+  required Category category,
+}) async {
+  if (category.isDefault) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.defaultCategoryProtected)),
+    );
+    return;
+  }
+  await showCategoryFormSheet(
+    context,
+    categoryId: category.id,
+    type: category.type,
   );
 }
 

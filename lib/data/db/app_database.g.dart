@@ -864,6 +864,16 @@ class $SettingsRowsTable extends SettingsRows
               requiredDuringInsert: false,
               defaultValue: const Constant('en'))
           .withConverter<AppLocale>($SettingsRowsTable.$converterlocaleCode);
+  static const VerificationMeta _biometricLockEnabledMeta =
+      const VerificationMeta('biometricLockEnabled');
+  @override
+  late final GeneratedColumn<bool> biometricLockEnabled = GeneratedColumn<bool>(
+      'biometric_lock_enabled', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("biometric_lock_enabled" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -871,7 +881,8 @@ class $SettingsRowsTable extends SettingsRows
         smsLastScanAt,
         themeMode,
         defaultEntryType,
-        localeCode
+        localeCode,
+        biometricLockEnabled
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -898,6 +909,12 @@ class $SettingsRowsTable extends SettingsRows
           smsLastScanAt.isAcceptableOrUnknown(
               data['sms_last_scan_at']!, _smsLastScanAtMeta));
     }
+    if (data.containsKey('biometric_lock_enabled')) {
+      context.handle(
+          _biometricLockEnabledMeta,
+          biometricLockEnabled.isAcceptableOrUnknown(
+              data['biometric_lock_enabled']!, _biometricLockEnabledMeta));
+    }
     return context;
   }
 
@@ -922,6 +939,8 @@ class $SettingsRowsTable extends SettingsRows
       localeCode: $SettingsRowsTable.$converterlocaleCode.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}locale_code'])!),
+      biometricLockEnabled: attachedDatabase.typeMapping.read(DriftSqlType.bool,
+          data['${effectivePrefix}biometric_lock_enabled'])!,
     );
   }
 
@@ -946,13 +965,15 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final AppThemeMode themeMode;
   final TransactionType defaultEntryType;
   final AppLocale localeCode;
+  final bool biometricLockEnabled;
   const SettingsRow(
       {required this.id,
       required this.currencyCode,
       this.smsLastScanAt,
       required this.themeMode,
       required this.defaultEntryType,
-      required this.localeCode});
+      required this.localeCode,
+      required this.biometricLockEnabled});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -974,6 +995,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       map['locale_code'] = Variable<String>(
           $SettingsRowsTable.$converterlocaleCode.toSql(localeCode));
     }
+    map['biometric_lock_enabled'] = Variable<bool>(biometricLockEnabled);
     return map;
   }
 
@@ -987,6 +1009,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       themeMode: Value(themeMode),
       defaultEntryType: Value(defaultEntryType),
       localeCode: Value(localeCode),
+      biometricLockEnabled: Value(biometricLockEnabled),
     );
   }
 
@@ -1003,6 +1026,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           .fromJson(serializer.fromJson<String>(json['defaultEntryType'])),
       localeCode: $SettingsRowsTable.$converterlocaleCode
           .fromJson(serializer.fromJson<String>(json['localeCode'])),
+      biometricLockEnabled:
+          serializer.fromJson<bool>(json['biometricLockEnabled']),
     );
   }
   @override
@@ -1019,6 +1044,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           .toJson(defaultEntryType)),
       'localeCode': serializer.toJson<String>(
           $SettingsRowsTable.$converterlocaleCode.toJson(localeCode)),
+      'biometricLockEnabled': serializer.toJson<bool>(biometricLockEnabled),
     };
   }
 
@@ -1028,7 +1054,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           Value<DateTime?> smsLastScanAt = const Value.absent(),
           AppThemeMode? themeMode,
           TransactionType? defaultEntryType,
-          AppLocale? localeCode}) =>
+          AppLocale? localeCode,
+          bool? biometricLockEnabled}) =>
       SettingsRow(
         id: id ?? this.id,
         currencyCode: currencyCode ?? this.currencyCode,
@@ -1037,6 +1064,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         themeMode: themeMode ?? this.themeMode,
         defaultEntryType: defaultEntryType ?? this.defaultEntryType,
         localeCode: localeCode ?? this.localeCode,
+        biometricLockEnabled: biometricLockEnabled ?? this.biometricLockEnabled,
       );
   SettingsRow copyWithCompanion(SettingsRowsCompanion data) {
     return SettingsRow(
@@ -1053,6 +1081,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           : this.defaultEntryType,
       localeCode:
           data.localeCode.present ? data.localeCode.value : this.localeCode,
+      biometricLockEnabled: data.biometricLockEnabled.present
+          ? data.biometricLockEnabled.value
+          : this.biometricLockEnabled,
     );
   }
 
@@ -1064,14 +1095,15 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('smsLastScanAt: $smsLastScanAt, ')
           ..write('themeMode: $themeMode, ')
           ..write('defaultEntryType: $defaultEntryType, ')
-          ..write('localeCode: $localeCode')
+          ..write('localeCode: $localeCode, ')
+          ..write('biometricLockEnabled: $biometricLockEnabled')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, currencyCode, smsLastScanAt, themeMode, defaultEntryType, localeCode);
+  int get hashCode => Object.hash(id, currencyCode, smsLastScanAt, themeMode,
+      defaultEntryType, localeCode, biometricLockEnabled);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1081,7 +1113,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.smsLastScanAt == this.smsLastScanAt &&
           other.themeMode == this.themeMode &&
           other.defaultEntryType == this.defaultEntryType &&
-          other.localeCode == this.localeCode);
+          other.localeCode == this.localeCode &&
+          other.biometricLockEnabled == this.biometricLockEnabled);
 }
 
 class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
@@ -1091,6 +1124,7 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<AppThemeMode> themeMode;
   final Value<TransactionType> defaultEntryType;
   final Value<AppLocale> localeCode;
+  final Value<bool> biometricLockEnabled;
   const SettingsRowsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
@@ -1098,6 +1132,7 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     this.themeMode = const Value.absent(),
     this.defaultEntryType = const Value.absent(),
     this.localeCode = const Value.absent(),
+    this.biometricLockEnabled = const Value.absent(),
   });
   SettingsRowsCompanion.insert({
     this.id = const Value.absent(),
@@ -1106,6 +1141,7 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     this.themeMode = const Value.absent(),
     this.defaultEntryType = const Value.absent(),
     this.localeCode = const Value.absent(),
+    this.biometricLockEnabled = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
@@ -1114,6 +1150,7 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<String>? themeMode,
     Expression<String>? defaultEntryType,
     Expression<String>? localeCode,
+    Expression<bool>? biometricLockEnabled,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1122,6 +1159,8 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
       if (themeMode != null) 'theme_mode': themeMode,
       if (defaultEntryType != null) 'default_entry_type': defaultEntryType,
       if (localeCode != null) 'locale_code': localeCode,
+      if (biometricLockEnabled != null)
+        'biometric_lock_enabled': biometricLockEnabled,
     });
   }
 
@@ -1131,7 +1170,8 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
       Value<DateTime?>? smsLastScanAt,
       Value<AppThemeMode>? themeMode,
       Value<TransactionType>? defaultEntryType,
-      Value<AppLocale>? localeCode}) {
+      Value<AppLocale>? localeCode,
+      Value<bool>? biometricLockEnabled}) {
     return SettingsRowsCompanion(
       id: id ?? this.id,
       currencyCode: currencyCode ?? this.currencyCode,
@@ -1139,6 +1179,7 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
       themeMode: themeMode ?? this.themeMode,
       defaultEntryType: defaultEntryType ?? this.defaultEntryType,
       localeCode: localeCode ?? this.localeCode,
+      biometricLockEnabled: biometricLockEnabled ?? this.biometricLockEnabled,
     );
   }
 
@@ -1167,6 +1208,9 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
       map['locale_code'] = Variable<String>(
           $SettingsRowsTable.$converterlocaleCode.toSql(localeCode.value));
     }
+    if (biometricLockEnabled.present) {
+      map['biometric_lock_enabled'] = Variable<bool>(biometricLockEnabled.value);
+    }
     return map;
   }
 
@@ -1178,7 +1222,8 @@ class SettingsRowsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('smsLastScanAt: $smsLastScanAt, ')
           ..write('themeMode: $themeMode, ')
           ..write('defaultEntryType: $defaultEntryType, ')
-          ..write('localeCode: $localeCode')
+          ..write('localeCode: $localeCode, ')
+          ..write('biometricLockEnabled: $biometricLockEnabled')
           ..write(')'))
         .toString();
   }
@@ -2804,6 +2849,7 @@ typedef $$SettingsRowsTableCreateCompanionBuilder = SettingsRowsCompanion
   Value<AppThemeMode> themeMode,
   Value<TransactionType> defaultEntryType,
   Value<AppLocale> localeCode,
+  Value<bool> biometricLockEnabled,
 });
 typedef $$SettingsRowsTableUpdateCompanionBuilder = SettingsRowsCompanion
     Function({
@@ -2813,6 +2859,7 @@ typedef $$SettingsRowsTableUpdateCompanionBuilder = SettingsRowsCompanion
   Value<AppThemeMode> themeMode,
   Value<TransactionType> defaultEntryType,
   Value<AppLocale> localeCode,
+  Value<bool> biometricLockEnabled,
 });
 
 class $$SettingsRowsTableFilterComposer
@@ -2847,6 +2894,10 @@ class $$SettingsRowsTableFilterComposer
       $composableBuilder(
           column: $table.localeCode,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<bool> get biometricLockEnabled => $composableBuilder(
+      column: $table.biometricLockEnabled,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$SettingsRowsTableOrderingComposer
@@ -2878,6 +2929,10 @@ class $$SettingsRowsTableOrderingComposer
 
   ColumnOrderings<String> get localeCode => $composableBuilder(
       column: $table.localeCode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get biometricLockEnabled => $composableBuilder(
+      column: $table.biometricLockEnabled,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$SettingsRowsTableAnnotationComposer
@@ -2908,6 +2963,9 @@ class $$SettingsRowsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<AppLocale, String> get localeCode =>
       $composableBuilder(
           column: $table.localeCode, builder: (column) => column);
+
+  GeneratedColumn<bool> get biometricLockEnabled => $composableBuilder(
+      column: $table.biometricLockEnabled, builder: (column) => column);
 }
 
 class $$SettingsRowsTableTableManager extends RootTableManager<
@@ -2942,6 +3000,7 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
             Value<AppThemeMode> themeMode = const Value.absent(),
             Value<TransactionType> defaultEntryType = const Value.absent(),
             Value<AppLocale> localeCode = const Value.absent(),
+            Value<bool> biometricLockEnabled = const Value.absent(),
           }) =>
               SettingsRowsCompanion(
             id: id,
@@ -2950,6 +3009,7 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
             themeMode: themeMode,
             defaultEntryType: defaultEntryType,
             localeCode: localeCode,
+            biometricLockEnabled: biometricLockEnabled,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -2958,6 +3018,7 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
             Value<AppThemeMode> themeMode = const Value.absent(),
             Value<TransactionType> defaultEntryType = const Value.absent(),
             Value<AppLocale> localeCode = const Value.absent(),
+            Value<bool> biometricLockEnabled = const Value.absent(),
           }) =>
               SettingsRowsCompanion.insert(
             id: id,
@@ -2966,6 +3027,7 @@ class $$SettingsRowsTableTableManager extends RootTableManager<
             themeMode: themeMode,
             defaultEntryType: defaultEntryType,
             localeCode: localeCode,
+            biometricLockEnabled: biometricLockEnabled,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

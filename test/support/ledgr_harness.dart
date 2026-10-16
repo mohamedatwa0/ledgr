@@ -8,6 +8,7 @@ import 'package:ledgr/data/repositories/transaction_repository_impl.dart';
 import 'package:ledgr/domain/date_utils.dart';
 import 'package:ledgr/domain/models/ledger_transaction.dart';
 import 'package:ledgr/domain/models/transaction_type.dart';
+import 'package:ledgr/domain/biometric/biometric_authenticator.dart';
 import 'package:ledgr/domain/sms/sms_gateway.dart';
 import 'package:ledgr/domain/sms/sms_message.dart';
 import 'package:ledgr/presentation/widgets/ledgr_shell.dart';
@@ -20,6 +21,7 @@ Future<void> pumpApp(
   WidgetTester tester, {
   required AppDatabase db,
   SmsGateway? smsGateway,
+  BiometricAuthenticator? biometrics,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(390, 844);
@@ -31,6 +33,7 @@ Future<void> pumpApp(
     LedgrApp(
       database: db,
       smsGateway: smsGateway,
+      biometricAuthenticator: biometrics,
       showLaunchScreen: false,
     ),
   );
@@ -108,6 +111,9 @@ class ThrowingScanGateway implements SmsGateway {
   bool get inboxSupported => true;
 
   @override
+  bool get shareImport => false;
+
+  @override
   Future<bool> hasPermission() async => true;
 
   @override
@@ -117,6 +123,12 @@ class ThrowingScanGateway implements SmsGateway {
   Future<List<RawSms>> readSince(DateTime? since, Set<String> senders) {
     throw StateError('scan failed');
   }
+
+  @override
+  Future<void> acknowledge(List<String> queueIds) async {}
+
+  @override
+  Future<bool> openImportSetup() async => false;
 
   @override
   Stream<RawSms> get incoming => const Stream.empty();

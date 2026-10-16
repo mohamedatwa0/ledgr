@@ -50,6 +50,10 @@ class SmsInboxPermissionRequested extends SmsInboxEvent {
   const SmsInboxPermissionRequested();
 }
 
+class SmsInboxSetupRequested extends SmsInboxEvent {
+  const SmsInboxSetupRequested();
+}
+
 class SmsInboxDismissRequested extends SmsInboxEvent {
   const SmsInboxDismissRequested(this.id);
 

@@ -43,8 +43,8 @@ void main() {
     )..add(const AddTransactionStarted());
     await bloc.stream.firstWhere(
       (state) =>
-          !state.categoriesLoading &&
-          (state.hasPendingCategory || state.categoryId != null) &&
+          !state.loading &&
+          state.categoryId != null &&
           state.amountText.isNotEmpty,
     );
     bloc.add(const AddTransactionSaveRequested());
@@ -75,6 +75,10 @@ void main() {
     );
     expect(
       entries.every((entry) => entry.category.id == created!.id),
+      isTrue,
+    );
+    expect(
+      entries.every((entry) => entry.transaction.note == draft.transcript),
       isTrue,
     );
   });

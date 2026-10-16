@@ -29,11 +29,13 @@ void main() {
     await settings.setThemeMode(AppThemeMode.dark);
     await settings.setDefaultEntryType(TransactionType.income);
     await settings.setLocale(AppLocale.ar);
+    await settings.setBiometricLockEnabled(true);
 
     final stored = await settings.get();
     expect(stored.themeMode, AppThemeMode.dark);
     expect(stored.defaultEntryType, TransactionType.income);
     expect(stored.locale, AppLocale.ar);
+    expect(stored.biometricLockEnabled, isTrue);
   });
 
   test('reset wipes transactions and sms inbox', () async {

@@ -11,4 +11,5 @@ abstract class SettingsRepository {
   Future<void> setThemeMode(AppThemeMode themeMode);
   Future<void> setDefaultEntryType(TransactionType type);
   Future<void> setLocale(AppLocale locale);
+  Future<void> setBiometricLockEnabled(bool enabled);
 }

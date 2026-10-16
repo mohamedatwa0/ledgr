@@ -1,7 +1,7 @@
 import '../repositories/settings_repository.dart';
+import '../sms/bank_message_filter.dart';
 import '../sms/sms_gateway.dart';
 import '../sms/sms_message.dart';
-import '../sms/templates/template_registry.dart';
 import 'ingest_sms.dart';
 
 class ScanSmsInbox {
@@ -20,13 +20,21 @@ class ScanSmsInbox {
       final settings = await _settings.get();
       final messages = await _gateway.readSince(
         settings.smsLastScanAt,
-        smsSenderAllowlist(),
+        smsImportSenderAllowlist(),
       );
+      final queueIds = <String>[];
       var added = 0;
       for (final message in messages) {
+        final queueId = message.queueId;
+        if (queueId != null && queueId.isNotEmpty) queueIds.add(queueId);
+        if (!isBankOrWalletMessage(
+            sender: message.sender, body: message.body)) {
+          continue;
+        }
         final result = await _ingest(message);
         if (!result.duplicate) added++;
       }
+      if (queueIds.isNotEmpty) await _gateway.acknowledge(queueIds);
       await _settings.setSmsLastScanAt(DateTime.now());
       return added;
     } catch (_) {

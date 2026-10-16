@@ -124,6 +124,7 @@
     }
   },
   "addNew": "Add new",
+  "holdCategoryToEdit": "Hold a category to edit or delete it",
   "bookkeeperMemo": "BOOKKEEPER MEMO",
   "noteHint": "Add note or counterparty (optional)...",
   "transactionDate": "TRANSACTION DATE",
@@ -153,6 +154,15 @@
   "languageSubtitle": "English or Arabic interface",
   "localeEn": "EN",
   "localeAr": "ع",
+  "appLock": "App Lock",
+  "appLockSubtitle": "Face ID or fingerprint to open Ledgr",
+  "appLockEnableReason": "Confirm it's you to turn on app lock",
+  "appLockDisableReason": "Confirm it's you to turn off app lock",
+  "appLockUnlockReason": "Unlock Ledgr",
+  "appLockUnlock": "Unlock",
+  "appLockPrompt": "Ledgr is locked",
+  "appLockUnavailableTitle": "Biometrics unavailable",
+  "appLockUnavailableMessage": "Set up Face ID or a fingerprint on this device, then turn on app lock.",
   "ledgrJournal": "Ledgr Journal",
   "journal": "JOURNAL",
   "physicalDriftStorage": "Physical drift SQLite storage",
@@ -241,6 +251,7 @@
   "noteOptional": "Note (optional)",
   "alreadyInInbox": "Already in the inbox",
   "noNewBankMessages": "No new bank messages",
+  "noSharedBankMessages": "No shared messages are waiting. In Messages, share a bank or wallet text to Ledgr, then tap Import messages.",
   "foundMessagesToReview": "{count, plural, =1{Found {count} message to review} other{Found {count} messages to review}}",
   "@foundMessagesToReview": {
     "placeholders": {
@@ -262,5 +273,14 @@
   "amountMustBePositive": "Amount must be greater than 0.",
   "categoryTypeMismatch": "Category does not match Debit/Credit.",
   "otherCategoryMissing": "The Other category is missing.",
-  "scanFailed": "Could not scan the inbox."
+  "scanFailed": "Could not scan the inbox.",
+  "smsInboxIos": "iPhone does not let apps read the Messages inbox. Share a bank or smart-wallet text with Ledgr, or send it from Shortcuts. Personal messages are ignored. Nothing is added to your transactions until you review it here.",
+  "smsImportSteps": "In Messages, touch and hold a bank or wallet text, tap Share, then Ledgr. It appears in this list. Open one to add it, or skip it. For new texts, add a Shortcuts automation: when a message contains a bank phrase, run Import Bank Message and pass the message text.",
+  "allowSmsImportIos": "Turn on bank and wallet import",
+  "turnOnSmsImport": "Turn on",
+  "smsImportEnabled": "Import is on. Share a bank or wallet message to add it here.",
+  "importSharedMessages": "Import messages",
+  "openShortcutsSetup": "Shortcuts setup",
+  "onlyBankOrWallet": "Only bank and smart wallet messages are imported.",
+  "shortcutsUnavailable": "Could not open Shortcuts."
 }

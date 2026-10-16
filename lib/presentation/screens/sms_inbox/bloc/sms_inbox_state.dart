@@ -5,6 +5,8 @@ enum SmsInboxFlash {
   alreadyInInbox,
   noNewBankMessages,
   foundMessages,
+  notBankOrWallet,
+  shortcutsUnavailable,
 }
 
 class SmsInboxState {
@@ -13,6 +15,7 @@ class SmsInboxState {
     required this.items,
     required this.pasteText,
     required this.inboxSupported,
+    required this.shareImport,
     required this.hasPermission,
     this.loading = false,
     this.scanning = false,
@@ -26,6 +29,7 @@ class SmsInboxState {
   final List<SmsInboxItem> items;
   final String pasteText;
   final bool inboxSupported;
+  final bool shareImport;
   final bool hasPermission;
   final bool loading;
   final bool scanning;
@@ -39,6 +43,7 @@ class SmsInboxState {
     List<SmsInboxItem>? items,
     String? pasteText,
     bool? inboxSupported,
+    bool? shareImport,
     bool? hasPermission,
     bool? loading,
     bool? scanning,
@@ -53,6 +58,7 @@ class SmsInboxState {
       items: items ?? this.items,
       pasteText: pasteText ?? this.pasteText,
       inboxSupported: inboxSupported ?? this.inboxSupported,
+      shareImport: shareImport ?? this.shareImport,
       hasPermission: hasPermission ?? this.hasPermission,
       loading: loading ?? this.loading,
       scanning: scanning ?? this.scanning,

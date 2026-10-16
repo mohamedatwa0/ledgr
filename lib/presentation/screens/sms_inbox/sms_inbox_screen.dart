@@ -56,13 +56,18 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
       listener: (context, state) {
         if (state.pasteText.isEmpty && _paste.text.isNotEmpty) {
           _paste.clear();
+          FocusManager.instance.primaryFocus?.unfocus();
         }
         final l10n = context.l10n;
         final text = switch (state.flash) {
           SmsInboxFlash.alreadyInInbox => l10n.alreadyInInbox,
-          SmsInboxFlash.noNewBankMessages => l10n.noNewBankMessages,
+          SmsInboxFlash.noNewBankMessages => state.shareImport
+              ? l10n.noSharedBankMessages
+              : l10n.noNewBankMessages,
           SmsInboxFlash.foundMessages =>
             l10n.foundMessagesToReview(state.flashCount ?? 0),
+          SmsInboxFlash.notBankOrWallet => l10n.onlyBankOrWallet,
+          SmsInboxFlash.shortcutsUnavailable => l10n.shortcutsUnavailable,
           null => state.message,
         };
         if (text != null) {
@@ -79,7 +84,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
             title: l10n.bankSms,
             leading: IconButton(
               tooltip: l10n.back,
-              onPressed: () => context.pop(),
+              onPressed: () => context.go('/settings'),
               icon: DirectionalIcon(
                 TablerIcons.arrow_left,
                 color: colors.onSurface,
@@ -91,22 +96,58 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
             padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
             children: [
               Text(
-                state.inboxSupported
-                    ? l10n.smsInboxSupported
-                    : l10n.smsInboxUnsupported,
+                state.shareImport
+                    ? l10n.smsInboxIos
+                    : state.inboxSupported
+                        ? l10n.smsInboxSupported
+                        : l10n.smsInboxUnsupported,
                 style:
                     uiStyle(fontSize: 13, color: colors.secondary, height: 1.4),
               ),
-              if (state.inboxSupported) ...[
+              if (state.shareImport) ...[
+                SizedBox(height: 10.h),
+                Text(
+                  l10n.smsImportSteps,
+                  style: uiStyle(
+                    fontSize: 13,
+                    color: colors.secondary,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+              if (state.inboxSupported && !state.shareImport) ...[
                 SizedBox(height: 14.h),
                 _PermissionCard(
                   granted: state.hasPermission,
                   scanning: state.scanning,
+                  statusLabel: state.hasPermission
+                      ? l10n.inboxAccessGranted
+                      : l10n.allowSmsAccess,
+                  actionLabel: state.hasPermission
+                      ? (state.scanning ? l10n.scanning : l10n.scanInbox)
+                      : l10n.request,
                   onRequest: () =>
                       bloc.add(const SmsInboxPermissionRequested()),
                   onScan: state.hasPermission
                       ? () => bloc.add(const SmsInboxScanRequested())
                       : null,
+                ),
+              ],
+              if (state.shareImport) ...[
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton(
+                    key: const Key('sms-shortcuts-setup'),
+                    onPressed: () => bloc.add(const SmsInboxSetupRequested()),
+                    child: Text(
+                      l10n.openShortcutsSetup,
+                      style: uiStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ),
                 ),
               ],
               SizedBox(height: 18.h),
@@ -229,19 +270,22 @@ class _PermissionCard extends StatelessWidget {
   const _PermissionCard({
     required this.granted,
     required this.scanning,
+    required this.statusLabel,
+    required this.actionLabel,
     required this.onRequest,
     required this.onScan,
   });
 
   final bool granted;
   final bool scanning;
+  final String statusLabel;
+  final String actionLabel;
   final VoidCallback onRequest;
   final VoidCallback? onScan;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h),
       decoration: BoxDecoration(
@@ -254,7 +298,7 @@ class _PermissionCard extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              granted ? l10n.inboxAccessGranted : l10n.allowSmsAccess,
+              statusLabel,
               style: uiStyle(fontSize: 13, color: colors.secondary),
             ),
           ),
@@ -264,9 +308,7 @@ class _PermissionCard extends StatelessWidget {
                 : const Key('sms-request-permission'),
             onPressed: granted ? (scanning ? null : onScan) : onRequest,
             child: Text(
-              granted
-                  ? (scanning ? l10n.scanning : l10n.scanInbox)
-                  : l10n.request,
+              actionLabel,
               style: uiStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

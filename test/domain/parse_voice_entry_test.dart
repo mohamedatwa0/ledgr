@@ -44,9 +44,109 @@ void main() {
     expect(parsed.createIfMissing, isFalse);
   });
 
+  test('حول لي is credit not debit', () {
+    final parsed = parseVoiceEntry('محمد جمال حول لي 5000 جنيه');
+    expect(parsed.type, TransactionType.income);
+    expect(parsed.amountMinor, 500000);
+    expect(parsed.categoryName, 'Transfer');
+  });
+
+  test('I transferred stays debit', () {
+    final parsed = parseVoiceEntry('انا حولت ٢٠ جنيه');
+    expect(parsed.type, TransactionType.expense);
+    expect(parsed.categoryName, 'Transfer');
+  });
+
   test('سجائر folds to سجاير', () {
     final parsed = parseVoiceEntry('اشتريت سجائر ب 50');
     expect(parsed.categoryName, 'سجاير');
     expect(parsed.createIfMissing, isTrue);
+  });
+
+  test('english digits fill the amount', () {
+    final parsed = parseVoiceEntry('I spent 50 pounds on uber');
+    expect(parsed.type, TransactionType.expense);
+    expect(parsed.amountMinor, 5000);
+    expect(parsed.categoryName, 'Transport');
+  });
+
+  test('english number words fill the amount', () {
+    final parsed = parseVoiceEntry('I bought coffee for fifty');
+    expect(parsed.type, TransactionType.expense);
+    expect(parsed.amountMinor, 5000);
+    expect(parsed.categoryName, 'Food & Dining');
+  });
+
+  test('arabic number words fill the amount', () {
+    final parsed = parseVoiceEntry('اشتريت قهوة بخمسين جنيه');
+    expect(parsed.type, TransactionType.expense);
+    expect(parsed.amountMinor, 5000);
+    expect(parsed.categoryName, 'Food & Dining');
+  });
+
+  test('unknown english noun becomes a short new category', () {
+    final parsed = parseVoiceEntry('I bought cigarettes for 100');
+    expect(parsed.type, TransactionType.expense);
+    expect(parsed.amountMinor, 10000);
+    expect(parsed.categoryName, 'Cigarettes');
+    expect(parsed.createIfMissing, isTrue);
+    expect(parsed.transcript, 'I bought cigarettes for 100');
+  });
+
+  test('related speech selects a default category', () {
+    expect(parseVoiceEntry('اشتريت غدا ب 80 جنيه').categoryName, 'Food & Dining');
+    expect(parseVoiceEntry('I spent 50 on lunch').categoryName, 'Food & Dining');
+    expect(
+      parseVoiceEntry('I paid electricity 200').categoryName,
+      'Bills & Utilities',
+    );
+    expect(parseVoiceEntry('دفعت فاتورة النت 300').categoryName, 'Bills & Utilities');
+    expect(parseVoiceEntry('I took an uber for 40').categoryName, 'Transport');
+  });
+
+  test('unrelated speech creates a one or two word category and keeps the note', () {
+    final parsed = parseVoiceEntry(
+      'I bought a leather jacket yesterday for 200 pounds',
+    );
+    expect(parsed.categoryName, 'Leather Jacket');
+    expect(parsed.createIfMissing, isTrue);
+    expect(
+      parsed.transcript,
+      'I bought a leather jacket yesterday for 200 pounds',
+    );
+  });
+
+  test('135 from eastern digits', () {
+    expect(parseVoiceEntry('حولت ١٣٥ جنيه').amountMinor, 13500);
+  });
+
+  test('135 from split digits', () {
+    expect(parseVoiceEntry('حولت 1 35 جنيه').amountMinor, 13500);
+  });
+
+  test('135 from hundred plus remainder', () {
+    expect(parseVoiceEntry('حولت مية 35 جنيه').amountMinor, 13500);
+  });
+
+  test('135 from arabic compound', () {
+    expect(parseVoiceEntry('حولت مية وخمسة وثلاثين جنيه').amountMinor, 13500);
+  });
+
+  test('20000 is twenty thousand not 20.00', () {
+    expect(parseVoiceEntry('دفعت 20000 جنيه').amountMinor, 2000000);
+    expect(parseVoiceEntry('دفعت 20,000 جنيه').amountMinor, 2000000);
+    expect(parseVoiceEntry('دفعت 20.000 جنيه').amountMinor, 2000000);
+    expect(parseVoiceEntry('دفعت 20 000 جنيه').amountMinor, 2000000);
+    expect(parseVoiceEntry('I spent 20,000').amountMinor, 2000000);
+    expect(parseVoiceEntry('دفعت ٢٠٠٠٠ جنيه').amountMinor, 2000000);
+    expect(parseVoiceEntry('دفعت ٢٠٬٠٠٠ جنيه').amountMinor, 2000000);
+  });
+
+  test('decimal amounts are parsed', () {
+    expect(parseVoiceEntry('دفعت 50.5 جنيه').amountMinor, 5050);
+    expect(parseVoiceEntry('دفعت 50 . 5 جنيه').amountMinor, 5050);
+    expect(parseVoiceEntry('I spent fifty point five').amountMinor, 5050);
+    expect(parseVoiceEntry('دفعت خمسين فاصلة خمسة جنيه').amountMinor, 5050);
+    expect(parseVoiceEntry('دفعت خمسين ونص جنيه').amountMinor, 5050);
   });
 }

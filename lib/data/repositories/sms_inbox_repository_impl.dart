@@ -95,6 +95,29 @@ class SmsInboxRepositoryImpl implements SmsInboxRepository {
   }
 
   @override
+  Future<SmsInboxItem> revive(int id, SmsInboxInsert row) async {
+    await (_db.update(_db.smsInboxRows)..where((t) => t.id.equals(id))).write(
+      SmsInboxRowsCompanion(
+        sender: Value(row.sender),
+        body: Value(row.body),
+        receivedAt: Value(row.receivedAt),
+        status: Value(row.status),
+        platformMessageId: Value(row.platformMessageId),
+        bankId: Value(row.bankId),
+        templateId: Value(row.templateId),
+        amount: Value(row.amount),
+        type: Value(row.type),
+        suggestedCategoryId: Value(row.suggestedCategoryId),
+        note: Value(row.note),
+        valueDate: Value(row.valueDate),
+        currencyCode: Value(row.currencyCode),
+        transactionId: const Value(null),
+      ),
+    );
+    return (await getById(id))!;
+  }
+
+  @override
   Future<void> deleteAll() {
     return _db.delete(_db.smsInboxRows).go();
   }

@@ -1,12 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/biometric/local_auth_biometric_authenticator.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/category_repository_impl.dart';
 import '../../data/repositories/settings_repository_impl.dart';
 import '../../data/repositories/sms_inbox_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
 import '../../data/sms/sms_gateway_factory.dart';
+import '../../domain/biometric/biometric_authenticator.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/repositories/sms_inbox_repository.dart';
@@ -23,6 +25,7 @@ import '../../domain/usecases/scan_sms_inbox.dart';
 import '../../domain/usecases/reset_ledger.dart';
 import '../../domain/usecases/update_category.dart';
 import '../../domain/usecases/update_transaction.dart';
+import '../app_lock/app_lock_session.dart';
 
 class LedgrScope extends StatefulWidget {
   const LedgrScope({
@@ -30,11 +33,15 @@ class LedgrScope extends StatefulWidget {
     required this.child,
     this.database,
     this.smsGateway,
+    this.appLock,
+    this.biometrics,
   });
 
   final Widget child;
   final AppDatabase? database;
   final SmsGateway? smsGateway;
+  final AppLockSession? appLock;
+  final BiometricAuthenticator? biometrics;
 
   @override
   State<LedgrScope> createState() => _LedgrScopeState();
@@ -44,10 +51,15 @@ class _LedgrScopeState extends State<LedgrScope> {
   late final AppDatabase _db = widget.database ?? AppDatabase();
   late final bool _ownsDb = widget.database == null;
   late final SmsGateway _smsGateway = widget.smsGateway ?? createSmsGateway();
+  late final AppLockSession _appLock = widget.appLock ?? AppLockSession();
+  late final bool _ownsLock = widget.appLock == null;
+  late final BiometricAuthenticator _biometrics =
+      widget.biometrics ?? LocalAuthBiometricAuthenticator();
 
   @override
   void dispose() {
     if (_ownsDb) _db.close();
+    if (_ownsLock) _appLock.dispose();
     super.dispose();
   }
 
@@ -57,6 +69,8 @@ class _LedgrScopeState extends State<LedgrScope> {
       providers: [
         RepositoryProvider<AppDatabase>.value(value: _db),
         RepositoryProvider<SmsGateway>.value(value: _smsGateway),
+        RepositoryProvider<AppLockSession>.value(value: _appLock),
+        RepositoryProvider<BiometricAuthenticator>.value(value: _biometrics),
         RepositoryProvider<TransactionRepository>(
           create: (context) =>
               TransactionRepositoryImpl(context.read<AppDatabase>()),

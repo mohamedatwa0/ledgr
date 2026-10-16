@@ -12,6 +12,7 @@ class CategoryCircle extends StatelessWidget {
     this.selected = false,
     this.iconColor,
     this.onTap,
+    this.onLongPress,
     this.size = 52,
   });
 
@@ -20,6 +21,7 @@ class CategoryCircle extends StatelessWidget {
   final bool selected;
   final Color? iconColor;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double size;
 
   @override
@@ -27,6 +29,7 @@ class CategoryCircle extends StatelessWidget {
     final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: Column(
         mainAxisSize: MainAxisSize.min,
