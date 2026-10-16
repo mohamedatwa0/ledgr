@@ -38,6 +38,8 @@ class AppDatabase extends _$AppDatabase {
       onUpgrade: (m, from, to) async {
         if (from < 2) {
           await m.alterTable(
+            // Drift still marks this migration helper experimental.
+            // ignore: experimental_member_use
             TableMigration(
               transactionRows,
               columnTransformer: {

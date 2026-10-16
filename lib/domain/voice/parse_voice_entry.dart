@@ -1,4 +1,3 @@
-import '../date_utils.dart';
 import '../models/transaction_type.dart';
 import '../sms/numeral.dart';
 
@@ -254,7 +253,6 @@ final _fillerTokens = <String>{
   'with',
   'and',
   'pound',
-  'pounds',
   'فاصله',
   'point',
   'dollar',
@@ -518,7 +516,8 @@ double? _amountAsMajor(String text) {
 
   double? major;
   if (words != null && integers.isNotEmpty) {
-    final remainder = integers.firstWhere((value) => value < 100, orElse: () => 0);
+    final remainder =
+        integers.firstWhere((value) => value < 100, orElse: () => 0);
     if (words >= 100 && remainder > 0 && remainder != words) {
       major = words + remainder;
     } else {

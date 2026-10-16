@@ -51,7 +51,6 @@ class _LedgrAppState extends State<LedgrApp> with WidgetsBindingObserver {
   ui.Picture? _launchIcon;
   Size _launchIconSize = Size.zero;
   ChildBackButtonDispatcher? _backButton;
-  var _backButtonAttempts = 0;
 
   @override
   void initState() {
