@@ -5,6 +5,8 @@ import 'package:ledgr/data/repositories/category_repository_impl.dart';
 import 'package:ledgr/data/repositories/sms_inbox_repository_impl.dart';
 import 'package:ledgr/data/repositories/transaction_repository_impl.dart';
 import 'package:ledgr/domain/models/transaction_source.dart';
+import 'package:ledgr/domain/sms/sms_fingerprint.dart';
+import 'package:ledgr/domain/sms/sms_inbox_item.dart';
 import 'package:ledgr/domain/sms/sms_inbox_status.dart';
 import 'package:ledgr/domain/sms/sms_message.dart';
 import 'package:ledgr/domain/usecases/create_transaction.dart';
@@ -43,6 +45,53 @@ void main() {
         receivedAt: DateTime(2026, 9, 15, 12),
       );
 
+  test('queued and inbox copies share one fingerprint', () async {
+    final queued = RawSms(
+      sender: 'CIB',
+      body: _cib,
+      receivedAt: DateTime(2026, 9, 15, 12),
+      queueId: 'q1',
+    );
+    final fromInbox = RawSms(
+      sender: 'CIB',
+      body: _cib,
+      receivedAt: DateTime(2026, 9, 15, 12),
+      platformMessageId: '42',
+    );
+    expect(smsFingerprint(queued), smsFingerprint(fromInbox));
+    expect(smsFingerprint(queued), startsWith('text:'));
+
+    final first = await ingest(queued);
+    final second = await ingest(fromInbox);
+    expect(first.duplicate, isFalse);
+    expect(second.duplicate, isTrue);
+    expect(second.item.id, first.item.id);
+  });
+
+  test('an unmatched row is refreshed when the same text parses', () async {
+    final inbox = SmsInboxRepositoryImpl(db);
+    final sms = RawSms(
+      sender: 'CIB',
+      body: _cib,
+      receivedAt: DateTime(2026, 9, 15, 12),
+    );
+    final existing = await inbox.insert(
+      SmsInboxInsert(
+        fingerprint: smsFingerprint(sms),
+        sender: sms.sender,
+        body: sms.body,
+        receivedAt: sms.receivedAt,
+        status: SmsInboxStatus.unmatched,
+      ),
+    );
+
+    final result = await ingest(sms);
+    expect(result.duplicate, isFalse);
+    expect(result.item.id, existing.id);
+    expect(result.item.status, SmsInboxStatus.ready);
+    expect(result.item.amount, 25000);
+  });
+
   test('duplicate fingerprint is skipped', () async {
     final first = await ingest(paste());
     final second = await ingest(paste());
@@ -56,6 +105,7 @@ void main() {
     final inbox = SmsInboxRepositoryImpl(db);
     final first = await ingest(paste());
     await DismissSms(inbox)(first.item.id);
+    expect((await inbox.getById(first.item.id))!.body, isEmpty);
 
     final again = await ingest(paste());
     expect(again.duplicate, isFalse);
@@ -82,5 +132,6 @@ void main() {
     final marked = await SmsInboxRepositoryImpl(db).getById(ingested.item.id);
     expect(marked!.status, SmsInboxStatus.imported);
     expect(marked.transactionId, created.id);
+    expect(marked.body, isEmpty);
   });
 }

@@ -6,11 +6,10 @@ import 'sms_message.dart';
 import 'sms_normalize.dart';
 
 String smsFingerprint(RawSms sms) {
-  final platformId = sms.platformMessageId?.trim();
-  if (platformId != null && platformId.isNotEmpty) {
-    return 'android:$platformId';
-  }
-  final normalized =
-      '${normalizeSender(sms.sender)}|${normalizeSmsText(sms.body)}';
+  return textSmsFingerprint(sms.sender, sms.body);
+}
+
+String textSmsFingerprint(String sender, String body) {
+  final normalized = '${normalizeSender(sender)}|${normalizeSmsText(body)}';
   return 'text:${sha256.convert(utf8.encode(normalized))}';
 }

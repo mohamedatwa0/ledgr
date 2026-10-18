@@ -43,6 +43,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Future<void> clearSmsLastScanAt() {
+    return (_db.update(_db.settingsRows)..where((s) => s.id.equals(1))).write(
+      const SettingsRowsCompanion(smsLastScanAt: Value(null)),
+    );
+  }
+
+  @override
   Future<void> setThemeMode(AppThemeMode themeMode) {
     return (_db.update(_db.settingsRows)..where((s) => s.id.equals(1))).write(
       SettingsRowsCompanion(themeMode: Value(themeMode)),

@@ -15,6 +15,10 @@ class CategoryFormState {
     this.deletePromptCount,
     this.errorMessage,
     this.savedCategoryId,
+    this.originalName = '',
+    this.originalType,
+    this.originalIconCodePoint,
+    this.originalColorValue,
   });
 
   final String name;
@@ -30,6 +34,18 @@ class CategoryFormState {
   final int? deletePromptCount;
   final String? errorMessage;
   final int? savedCategoryId;
+  final String originalName;
+  final TransactionType? originalType;
+  final int? originalIconCodePoint;
+  final int? originalColorValue;
+
+  bool get isDirty {
+    if (saved || deleted) return false;
+    return name != originalName ||
+        type != (originalType ?? type) ||
+        iconCodePoint != (originalIconCodePoint ?? iconCodePoint) ||
+        colorValue != (originalColorValue ?? colorValue);
+  }
 
   bool get canSave =>
       name.trim().isNotEmpty &&
@@ -52,6 +68,10 @@ class CategoryFormState {
     int? deletePromptCount,
     String? errorMessage,
     int? savedCategoryId,
+    String? originalName,
+    TransactionType? originalType,
+    int? originalIconCodePoint,
+    int? originalColorValue,
     bool clearDeletePrompt = false,
     bool clearError = false,
   }) {
@@ -71,6 +91,11 @@ class CategoryFormState {
           : (deletePromptCount ?? this.deletePromptCount),
       errorMessage: clearError ? null : errorMessage,
       savedCategoryId: savedCategoryId ?? this.savedCategoryId,
+      originalName: originalName ?? this.originalName,
+      originalType: originalType ?? this.originalType,
+      originalIconCodePoint:
+          originalIconCodePoint ?? this.originalIconCodePoint,
+      originalColorValue: originalColorValue ?? this.originalColorValue,
     );
   }
 }

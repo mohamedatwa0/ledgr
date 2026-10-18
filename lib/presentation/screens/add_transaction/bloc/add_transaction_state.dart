@@ -22,6 +22,12 @@ class AddTransactionState {
     this.createIfMissing = false,
     this.pendingCategoryName,
     this.userPickedCategory = false,
+    this.baselineAmountText = '',
+    this.baselineType = TransactionType.expense,
+    this.baselineCategoryId,
+    this.baselineNote = '',
+    this.baselineDate,
+    this.baselinePendingCategoryName,
   });
 
   final String amountText;
@@ -42,6 +48,12 @@ class AddTransactionState {
   final bool createIfMissing;
   final String? pendingCategoryName;
   final bool userPickedCategory;
+  final String baselineAmountText;
+  final TransactionType baselineType;
+  final int? baselineCategoryId;
+  final String baselineNote;
+  final DateTime? baselineDate;
+  final String? baselinePendingCategoryName;
 
   bool get hasPendingCategory =>
       pendingCategoryName != null && pendingCategoryName!.isNotEmpty;
@@ -54,7 +66,16 @@ class AddTransactionState {
   bool get canSave =>
       missingRequiredFields == false && !saving && !loading && !notFound;
 
-  bool get isDirty => amountText.trim().isNotEmpty || note.trim().isNotEmpty;
+  bool get isDirty {
+    if (saved || deleted) return false;
+    final baseline = baselineDate ?? date;
+    return amountText.trim() != baselineAmountText.trim() ||
+        type != baselineType ||
+        categoryId != baselineCategoryId ||
+        note.trim() != baselineNote.trim() ||
+        dateOnly(date) != dateOnly(baseline) ||
+        pendingCategoryName != baselinePendingCategoryName;
+  }
 
   AddTransactionState copyWith({
     String? amountText,
@@ -75,9 +96,17 @@ class AddTransactionState {
     bool? createIfMissing,
     String? pendingCategoryName,
     bool? userPickedCategory,
+    String? baselineAmountText,
+    TransactionType? baselineType,
+    int? baselineCategoryId,
+    String? baselineNote,
+    DateTime? baselineDate,
+    String? baselinePendingCategoryName,
     bool clearCategory = false,
     bool clearError = false,
     bool clearPending = false,
+    bool clearBaselineCategory = false,
+    bool clearBaselinePending = false,
   }) {
     return AddTransactionState(
       amountText: amountText ?? this.amountText,
@@ -99,6 +128,16 @@ class AddTransactionState {
       pendingCategoryName:
           clearPending ? null : (pendingCategoryName ?? this.pendingCategoryName),
       userPickedCategory: userPickedCategory ?? this.userPickedCategory,
+      baselineAmountText: baselineAmountText ?? this.baselineAmountText,
+      baselineType: baselineType ?? this.baselineType,
+      baselineCategoryId: clearBaselineCategory
+          ? null
+          : (baselineCategoryId ?? this.baselineCategoryId),
+      baselineNote: baselineNote ?? this.baselineNote,
+      baselineDate: baselineDate ?? this.baselineDate,
+      baselinePendingCategoryName: clearBaselinePending
+          ? null
+          : (baselinePendingCategoryName ?? this.baselinePendingCategoryName),
     );
   }
 }

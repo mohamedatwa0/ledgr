@@ -31,6 +31,7 @@ class SettingsScreen extends StatelessWidget {
     return BlocBuilder<SettingsBloc, SettingsState>(
       builder: (context, state) {
         return ListView(
+          key: const Key('settings-scroll'),
           padding: EdgeInsets.fromLTRB(0.w, 16.h, 0.w, 32.h),
           children: [
             Padding(
@@ -535,7 +536,7 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              title.toUpperCase(),
+              latinUppercase(context, title),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: uiStyle(

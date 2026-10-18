@@ -65,7 +65,10 @@ void main() {
       (tester) async {
     await pumpApp(tester, db: db);
     await openNewEntry(tester);
-    await tester.ensureVisible(find.byKey(const Key('category-Food & Dining')));
+    await revealOnEntryForm(
+      tester,
+      find.byKey(const Key('category-Food & Dining')),
+    );
     await tester.longPress(find.byKey(const Key('category-Food & Dining')));
     await settle(tester);
 
@@ -86,12 +89,5 @@ Future<void> _openNewCategory(WidgetTester tester) async {
 }
 
 Future<void> _reveal(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pump();
-  final scrollable = find.ancestor(
-    of: finder,
-    matching: find.byType(Scrollable),
-  );
-  await tester.drag(scrollable.first, const Offset(0, -180));
-  await tester.pump();
+  await revealOnEntryForm(tester, finder);
 }

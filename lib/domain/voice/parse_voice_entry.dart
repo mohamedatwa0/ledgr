@@ -42,7 +42,7 @@ final _incomePhrases = <String>[
   'جالي',
   'دخل',
   'bonus',
-  'got',
+  'got paid',
 ];
 
 final _expensePhrases = <String>[
@@ -478,12 +478,29 @@ String _prepareAmountText(String text) {
     RegExp(r'(\d+)\s+(?:point|فاصله)\s+(\d{1,2})\b'),
     (match) => '${match[1]}.${match[2]}',
   );
-  // Voice often splits 135 into "1 35".
+  // Voice often splits 135 into "1 35". "2 50 pounds" is 2.50.
   prepared = prepared.replaceAllMapped(
     RegExp(r'\b(\d)\s+(\d{2})\b'),
-    (match) => '${match[1]}${match[2]}',
+    (match) {
+      final around = _amountContext(prepared, match.start, match.end);
+      if (_currencyWord.hasMatch(around)) {
+        return '${match[1]}.${match[2]}';
+      }
+      return '${match[1]}${match[2]}';
+    },
   );
   return prepared;
+}
+
+final _currencyWord = RegExp(
+  r'(pounds?|egp|usd|eur|gbp|le\b|e£|جنيه)',
+  caseSensitive: false,
+);
+
+String _amountContext(String text, int start, int end) {
+  final from = start - 16 < 0 ? 0 : start - 16;
+  final to = end + 16 > text.length ? text.length : end + 16;
+  return text.substring(from, to);
 }
 
 String _collapseThousands(Match match) {
@@ -709,7 +726,8 @@ TransactionType? _typeOf(String text) {
   if (_hasAny(text, _shoppingKeys)) {
     return (name: 'Shopping', createIfMissing: false);
   }
-  if (_hasAny(text, _billsKeys) || RegExp(r'\bwe\b').hasMatch(text)) {
+  if (_hasAny(text, _billsKeys) ||
+      RegExp(r'\bwe\s+(pay|telecom|bill)\b').hasMatch(text)) {
     return (name: 'Bills & Utilities', createIfMissing: false);
   }
   if (_hasAny(text, _healthKeys)) {

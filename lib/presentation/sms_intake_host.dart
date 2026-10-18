@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../domain/sms/bank_message_filter.dart';
 import '../../domain/sms/sms_gateway.dart';
@@ -13,11 +12,9 @@ import '../../domain/usecases/scan_sms_inbox.dart';
 class SmsIntakeHost extends StatefulWidget {
   const SmsIntakeHost({
     super.key,
-    required this.router,
     required this.child,
   });
 
-  final GoRouter router;
   final Widget child;
 
   @override
@@ -58,9 +55,13 @@ class _SmsIntakeHostState extends State<SmsIntakeHost>
     final gateway = context.read<SmsGateway>();
     final ingest = context.read<IngestSms>();
     _incoming = gateway.incoming.listen(
-      (sms) {
+      (sms) async {
         if (!isBankOrWalletMessage(sender: sms.sender, body: sms.body)) return;
-        ingest(sms);
+        await ingest(sms);
+        final queueId = sms.queueId;
+        if (queueId != null && queueId.isNotEmpty) {
+          await gateway.acknowledge([queueId]);
+        }
       },
       onError: (_) {},
     );
@@ -81,25 +82,14 @@ class _SmsIntakeHostState extends State<SmsIntakeHost>
     if (!mounted) return;
     await scan();
     if (!mounted || pending == null || pending.trim().isEmpty) return;
-    if (pending == kSmsImportSignal) {
-      _openInbox();
-      return;
-    }
+    if (pending == kSmsImportSignal) return;
     await _ingestShared(pending);
-  }
-
-  void _openInbox() {
-    final path = widget.router.state.uri.path;
-    if (path == '/settings/sms' || path.startsWith('/settings/sms/')) return;
-    widget.router.push('/settings/sms');
   }
 
   Future<void> _ingestShared(String text) async {
     if (!mounted) return;
     if (!isBankOrWalletMessage(sender: 'share', body: text)) return;
     await context.read<IngestSms>()(pasteRawSms(text, sender: 'share'));
-    if (!mounted) return;
-    _openInbox();
   }
 
   @override

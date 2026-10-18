@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 
@@ -39,7 +40,7 @@ class LedgrPrimaryButton extends StatelessWidget {
             letterSpacing: 0.8,
           ),
         ),
-        child: Text(label.toUpperCase()),
+        child: Text(latinUppercase(context, label)),
       ),
     );
   }

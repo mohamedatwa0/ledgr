@@ -13,6 +13,8 @@ class SmsReceiver : BroadcastReceiver() {
         val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
         val sender = messages.first().displayOriginatingAddress ?: ""
         val dateMs = messages.first().timestampMillis
-        SmsPlugin.emitIncoming(sender, body, dateMs)
+        if (!BankMessageFilter.accepts(sender, body)) return
+        val queueId = BankSmsQueue.enqueue(context, sender, body, dateMs)
+        SmsPlugin.emitIncoming(sender, body, dateMs, queueId)
     }
 }

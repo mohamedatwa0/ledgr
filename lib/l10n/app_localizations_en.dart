@@ -687,4 +687,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcutsUnavailable => 'Could not open Shortcuts.';
+
+  @override
+  String get settingsLoadFailed => 'Could not load your ledger settings.';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get entryDeleted => 'Entry deleted';
+
+  @override
+  String get discardCategoryTitle => 'Discard changes?';
+
+  @override
+  String get discardCategoryMessage => 'Edits to this category will be lost.';
+
+  @override
+  String get iconCoffee => 'Coffee';
+
+  @override
+  String get iconShopping => 'Shopping';
+
+  @override
+  String get iconTransit => 'Transit';
+
+  @override
+  String get iconBooks => 'Books';
+
+  @override
+  String get iconDining => 'Dining';
+
+  @override
+  String get iconTools => 'Tools';
+
+  @override
+  String get iconHousing => 'Housing';
+
+  @override
+  String get iconMusic => 'Music';
+
+  @override
+  String get iconCamera => 'Camera';
+
+  @override
+  String get iconTravel => 'Travel';
+
+  @override
+  String get iconInvoice => 'Invoice';
+
+  @override
+  String get iconHealth => 'Health';
+
+  @override
+  String get iconMovies => 'Movies';
+
+  @override
+  String get iconWallet => 'Wallet';
+
+  @override
+  String get iconWork => 'Work';
+
+  @override
+  String get iconTransfer => 'Transfer';
+
+  @override
+  String get iconOther => 'Other';
+
+  @override
+  String get iconGift => 'Gift';
+
+  @override
+  String get iconPhone => 'Phone';
+
+  @override
+  String get iconUtilities => 'Utilities';
+
+  @override
+  String get iconFuel => 'Fuel';
+
+  @override
+  String get iconBank => 'Bank';
+
+  @override
+  String get iconTv => 'TV';
+
+  @override
+  String get iconCalendar => 'Calendar';
+
+  @override
+  String get iconTag => 'Tag';
+
+  @override
+  String get iconPersonal => 'Personal';
+
+  @override
+  String get iconReceipt => 'Receipt';
 }

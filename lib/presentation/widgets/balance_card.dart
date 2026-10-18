@@ -94,9 +94,10 @@ class BalanceCard extends StatelessWidget {
                         size: 14.r, color: colors.primary),
                     SizedBox(width: 4.w),
                     Text(
-                      DateFormat('MMM y', l10n.localeName)
-                          .format(month)
-                          .toUpperCase(),
+                      latinUppercase(
+                        context,
+                        DateFormat('MMM y', l10n.localeName).format(month),
+                      ),
                       style: uiStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -142,7 +143,10 @@ class BalanceCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            monthPageLabel(month, l10n: l10n).toUpperCase(),
+                            latinUppercase(
+                              context,
+                              monthPageLabel(month, l10n: l10n),
+                            ),
                             style: uiStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -251,7 +255,7 @@ class _Subtotal extends StatelessWidget {
             Icon(icon, size: 16.r, color: color),
             SizedBox(width: 4.w),
             Text(
-              label.toUpperCase(),
+              latinUppercase(context, label),
               style: uiStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,

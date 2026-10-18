@@ -32,6 +32,7 @@ class CategoryFormScreen extends StatefulWidget {
 class _CategoryFormScreenState extends State<CategoryFormScreen> {
   late final TextEditingController _name;
   var _hydrated = false;
+  var _allowPop = false;
 
   @override
   void initState() {
@@ -63,7 +64,15 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
                 child: SizedBox(
                   height: sheetHeight,
-                  child: ScaffoldMessenger(
+                  child: BlocBuilder<CategoryFormBloc, CategoryFormState>(
+                    builder: (context, popState) {
+                      return PopScope(
+                        canPop: _allowPop || !popState.isDirty,
+                        onPopInvokedWithResult: (didPop, _) async {
+                          if (didPop) return;
+                          await _onClose(context, popState);
+                        },
+                        child: ScaffoldMessenger(
                     child: Scaffold(
                       backgroundColor: colors.paperLight,
                       // The sheet is already lifted above the keyboard. A second
@@ -123,6 +132,9 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                             _form(context, state, colors),
                       ),
                     ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -156,7 +168,10 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
       );
     }
     final creating = widget.categoryId == null;
-    final iconLabel = categoryIconLabel(state.iconCodePoint);
+    final iconLabel = localizedCategoryIconLabel(
+      l10n,
+      categoryIconLabel(state.iconCodePoint),
+    );
     return Column(
       children: [
         SizedBox(height: 10.h),
@@ -180,7 +195,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
               ),
               IconButton(
                 tooltip: l10n.close,
-                onPressed: () => context.pop(),
+                onPressed: () => _onClose(context, state),
                 icon: Icon(TablerIcons.x, color: colors.secondary, size: 22.r),
               ),
             ],
@@ -382,6 +397,29 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     );
   }
 
+  Future<void> _onClose(
+    BuildContext context,
+    CategoryFormState state,
+  ) async {
+    if (state.isDirty) {
+      final l10n = context.l10n;
+      final discard = await showDeleteConfirmDialog(
+        context: context,
+        title: l10n.discardCategoryTitle,
+        message: l10n.discardCategoryMessage,
+        confirmLabel: l10n.discard,
+      );
+      if (discard && context.mounted) {
+        setState(() => _allowPop = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.pop();
+        });
+      }
+      return;
+    }
+    context.pop();
+  }
+
   OutlineInputBorder _nameBorder(Color color) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(14.r),
@@ -398,7 +436,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      text.toUpperCase(),
+      latinUppercase(context, text),
       style: uiStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,

@@ -29,7 +29,11 @@ class IngestSms {
 
   Future<IngestResult> call(RawSms sms) async {
     final fingerprint = smsFingerprint(sms);
-    final existing = await _inbox.findByFingerprint(fingerprint);
+    final platformId = sms.platformMessageId?.trim();
+    final existing = await _inbox.findByFingerprint(fingerprint) ??
+        (platformId == null || platformId.isEmpty
+            ? null
+            : await _inbox.findByPlatformMessageId(platformId));
     final parsed = _parser.parse(sms);
     final suggestedId =
         parsed == null ? null : await _suggestedCategoryId(sms, parsed);
@@ -51,11 +55,15 @@ class IngestSms {
       currencyCode: parsed?.currencyCode,
     );
     if (existing != null) {
-      if (existing.status != SmsInboxStatus.dismissed) {
-        return IngestResult(item: existing, duplicate: true);
+      if (existing.status == SmsInboxStatus.dismissed) {
+        final revived = await _inbox.revive(existing.id, row);
+        return IngestResult(item: revived, duplicate: false);
       }
-      final revived = await _inbox.revive(existing.id, row);
-      return IngestResult(item: revived, duplicate: false);
+      if (existing.status == SmsInboxStatus.unmatched && parsed != null) {
+        final updated = await _inbox.revive(existing.id, row);
+        return IngestResult(item: updated, duplicate: false);
+      }
+      return IngestResult(item: existing, duplicate: true);
     }
 
     final item = await _inbox.insert(row);

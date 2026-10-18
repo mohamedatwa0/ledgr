@@ -82,17 +82,32 @@ void main() {
     await tester.tap(find.byKey(const Key('tab-transactions')));
     await settle(tester);
 
-    expect(find.byType(Dismissible), findsOneWidget);
+    final historyRow = find.descendant(
+      of: find.byKey(const Key('history-scroll')),
+      matching: find.byType(Dismissible),
+    );
+    expect(historyRow, findsOneWidget);
 
-    await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
+    await tester.drag(historyRow, const Offset(-500, 0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Delete entry'), findsOneWidget);
-    await tester.tap(find.text('Delete'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Delete'),
+      ),
+    );
     await settle(tester);
 
-    expect(find.byType(Dismissible), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('history-scroll')),
+        matching: find.byType(Dismissible),
+      ),
+      findsNothing,
+    );
     expect(find.text('No transactions in this view'), findsOneWidget);
     await disposeApp(tester);
   });
@@ -104,9 +119,7 @@ void main() {
 
     await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
-    await tester.ensureVisible(addCategory);
-    await tester.drag(find.byType(ListView), const Offset(0, -180));
-    await tester.pumpAndSettle();
+    await revealOnEntryForm(tester, addCategory);
     await tester.tap(addCategory);
     await settle(tester);
 

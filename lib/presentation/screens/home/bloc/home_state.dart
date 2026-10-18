@@ -9,6 +9,8 @@ class HomeState {
     required this.summary,
     required this.currencyCode,
     this.loading = false,
+    this.undoEntry,
+    this.errorMessage,
   });
 
   final DateTime month;
@@ -16,6 +18,8 @@ class HomeState {
   final MonthlySummary summary;
   final String currencyCode;
   final bool loading;
+  final TransactionEntry? undoEntry;
+  final String? errorMessage;
 
   factory HomeState.initial() {
     return HomeState(
@@ -35,6 +39,10 @@ class HomeState {
     MonthlySummary? summary,
     String? currencyCode,
     bool? loading,
+    TransactionEntry? undoEntry,
+    String? errorMessage,
+    bool clearUndo = false,
+    bool clearError = false,
   }) {
     return HomeState(
       month: month ?? this.month,
@@ -42,6 +50,8 @@ class HomeState {
       summary: summary ?? this.summary,
       currencyCode: currencyCode ?? this.currencyCode,
       loading: loading ?? this.loading,
+      undoEntry: clearUndo ? null : (undoEntry ?? this.undoEntry),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }

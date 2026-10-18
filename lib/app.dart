@@ -87,14 +87,14 @@ class _LedgrAppState extends State<LedgrApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_lockEnabled || _session.authenticating) return;
+    if (!_lockEnabled) return;
     switch (state) {
       case AppLifecycleState.inactive:
         _showCover();
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        if (!_lockedForBackground) {
+        if (!_session.authenticating && !_lockedForBackground) {
           _lockedForBackground = true;
           _session.lock();
         }
@@ -167,7 +167,6 @@ class _LedgrAppState extends State<LedgrApp> with WidgetsBindingObserver {
         appLock: _session,
         biometrics: widget.biometricAuthenticator,
         child: SmsIntakeHost(
-          router: _router,
           child: Builder(
             builder: (context) {
               return StreamBuilder<AppSettings>(
@@ -176,6 +175,37 @@ class _LedgrAppState extends State<LedgrApp> with WidgetsBindingObserver {
                   final mode = snapshot.data?.themeMode ?? AppThemeMode.system;
                   final locale = snapshot.data?.locale ?? AppLocale.en;
                   final waiting = !snapshot.hasData && !snapshot.hasError;
+                  if (snapshot.hasError) {
+                    return MaterialApp(
+                      title: 'Ledgr',
+                      theme: ledgrLightTheme,
+                      darkTheme: ledgrDarkTheme,
+                      themeMode: mode.material,
+                      locale: locale.material,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      localizationsDelegates:
+                          AppLocalizations.localizationsDelegates,
+                      debugShowCheckedModeBanner: false,
+                      home: Builder(
+                        builder: (context) {
+                          return Scaffold(
+                            body: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                      .settingsLoadFailed,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
                   _lockEnabled = snapshot.data?.biometricLockEnabled ?? false;
                   final locked = _lockEnabled && !_session.unlocked;
                   if (_showSplash || (widget.showLaunchScreen && waiting)) {

@@ -18,7 +18,13 @@ class SmsReviewState {
     this.categoriesLoading = false,
     this.saved = false,
     this.dismissed = false,
+    this.notFound = false,
     this.errorMessage,
+    this.baselineAmountText = '',
+    this.baselineType = TransactionType.expense,
+    this.baselineCategoryId,
+    this.baselineNote = '',
+    this.baselineDate,
   });
 
   final String amountText;
@@ -35,14 +41,31 @@ class SmsReviewState {
   final bool categoriesLoading;
   final bool saved;
   final bool dismissed;
+  final bool notFound;
   final String? errorMessage;
+  final String baselineAmountText;
+  final TransactionType baselineType;
+  final int? baselineCategoryId;
+  final String baselineNote;
+  final DateTime? baselineDate;
 
   bool get missingRequiredFields {
     final amount = parseMinorUnits(amountText) ?? 0;
     return amount <= 0 || categoryId == null;
   }
 
-  bool get canSave => !missingRequiredFields && !saving && !loading;
+  bool get canSave =>
+      !missingRequiredFields && !saving && !loading && !notFound;
+
+  bool get isDirty {
+    if (saved || dismissed || notFound || loading) return false;
+    final baseline = baselineDate ?? date;
+    return amountText.trim() != baselineAmountText.trim() ||
+        type != baselineType ||
+        categoryId != baselineCategoryId ||
+        note.trim() != baselineNote.trim() ||
+        dateOnly(date) != dateOnly(baseline);
+  }
 
   bool get currencyMismatch =>
       smsCurrencyCode != null &&
@@ -64,9 +87,16 @@ class SmsReviewState {
     bool? categoriesLoading,
     bool? saved,
     bool? dismissed,
+    bool? notFound,
     String? errorMessage,
+    String? baselineAmountText,
+    TransactionType? baselineType,
+    int? baselineCategoryId,
+    String? baselineNote,
+    DateTime? baselineDate,
     bool clearCategory = false,
     bool clearError = false,
+    bool clearBaselineCategory = false,
   }) {
     return SmsReviewState(
       amountText: amountText ?? this.amountText,
@@ -83,7 +113,15 @@ class SmsReviewState {
       categoriesLoading: categoriesLoading ?? this.categoriesLoading,
       saved: saved ?? false,
       dismissed: dismissed ?? false,
+      notFound: notFound ?? this.notFound,
       errorMessage: clearError ? null : errorMessage,
+      baselineAmountText: baselineAmountText ?? this.baselineAmountText,
+      baselineType: baselineType ?? this.baselineType,
+      baselineCategoryId: clearBaselineCategory
+          ? null
+          : (baselineCategoryId ?? this.baselineCategoryId),
+      baselineNote: baselineNote ?? this.baselineNote,
+      baselineDate: baselineDate ?? this.baselineDate,
     );
   }
 }

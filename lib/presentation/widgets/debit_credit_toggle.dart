@@ -54,11 +54,13 @@ class FilterSegmentedControl extends StatelessWidget {
     required this.labels,
     required this.selectedIndex,
     required this.onSelected,
+    this.segmentKeys,
   });
 
   final List<String> labels;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final List<Key>? segmentKeys;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +75,9 @@ class FilterSegmentedControl extends StatelessWidget {
         children: [
           for (var i = 0; i < labels.length; i++)
             _Segment(
+              key: segmentKeys != null && i < segmentKeys!.length
+                  ? segmentKeys![i]
+                  : null,
               label: labels[i],
               selected: selectedIndex == i,
               onTap: () => onSelected(i),
@@ -87,6 +92,7 @@ class FilterSegmentedControl extends StatelessWidget {
 
 class _Segment extends StatelessWidget {
   const _Segment({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,

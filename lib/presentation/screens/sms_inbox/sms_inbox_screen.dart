@@ -68,6 +68,7 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
             l10n.foundMessagesToReview(state.flashCount ?? 0),
           SmsInboxFlash.notBankOrWallet => l10n.onlyBankOrWallet,
           SmsInboxFlash.shortcutsUnavailable => l10n.shortcutsUnavailable,
+          SmsInboxFlash.scanFailed => l10n.scanFailed,
           null => state.message,
         };
         if (text != null) {
@@ -92,115 +93,30 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
               ),
             ),
           ),
-          body: ListView(
+          body: ListView.builder(
+            key: const Key('sms-inbox-scroll'),
             padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
-            children: [
-              Text(
-                state.shareImport
-                    ? l10n.smsInboxIos
-                    : state.inboxSupported
-                        ? l10n.smsInboxSupported
-                        : l10n.smsInboxUnsupported,
-                style:
-                    uiStyle(fontSize: 13, color: colors.secondary, height: 1.4),
-              ),
-              if (state.shareImport) ...[
-                SizedBox(height: 10.h),
-                Text(
-                  l10n.smsImportSteps,
-                  style: uiStyle(
-                    fontSize: 13,
-                    color: colors.secondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-              if (state.inboxSupported && !state.shareImport) ...[
-                SizedBox(height: 14.h),
-                _PermissionCard(
-                  granted: state.hasPermission,
-                  scanning: state.scanning,
-                  statusLabel: state.hasPermission
-                      ? l10n.inboxAccessGranted
-                      : l10n.allowSmsAccess,
-                  actionLabel: state.hasPermission
-                      ? (state.scanning ? l10n.scanning : l10n.scanInbox)
-                      : l10n.request,
-                  onRequest: () =>
-                      bloc.add(const SmsInboxPermissionRequested()),
-                  onScan: state.hasPermission
-                      ? () => bloc.add(const SmsInboxScanRequested())
-                      : null,
-                ),
-              ],
-              if (state.shareImport) ...[
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: TextButton(
-                    key: const Key('sms-shortcuts-setup'),
-                    onPressed: () => bloc.add(const SmsInboxSetupRequested()),
-                    child: Text(
-                      l10n.openShortcutsSetup,
-                      style: uiStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: colors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              SizedBox(height: 18.h),
-              TextField(
-                key: const Key('sms-paste-field'),
-                controller: _paste,
-                minLines: 3,
-                maxLines: 5,
-                style: uiStyle(fontSize: 14, color: colors.onSurface),
-                cursorColor: colors.primary,
-                decoration: InputDecoration(
-                  hintText: l10n.pasteBankSms,
-                  hintStyle: uiStyle(fontSize: 14, color: colors.secondary),
-                  filled: true,
-                  fillColor: colors.paperLight,
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colors.rule),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: colors.primary),
-                  ),
-                ),
-                onChanged: (value) => bloc.add(SmsInboxPasteChanged(value)),
-              ),
-              SizedBox(height: 10.h),
-              LedgrPrimaryButton(
-                key: const Key('sms-parse-button'),
-                label: state.parsing ? l10n.parsing : l10n.parse,
-                onPressed: state.parsing
-                    ? null
-                    : () => bloc.add(SmsInboxParseRequested(_paste.text)),
-              ),
-              SizedBox(height: 20.h),
-              FilterSegmentedControl(
-                labels: [l10n.toReview, l10n.unmatched, l10n.imported],
-                selectedIndex: state.filter.index,
-                onSelected: (i) {
-                  bloc.add(SmsInboxFilterChanged(SmsInboxFilter.values[i]));
-                },
-              ),
-              SizedBox(height: 12.h),
-              if (state.loading)
-                Padding(
+            itemCount: 1 +
+                (state.loading || state.items.isEmpty ? 1 : state.items.length),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _header(context, state, bloc);
+              }
+              if (state.loading) {
+                return Padding(
                   padding: EdgeInsets.symmetric(vertical: 32.h),
                   child: Center(
                     child: CircularProgressIndicator(color: colors.primary),
                   ),
-                )
-              else if (state.items.isEmpty)
-                LedgrEmptyState(message: _emptyMessage(l10n, state.filter))
-              else
-                ..._rows(context, state.items),
-            ],
+                );
+              }
+              if (state.items.isEmpty) {
+                return LedgrEmptyState(
+                  message: _emptyMessage(l10n, state.filter),
+                );
+              }
+              return _messageRow(context, state.items, index - 1);
+            },
           ),
         );
       },
@@ -218,51 +134,158 @@ class _SmsInboxScreenState extends State<SmsInboxScreen> {
     }
   }
 
-  List<Widget> _rows(BuildContext context, List<SmsInboxItem> items) {
+  Widget _header(
+    BuildContext context,
+    SmsInboxState state,
+    SmsInboxBloc bloc,
+  ) {
     final colors = context.colors;
-    return [
-      for (var i = 0; i < items.length; i++)
-        if (items[i].status == SmsInboxStatus.imported)
-          _SmsInboxRow(
-            item: items[i],
-            showDivider: i != items.length - 1,
-            onTap: () => context.push('/settings/sms/${items[i].id}'),
-          )
-        else
-          Dismissible(
-            key: ValueKey(items[i].id),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              alignment: AlignmentDirectional.centerEnd,
-              color: colors.ledgerRed,
-              padding: EdgeInsetsDirectional.only(end: 16.w),
-              child: Icon(
-                TablerIcons.trash,
-                color: colors.onPrimary,
-                size: 20.r,
-              ),
-            ),
-            confirmDismiss: (_) {
-              final l10n = context.l10n;
-              return showDeleteConfirmDialog(
-                context: context,
-                title: l10n.skipSmsTitle,
-                message: l10n.skipSmsMessage,
-                confirmLabel: l10n.skip,
-              );
-            },
-            onDismissed: (_) {
-              context
-                  .read<SmsInboxBloc>()
-                  .add(SmsInboxDismissRequested(items[i].id));
-            },
-            child: _SmsInboxRow(
-              item: items[i],
-              showDivider: i != items.length - 1,
-              onTap: () => context.push('/settings/sms/${items[i].id}'),
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          state.shareImport
+              ? l10n.smsInboxIos
+              : state.inboxSupported
+                  ? l10n.smsInboxSupported
+                  : l10n.smsInboxUnsupported,
+          style: uiStyle(fontSize: 13, color: colors.secondary, height: 1.4),
+        ),
+        if (state.shareImport) ...[
+          SizedBox(height: 10.h),
+          Text(
+            l10n.smsImportSteps,
+            style: uiStyle(
+              fontSize: 13,
+              color: colors.secondary,
+              height: 1.4,
             ),
           ),
-    ];
+        ],
+        if (state.inboxSupported && !state.shareImport) ...[
+          SizedBox(height: 14.h),
+          _PermissionCard(
+            granted: state.hasPermission,
+            scanning: state.scanning,
+            statusLabel: state.hasPermission
+                ? l10n.inboxAccessGranted
+                : l10n.allowSmsAccess,
+            actionLabel: state.hasPermission
+                ? (state.scanning ? l10n.scanning : l10n.scanInbox)
+                : l10n.request,
+            onRequest: () => bloc.add(const SmsInboxPermissionRequested()),
+            onScan: state.hasPermission
+                ? () => bloc.add(const SmsInboxScanRequested())
+                : null,
+          ),
+        ],
+        if (state.shareImport) ...[
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              key: const Key('sms-shortcuts-setup'),
+              onPressed: () => bloc.add(const SmsInboxSetupRequested()),
+              child: Text(
+                l10n.openShortcutsSetup,
+                style: uiStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: colors.primary,
+                ),
+              ),
+            ),
+          ),
+        ],
+        SizedBox(height: 18.h),
+        TextField(
+          key: const Key('sms-paste-field'),
+          controller: _paste,
+          minLines: 3,
+          maxLines: 5,
+          style: uiStyle(fontSize: 14, color: colors.onSurface),
+          cursorColor: colors.primary,
+          decoration: InputDecoration(
+            hintText: l10n.pasteBankSms,
+            hintStyle: uiStyle(fontSize: 14, color: colors.secondary),
+            filled: true,
+            fillColor: colors.paperLight,
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: colors.rule),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: colors.primary),
+            ),
+          ),
+          onChanged: (value) => bloc.add(SmsInboxPasteChanged(value)),
+        ),
+        SizedBox(height: 10.h),
+        LedgrPrimaryButton(
+          key: const Key('sms-parse-button'),
+          label: state.parsing ? l10n.parsing : l10n.parse,
+          onPressed: state.parsing
+              ? null
+              : () => bloc.add(SmsInboxParseRequested(_paste.text)),
+        ),
+        SizedBox(height: 20.h),
+        FilterSegmentedControl(
+          labels: [l10n.toReview, l10n.unmatched, l10n.imported],
+          selectedIndex: state.filter.index,
+          segmentKeys: const [
+            Key('sms-filter-review'),
+            Key('sms-filter-unmatched'),
+            Key('sms-filter-imported'),
+          ],
+          onSelected: (i) {
+            bloc.add(SmsInboxFilterChanged(SmsInboxFilter.values[i]));
+          },
+        ),
+        SizedBox(height: 12.h),
+      ],
+    );
+  }
+
+  Widget _messageRow(
+    BuildContext context,
+    List<SmsInboxItem> items,
+    int index,
+  ) {
+    final colors = context.colors;
+    final item = items[index];
+    final row = _SmsInboxRow(
+      item: item,
+      showDivider: index != items.length - 1,
+      onTap: () => context.push('/settings/sms/${item.id}'),
+    );
+    if (item.status == SmsInboxStatus.imported) return row;
+    return Dismissible(
+      key: ValueKey(item.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        color: colors.ledgerRed,
+        padding: EdgeInsetsDirectional.only(end: 16.w),
+        child: Icon(
+          TablerIcons.trash,
+          color: colors.onPrimary,
+          size: 20.r,
+        ),
+      ),
+      confirmDismiss: (_) {
+        final l10n = context.l10n;
+        return showDeleteConfirmDialog(
+          context: context,
+          title: l10n.skipSmsTitle,
+          message: l10n.skipSmsMessage,
+          confirmLabel: l10n.skip,
+        );
+      },
+      onDismissed: (_) {
+        context.read<SmsInboxBloc>().add(SmsInboxDismissRequested(item.id));
+      },
+      child: row,
+    );
   }
 }
 

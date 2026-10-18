@@ -31,3 +31,7 @@ class HomeDeleteRequested extends HomeEvent {
 
   final int id;
 }
+
+class HomeUndoDeleteRequested extends HomeEvent {
+  const HomeUndoDeleteRequested();
+}

@@ -3,7 +3,9 @@ import 'package:ledgr/domain/models/transaction_type.dart';
 import 'package:ledgr/domain/sms/keyword_categorizer.dart';
 import 'package:ledgr/domain/sms/money_parse.dart';
 import 'package:ledgr/domain/sms/sms_message.dart';
+import 'package:ledgr/domain/sms/sms_normalize.dart';
 import 'package:ledgr/domain/sms/sms_parser.dart';
+import 'package:ledgr/domain/sms/templates/generic.dart';
 
 RawSms _sms(String sender, String body) {
   return RawSms(
@@ -247,6 +249,34 @@ void main() {
         suggestCategoryName(haystack: 'ATM withdrawal', type: TransactionType.expense),
         isNull,
       );
+    });
+  });
+
+  group('generic overlap and senders', () {
+    test('credit card is an expense', () {
+      final parsed = parseGenericSms(
+        'Your credit card was charged EGP 80.00',
+      );
+      expect(parsed, isNotNull);
+      expect(parsed!.type, TransactionType.expense);
+      expect(parsed.amount, 8000);
+    });
+
+    test('standalone credited stays income', () {
+      final parsed = parseGenericSms(
+        'EGP 50.00 credited to your account',
+      );
+      expect(parsed, isNotNull);
+      expect(parsed!.type, TransactionType.income);
+      expect(parsed.amount, 5000);
+    });
+
+    test('short sender ids match only as whole tokens', () {
+      expect(senderTokenMatches('BM', 'BM'), isTrue);
+      expect(senderTokenMatches('BMCORP', 'BM'), isFalse);
+      expect(senderTokenMatches('CIB', 'CIB'), isTrue);
+      expect(senderTokenMatches('CIBEGYPT', 'CIB'), isFalse);
+      expect(senderTokenMatches('VODAFONECASH', 'VODAFONECASH'), isTrue);
     });
   });
 }

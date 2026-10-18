@@ -696,4 +696,100 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shortcutsUnavailable => 'تعذر فتح الاختصارات.';
+
+  @override
+  String get settingsLoadFailed => 'تعذر تحميل إعدادات الدفتر.';
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get entryDeleted => 'تم حذف القيد';
+
+  @override
+  String get discardCategoryTitle => 'تجاهل التغييرات؟';
+
+  @override
+  String get discardCategoryMessage => 'ستُفقد تعديلات هذا التصنيف.';
+
+  @override
+  String get iconCoffee => 'قهوة';
+
+  @override
+  String get iconShopping => 'تسوق';
+
+  @override
+  String get iconTransit => 'تنقل';
+
+  @override
+  String get iconBooks => 'كتب';
+
+  @override
+  String get iconDining => 'طعام';
+
+  @override
+  String get iconTools => 'أدوات';
+
+  @override
+  String get iconHousing => 'سكن';
+
+  @override
+  String get iconMusic => 'موسيقى';
+
+  @override
+  String get iconCamera => 'كاميرا';
+
+  @override
+  String get iconTravel => 'سفر';
+
+  @override
+  String get iconInvoice => 'فاتورة';
+
+  @override
+  String get iconHealth => 'صحة';
+
+  @override
+  String get iconMovies => 'أفلام';
+
+  @override
+  String get iconWallet => 'محفظة';
+
+  @override
+  String get iconWork => 'عمل';
+
+  @override
+  String get iconTransfer => 'تحويل';
+
+  @override
+  String get iconOther => 'أخرى';
+
+  @override
+  String get iconGift => 'هدية';
+
+  @override
+  String get iconPhone => 'هاتف';
+
+  @override
+  String get iconUtilities => 'مرافق';
+
+  @override
+  String get iconFuel => 'وقود';
+
+  @override
+  String get iconBank => 'بنك';
+
+  @override
+  String get iconTv => 'تلفاز';
+
+  @override
+  String get iconCalendar => 'تقويم';
+
+  @override
+  String get iconTag => 'وسم';
+
+  @override
+  String get iconPersonal => 'شخصي';
+
+  @override
+  String get iconReceipt => 'إيصال';
 }

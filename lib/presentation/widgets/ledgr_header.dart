@@ -50,7 +50,7 @@ class LedgrHeader extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    section.toUpperCase(),
+                    latinUppercase(context, section),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: uiStyle(

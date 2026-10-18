@@ -6,6 +6,7 @@ import 'bank_id.dart';
 
 final _expenseKeyword = RegExp(
   r'(debit(?:ed)?|purchased?|withdrawn|withdrawal|paid|payment to|sent to|'
+  r'credit\s*cards?|'
   r'خصم|مشتريات|سحب|مدفوع|تحويل إلى|تم تحويل)',
   caseSensitive: false,
 );
@@ -13,6 +14,18 @@ final _expenseKeyword = RegExp(
 final _incomeKeyword = RegExp(
   r'(credit(?:ed)?|received|deposit(?:ed)?|salary|payroll|'
   r'ايداع|إيداع|استلام|واردة|راتب)',
+  caseSensitive: false,
+);
+
+final _strongExpense = RegExp(
+  r'(debit(?:ed)?|purchased?|withdrawn|withdrawal|\bpaid\b|credit\s*cards?|'
+  r'خصم|مشتريات|سحب)',
+  caseSensitive: false,
+);
+
+final _strongIncome = RegExp(
+  r'(credited|\breceived\b|deposit(?:ed)?|salary|payroll|'
+  r'ايداع|إيداع|راتب)',
   caseSensitive: false,
 );
 
@@ -41,8 +54,27 @@ bool _isBalanceContext(String body, int start) {
 }
 
 ParsedSms? parseGenericSms(String body) {
-  final expense = _expenseKeyword.hasMatch(body);
-  final income = _incomeKeyword.hasMatch(body);
+  final forIncome = body.replaceAll(
+    RegExp(r'credit\s*cards?', caseSensitive: false),
+    ' ',
+  );
+  var expense = _expenseKeyword.hasMatch(body);
+  var income = _incomeKeyword.hasMatch(forIncome);
+  if (expense && income) {
+    if (RegExp(r'credit\s*cards?', caseSensitive: false).hasMatch(body)) {
+      income = false;
+    } else {
+      final strongExpense = _strongExpense.hasMatch(body);
+      final strongIncome = _strongIncome.hasMatch(forIncome);
+      if (strongExpense && !strongIncome) {
+        income = false;
+      } else if (strongIncome && !strongExpense) {
+        expense = false;
+      } else {
+        return null;
+      }
+    }
+  }
   if (expense == income) return null;
 
   final matches = [

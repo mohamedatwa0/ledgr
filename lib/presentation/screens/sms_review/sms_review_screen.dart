@@ -38,6 +38,7 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
   late final TextEditingController _amount;
   late final TextEditingController _note;
   var _hydrated = false;
+  var _allowPop = false;
 
   @override
   void initState() {
@@ -51,6 +52,29 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
     _amount.dispose();
     _note.dispose();
     super.dispose();
+  }
+
+  Future<void> _onClose(
+    BuildContext context,
+    SmsReviewState state,
+  ) async {
+    if (state.isDirty) {
+      final l10n = context.l10n;
+      final discard = await showDeleteConfirmDialog(
+        context: context,
+        title: l10n.discardEntryTitle,
+        message: l10n.discardEntryMessage,
+        confirmLabel: l10n.discard,
+      );
+      if (discard && context.mounted) {
+        setState(() => _allowPop = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.pop();
+        });
+      }
+      return;
+    }
+    context.pop();
   }
 
   @override
@@ -82,7 +106,7 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
           context.pop();
           return;
         }
-        if (state.errorMessage != null) {
+        if (state.errorMessage != null && !state.notFound) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -96,37 +120,58 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
         final bloc = context.read<SmsReviewBloc>();
         final symbol = currencyByCode(state.currencyCode).symbol;
 
-        return Scaffold(
+        return PopScope(
+          canPop: _allowPop || !state.isDirty,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            await _onClose(context, state);
+          },
+          child: Scaffold(
           appBar: LedgrAppBar(
             title: l10n.confirmEntry,
             leading: IconButton(
               tooltip: l10n.close,
-              onPressed: () => context.pop(),
+              onPressed: () => _onClose(context, state),
               icon: Icon(TablerIcons.x, color: colors.onSurface, size: 19.r),
             ),
             actions: [
-              IconButton(
-                key: const Key('sms-dismiss'),
-                tooltip: l10n.skip,
-                onPressed: () async {
-                  final confirmed = await showDeleteConfirmDialog(
-                    context: context,
-                    title: l10n.skipSmsTitle,
-                    message: l10n.skipSmsMessage,
-                    confirmLabel: l10n.skip,
-                  );
-                  if (confirmed && context.mounted) {
-                    bloc.add(const SmsReviewDismissRequested());
-                  }
-                },
-                icon: Icon(TablerIcons.trash,
-                    color: colors.ledgerRed, size: 19.r),
-              ),
+              if (!state.notFound)
+                IconButton(
+                  key: const Key('sms-dismiss'),
+                  tooltip: l10n.skip,
+                  onPressed: () async {
+                    final confirmed = await showDeleteConfirmDialog(
+                      context: context,
+                      title: l10n.skipSmsTitle,
+                      message: l10n.skipSmsMessage,
+                      confirmLabel: l10n.skip,
+                    );
+                    if (confirmed && context.mounted) {
+                      bloc.add(const SmsReviewDismissRequested());
+                    }
+                  },
+                  icon: Icon(TablerIcons.trash,
+                      color: colors.ledgerRed, size: 19.r),
+                ),
             ],
           ),
           body: state.loading
               ? Center(child: CircularProgressIndicator(color: colors.primary))
-              : Column(
+              : state.notFound
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Text(
+                          l10n.smsNotFound,
+                          textAlign: TextAlign.center,
+                          style: uiStyle(
+                            fontSize: 14,
+                            color: colors.secondary,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Column(
                   children: [
                     Expanded(
                       child: ListView(
@@ -376,6 +421,7 @@ class _SmsReviewScreenState extends State<SmsReviewScreen> {
                     ),
                   ],
                 ),
+          ),
         );
       },
     );

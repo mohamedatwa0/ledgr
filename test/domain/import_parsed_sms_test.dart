@@ -35,6 +35,10 @@ class _FailingMarkImportedInbox implements SmsInboxRepository {
       _inner.findByFingerprint(fingerprint);
 
   @override
+  Future<SmsInboxItem?> findByPlatformMessageId(String platformMessageId) =>
+      _inner.findByPlatformMessageId(platformMessageId);
+
+  @override
   Future<SmsInboxItem> insert(SmsInboxInsert row) => _inner.insert(row);
 
   @override

@@ -74,7 +74,7 @@ String? suggestCategoryName({
         'gas bill',
         'water bill',
       ]) ||
-      RegExp(r'\bwe\b').hasMatch(text)) {
+      RegExp(r'\bwe\s+(pay|telecom|bill)\b').hasMatch(text)) {
     return 'Bills & Utilities';
   }
 

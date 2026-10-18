@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../domain/date_utils.dart';
+import '../../../../domain/exceptions.dart';
+import '../../../../domain/models/transaction_command.dart';
 import '../../../../domain/models/transaction_entry.dart';
 import '../../../../domain/models/transaction_type.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../domain/usecases/create_transaction.dart';
 import '../../../../domain/usecases/delete_transaction.dart';
 import 'history_event.dart';
 import 'history_state.dart';
@@ -14,12 +17,15 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   HistoryBloc({
     required TransactionRepository transactions,
     required DeleteTransaction deleteTransaction,
+    required CreateTransaction createTransaction,
   })  : _transactions = transactions,
         _deleteTransaction = deleteTransaction,
+        _createTransaction = createTransaction,
         super(HistoryState.initial()) {
     on<HistoryStarted>(_onStarted);
     on<HistoryFilterChanged>(_onFilterChanged);
     on<HistoryDeleteRequested>(_onDeleteRequested);
+    on<HistoryUndoDeleteRequested>(_onUndoDeleteRequested);
     on<HistoryEntriesUpdated>(_onEntriesUpdated);
     on<HistoryQueryChanged>(_onQueryChanged);
     on<HistoryMonthChanged>(_onMonthChanged);
@@ -27,6 +33,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
 
   final TransactionRepository _transactions;
   final DeleteTransaction _deleteTransaction;
+  final CreateTransaction _createTransaction;
   StreamSubscription<List<TransactionEntry>>? _subscription;
 
   void _onStarted(HistoryStarted event, Emitter<HistoryState> emit) {
@@ -38,7 +45,13 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     Emitter<HistoryState> emit,
   ) {
     if (event.filter == state.filter) return;
-    emit(state.copyWith(filter: event.filter, loading: state.entries.isEmpty));
+    emit(
+      state.copyWith(
+        filter: event.filter,
+        entries: const [],
+        loading: true,
+      ),
+    );
     _watch(filter: event.filter, month: state.month);
   }
 
@@ -58,8 +71,61 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   Future<void> _onDeleteRequested(
     HistoryDeleteRequested event,
     Emitter<HistoryState> emit,
-  ) {
-    return _deleteTransaction(event.id);
+  ) async {
+    TransactionEntry? entry;
+    for (final item in state.entries) {
+      if (item.transaction.id == event.id) {
+        entry = item;
+        break;
+      }
+    }
+    final previous = state.entries;
+    emit(
+      state.copyWith(
+        entries: [
+          for (final item in state.entries)
+            if (item.transaction.id != event.id) item,
+        ],
+        undoEntry: entry,
+        clearError: true,
+      ),
+    );
+    try {
+      await _deleteTransaction(event.id);
+    } on LedgrException catch (e) {
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            entries: previous,
+            errorMessage: e.message,
+            clearUndo: true,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _onUndoDeleteRequested(
+    HistoryUndoDeleteRequested event,
+    Emitter<HistoryState> emit,
+  ) async {
+    final entry = state.undoEntry;
+    if (entry == null) return;
+    try {
+      await _createTransaction(
+        TransactionCommand(
+          amount: entry.transaction.amount,
+          type: entry.transaction.type,
+          categoryId: entry.category.id,
+          note: entry.transaction.note,
+          date: entry.transaction.date,
+          source: entry.transaction.source,
+        ),
+      );
+      if (!isClosed) emit(state.copyWith(clearUndo: true, clearError: true));
+    } on LedgrException catch (e) {
+      if (!isClosed) emit(state.copyWith(errorMessage: e.message));
+    }
   }
 
   void _onEntriesUpdated(

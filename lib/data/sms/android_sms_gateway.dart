@@ -88,6 +88,11 @@ class AndroidSmsGateway implements SmsGateway {
   }
 
   @override
+  Future<void> clearPending() async {
+    await _invoke<bool>('clearPending');
+  }
+
+  @override
   Future<bool> openImportSetup() async {
     return await _invoke<bool>('openImportSetup') ?? false;
   }

@@ -1,3 +1,4 @@
+import '../sms_normalize.dart';
 import 'banque_du_caire.dart';
 import 'banque_misr.dart';
 import 'cib.dart';
@@ -5,6 +6,8 @@ import 'instapay.dart';
 import 'nbe.dart';
 import 'qnb.dart';
 import 'sms_template.dart';
+
+const smsPlaceholderSenders = {'', 'SHARE', 'PASTE', 'MESSAGES', 'SMS'};
 
 final List<SmsTemplate> allSmsTemplates = [
   ...cibTemplates,
@@ -22,19 +25,15 @@ Set<String> smsSenderAllowlist() {
 }
 
 List<SmsTemplate> templatesForSender(String normalizedSender) {
-  if (normalizedSender.isEmpty) return allSmsTemplates;
-  final matching = <SmsTemplate>[];
-  final rest = <SmsTemplate>[];
-  for (final template in allSmsTemplates) {
-    final hits = template.senderIds.any((id) {
-      final token = id.toUpperCase().replaceAll(RegExp(r'[\s\-_.]+'), '');
-      return normalizedSender.contains(token) || token.contains(normalizedSender);
-    });
-    if (hits) {
-      matching.add(template);
-    } else {
-      rest.add(template);
-    }
+  if (normalizedSender.isEmpty ||
+      smsPlaceholderSenders.contains(normalizedSender)) {
+    return allSmsTemplates;
   }
-  return [...matching, ...rest];
+  return [
+    for (final template in allSmsTemplates)
+      if (template.senderIds.any((id) {
+        return senderTokenMatches(normalizedSender, normalizeSender(id));
+      }))
+        template,
+  ];
 }

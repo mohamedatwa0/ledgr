@@ -25,6 +25,9 @@ class NoOpSmsGateway implements SmsGateway {
   Future<void> acknowledge(List<String> queueIds) async {}
 
   @override
+  Future<void> clearPending() async {}
+
+  @override
   Future<bool> openImportSetup() async => false;
 
   @override

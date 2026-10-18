@@ -43,8 +43,8 @@ class SmsPlugin :
             instance?.onShareIntent(intent)
         }
 
-        fun emitIncoming(sender: String, body: String, dateMs: Long) {
-            instance?.emitIncomingSms(sender, body, dateMs)
+        fun emitIncoming(sender: String, body: String, dateMs: Long, queueId: String) {
+            instance?.emitIncomingSms(sender, body, dateMs, queueId)
         }
 
         fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray): Boolean {
@@ -54,6 +54,7 @@ class SmsPlugin :
     }
 
     private var activity: Activity? = null
+    private var appContext: android.content.Context? = null
     private var methodChannel: MethodChannel? = null
     private var incomingChannel: EventChannel? = null
     private var shareChannel: EventChannel? = null
@@ -65,6 +66,7 @@ class SmsPlugin :
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         instance = this
+        appContext = binding.applicationContext
         val messenger = binding.binaryMessenger
 
         methodChannel = MethodChannel(messenger, METHOD).also {
@@ -138,7 +140,18 @@ class SmsPlugin :
             "readSince" -> {
                 val sinceMs = call.argument<Number>("sinceMs")?.toLong()
                 val senders = call.argument<List<String>>("senders") ?: emptyList()
-                result.success(readInbox(sinceMs, senders))
+                result.success(readSince(sinceMs, senders))
+            }
+            "acknowledge" -> {
+                val ids = call.argument<List<String>>("ids") ?: emptyList()
+                val ctx = appContext
+                if (ctx != null) BankSmsQueue.remove(ctx, ids)
+                result.success(true)
+            }
+            "clearPending" -> {
+                val ctx = appContext
+                if (ctx != null) BankSmsQueue.clear(ctx)
+                result.success(true)
             }
             "takeInitialSharedText" -> {
                 val text = pendingShare
@@ -179,17 +192,30 @@ class SmsPlugin :
         }
     }
 
-    private fun emitIncomingSms(sender: String, body: String, dateMs: Long) {
+    private fun emitIncomingSms(
+        sender: String,
+        body: String,
+        dateMs: Long,
+        queueId: String,
+    ) {
         val sink = incomingSink ?: return
         main.post {
             sink.success(
                 hashMapOf(
+                    "queueId" to queueId,
                     "sender" to sender,
                     "body" to body,
                     "dateMs" to dateMs,
                 ),
             )
         }
+    }
+
+    private fun readSince(sinceMs: Long?, senders: List<String>): List<Map<String, Any?>> {
+        val ctx = appContext
+        val queued = if (ctx != null) BankSmsQueue.pending(ctx) else emptyList()
+        val inbox = readInbox(sinceMs, senders)
+        return queued + inbox
     }
 
     private fun hasSmsPermission(): Boolean {
@@ -222,41 +248,73 @@ class SmsPlugin :
         val current = activity ?: return emptyList()
         if (!hasSmsPermission()) return emptyList()
         val normalizedSenders = senders.map { normalizeSender(it) }.filter { it.isNotEmpty() }
-        val selection = if (sinceMs != null) "${Telephony.Sms.DATE} > ?" else null
-        val args = if (sinceMs != null) arrayOf(sinceMs.toString()) else null
-        val cursor = current.contentResolver.query(
-            Telephony.Sms.Inbox.CONTENT_URI,
-            arrayOf(
-                Telephony.Sms._ID,
-                Telephony.Sms.ADDRESS,
-                Telephony.Sms.BODY,
-                Telephony.Sms.DATE,
-            ),
-            selection,
-            args,
-            "${Telephony.Sms.DATE} DESC",
-        ) ?: return emptyList()
-
         val rows = mutableListOf<Map<String, Any?>>()
-        cursor.use {
-            val idIdx = it.getColumnIndex(Telephony.Sms._ID)
-            val addressIdx = it.getColumnIndex(Telephony.Sms.ADDRESS)
-            val bodyIdx = it.getColumnIndex(Telephony.Sms.BODY)
-            val dateIdx = it.getColumnIndex(Telephony.Sms.DATE)
-            while (it.moveToNext() && rows.size < 500) {
-                val address = if (addressIdx >= 0) it.getString(addressIdx) ?: "" else ""
-                if (normalizedSenders.isNotEmpty() && !senderAllowed(address, normalizedSenders)) {
-                    continue
-                }
-                rows.add(
-                    hashMapOf(
-                        "id" to if (idIdx >= 0) it.getLong(idIdx) else null,
-                        "sender" to address,
-                        "body" to if (bodyIdx >= 0) it.getString(bodyIdx) ?: "" else "",
-                        "dateMs" to if (dateIdx >= 0) it.getLong(dateIdx) else 0L,
-                    ),
-                )
+        val pageSize = 200
+        var cursorDate: Long? = null
+        var cursorId: Long? = null
+        while (true) {
+            val parts = mutableListOf<String>()
+            val args = mutableListOf<String>()
+            if (sinceMs != null) {
+                parts.add("${Telephony.Sms.DATE} > ?")
+                args.add(sinceMs.toString())
             }
+            if (cursorDate != null && cursorId != null) {
+                parts.add(
+                    "(${Telephony.Sms.DATE} < ? OR (${Telephony.Sms.DATE} = ? AND ${Telephony.Sms._ID} < ?))",
+                )
+                args.add(cursorDate.toString())
+                args.add(cursorDate.toString())
+                args.add(cursorId.toString())
+            }
+            val page = current.contentResolver.query(
+                Telephony.Sms.Inbox.CONTENT_URI,
+                arrayOf(
+                    Telephony.Sms._ID,
+                    Telephony.Sms.ADDRESS,
+                    Telephony.Sms.BODY,
+                    Telephony.Sms.DATE,
+                ),
+                if (parts.isEmpty()) null else parts.joinToString(" AND "),
+                if (args.isEmpty()) null else args.toTypedArray(),
+                "${Telephony.Sms.DATE} DESC, ${Telephony.Sms._ID} DESC",
+            ) ?: break
+
+            var pageCount = 0
+            var lastDate: Long? = null
+            var lastId: Long? = null
+            page.use {
+                val idIdx = it.getColumnIndex(Telephony.Sms._ID)
+                val addressIdx = it.getColumnIndex(Telephony.Sms.ADDRESS)
+                val bodyIdx = it.getColumnIndex(Telephony.Sms.BODY)
+                val dateIdx = it.getColumnIndex(Telephony.Sms.DATE)
+                while (it.moveToNext() && pageCount < pageSize) {
+                    pageCount++
+                    val id = if (idIdx >= 0) it.getLong(idIdx) else 0L
+                    val dateMs = if (dateIdx >= 0) it.getLong(dateIdx) else 0L
+                    lastDate = dateMs
+                    lastId = id
+                    val address = if (addressIdx >= 0) it.getString(addressIdx) ?: "" else ""
+                    if (normalizedSenders.isNotEmpty() &&
+                        !senderAllowed(address, normalizedSenders)
+                    ) {
+                        continue
+                    }
+                    rows.add(
+                        hashMapOf(
+                            "id" to id,
+                            "sender" to address,
+                            "body" to if (bodyIdx >= 0) it.getString(bodyIdx) ?: "" else "",
+                            "dateMs" to dateMs,
+                        ),
+                    )
+                }
+            }
+            if (pageCount == 0 || pageCount < pageSize) break
+            if (lastDate == null || lastId == null) break
+            if (cursorDate == lastDate && cursorId == lastId) break
+            cursorDate = lastDate
+            cursorId = lastId
         }
         return rows.reversed()
     }
@@ -264,9 +322,14 @@ class SmsPlugin :
     private fun senderAllowed(address: String, senders: List<String>): Boolean {
         val normalized = normalizeSender(address)
         if (normalized.isEmpty()) return false
-        return senders.any { token ->
-            normalized.contains(token) || token.contains(normalized)
-        }
+        return senders.any { token -> senderTokenMatches(normalized, token) }
+    }
+
+    private fun senderTokenMatches(normalized: String, token: String): Boolean {
+        if (normalized == token) return true
+        if (token.length >= 4 && normalized.contains(token)) return true
+        if (normalized.length >= 4 && token.contains(normalized)) return true
+        return false
     }
 
     private fun normalizeSender(value: String): String {

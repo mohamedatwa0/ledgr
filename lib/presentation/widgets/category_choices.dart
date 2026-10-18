@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class CategoryIconChoice {
   const CategoryIconChoice(this.icon, this.label);
 
@@ -43,6 +45,67 @@ String? categoryIconLabel(int codePoint) {
     if (choice.icon.codePoint == codePoint) return choice.label;
   }
   return null;
+}
+
+String? localizedCategoryIconLabel(AppLocalizations l10n, String? label) {
+  switch (label) {
+    case 'Coffee':
+      return l10n.iconCoffee;
+    case 'Shopping':
+      return l10n.iconShopping;
+    case 'Transit':
+      return l10n.iconTransit;
+    case 'Books':
+      return l10n.iconBooks;
+    case 'Dining':
+      return l10n.iconDining;
+    case 'Tools':
+      return l10n.iconTools;
+    case 'Housing':
+      return l10n.iconHousing;
+    case 'Music':
+      return l10n.iconMusic;
+    case 'Camera':
+      return l10n.iconCamera;
+    case 'Travel':
+      return l10n.iconTravel;
+    case 'Invoice':
+      return l10n.iconInvoice;
+    case 'Health':
+      return l10n.iconHealth;
+    case 'Movies':
+      return l10n.iconMovies;
+    case 'Wallet':
+      return l10n.iconWallet;
+    case 'Work':
+      return l10n.iconWork;
+    case 'Transfer':
+      return l10n.iconTransfer;
+    case 'Other':
+      return l10n.iconOther;
+    case 'Gift':
+      return l10n.iconGift;
+    case 'Phone':
+      return l10n.iconPhone;
+    case 'Utilities':
+      return l10n.iconUtilities;
+    case 'Fuel':
+      return l10n.iconFuel;
+    case 'Bank':
+      return l10n.iconBank;
+    case 'TV':
+      return l10n.iconTv;
+    case 'Calendar':
+      return l10n.iconCalendar;
+    case 'Tag':
+      return l10n.iconTag;
+    case 'Personal':
+      return l10n.iconPersonal;
+    case 'Receipt':
+      return l10n.iconReceipt;
+    default:
+      return label;
+  }
 }
 
 const categoryColorChoices = <int>[

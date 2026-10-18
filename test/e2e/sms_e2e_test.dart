@@ -37,7 +37,7 @@ void main() {
     await tester.tap(find.byKey(const Key('save-entry')));
     await settle(tester);
 
-    await tester.tap(find.text('Imported'));
+    await tester.tap(find.byKey(const Key('sms-filter-imported')));
     await settle(tester);
 
     expect(find.text('STARBUCKS'), findsOneWidget);
@@ -55,7 +55,7 @@ void main() {
     await settle(tester);
     await tester.dragUntilVisible(
       find.byKey(const Key('settings-sms')),
-      find.byType(ListView),
+      find.byKey(const Key('settings-scroll')),
       const Offset(0, -200),
     );
     await tester.tap(find.byKey(const Key('settings-sms')));

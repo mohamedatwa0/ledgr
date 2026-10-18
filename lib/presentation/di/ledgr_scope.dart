@@ -142,6 +142,8 @@ class _LedgrScopeState extends State<LedgrScope> {
           create: (context) => ResetLedger(
             transactions: context.read<TransactionRepository>(),
             smsInbox: context.read<SmsInboxRepository>(),
+            settings: context.read<SettingsRepository>(),
+            sms: context.read<SmsGateway>(),
           ),
         ),
       ],

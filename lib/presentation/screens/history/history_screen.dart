@@ -11,6 +11,8 @@ import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../formatters/date_labels.dart';
 import '../../widgets/debit_credit_toggle.dart';
+import '../../widgets/directional_icon.dart';
+import '../../widgets/entry_deleted_snackbar.dart';
 import '../../widgets/ledgr_empty_state.dart';
 import '../../widgets/ruled_transaction_row.dart';
 import 'bloc/history_bloc.dart';
@@ -23,10 +25,33 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return BlocBuilder<HistoryBloc, HistoryState>(
+    return BlocConsumer<HistoryBloc, HistoryState>(
+      listenWhen: (previous, current) =>
+          current.undoEntry != previous.undoEntry ||
+          current.errorMessage != previous.errorMessage,
+      listener: (context, state) {
+        if (state.errorMessage != null) {
+          showLedgerErrorSnackBar(context, state.errorMessage!);
+        }
+        if (state.undoEntry != null) {
+          showEntryDeletedSnackBar(
+            context,
+            onUndo: () => context
+                .read<HistoryBloc>()
+                .add(const HistoryUndoDeleteRequested()),
+          );
+        }
+      },
       builder: (context, state) {
         final visible = state.visibleFor(context.l10n);
         final l10n = context.l10n;
+        final groups =
+            groupByDate(visible, (e) => e.transaction.date, l10n: l10n);
+        final rows = <Object>[];
+        for (final group in groups) {
+          rows.add(group);
+          rows.addAll(group.items);
+        }
         return Column(
           children: [
             Container(
@@ -94,7 +119,7 @@ class HistoryScreen extends StatelessWidget {
                             ),
                           );
                     },
-                    icon: Icon(
+                    icon: DirectionalIcon(
                       TablerIcons.chevron_left,
                       size: 16.r,
                       color: colors.secondary,
@@ -142,7 +167,7 @@ class HistoryScreen extends StatelessWidget {
                                   ),
                                 );
                           },
-                    icon: Icon(
+                    icon: DirectionalIcon(
                       TablerIcons.chevron_right,
                       size: 16.r,
                       color: state.isCurrentMonth
@@ -173,9 +198,12 @@ class HistoryScreen extends StatelessWidget {
                                 color: colors.ledgerRed.withValues(alpha: 0.9),
                               ),
                             ),
-                            ListView(
+                            ListView.builder(
+                              key: const Key('history-scroll'),
                               padding: EdgeInsets.fromLTRB(0.w, 0.h, 0.w, 96.h),
-                              children: _groupedRows(context, visible),
+                              itemCount: rows.length,
+                              itemBuilder: (context, index) =>
+                                  _historyRow(context, rows[index]),
                             ),
                           ],
                         ),
@@ -208,56 +236,44 @@ class HistoryScreen extends StatelessWidget {
     }
   }
 
-  List<Widget> _groupedRows(
-    BuildContext context,
-    List<TransactionEntry> items,
-  ) {
+  Widget _historyRow(BuildContext context, Object row) {
     final colors = context.colors;
     final l10n = context.l10n;
-    final groups = groupByDate(items, (e) => e.transaction.date, l10n: l10n);
-    final widgets = <Widget>[];
-    for (final group in groups) {
-      widgets.add(
-        Container(
-          padding: EdgeInsetsDirectional.fromSTEB(40.w, 8.h, 16.w, 8.h),
-          color: colors.surfaceContainerLow.withValues(alpha: 0.6),
-          child: Row(
-            children: [
-              Text(
-                group.label.toUpperCase(),
-                style: uiStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: colors.secondary,
-                  letterSpacing: ltrLetterSpacing(context, 1.2),
-                ),
+    if (row is DateGrouped<TransactionEntry>) {
+      return Container(
+        padding: EdgeInsetsDirectional.fromSTEB(40.w, 8.h, 16.w, 8.h),
+        color: colors.surfaceContainerLow.withValues(alpha: 0.6),
+        child: Row(
+          children: [
+            Text(
+              latinUppercase(context, row.label),
+              style: uiStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: colors.secondary,
+                letterSpacing: ltrLetterSpacing(context, 1.2),
               ),
-              const Spacer(),
-              Text(
-                l10n.postItemsCount(group.items.length),
-                style: uiStyle(fontSize: 10, color: colors.outline),
-              ),
-            ],
-          ),
+            ),
+            const Spacer(),
+            Text(
+              l10n.postItemsCount(row.items.length),
+              style: uiStyle(fontSize: 10, color: colors.outline),
+            ),
+          ],
         ),
       );
-      for (var i = 0; i < group.items.length; i++) {
-        final entry = group.items[i];
-        widgets.add(
-          RuledTransactionRow(
-            entry: entry,
-            showDivider: true,
-            leadingInset: 24,
-            onTap: () => context.push('/transaction/${entry.transaction.id}'),
-            onDelete: () {
-              context
-                  .read<HistoryBloc>()
-                  .add(HistoryDeleteRequested(entry.transaction.id));
-            },
-          ),
-        );
-      }
     }
-    return widgets;
+    final entry = row as TransactionEntry;
+    return RuledTransactionRow(
+      entry: entry,
+      showDivider: true,
+      leadingInset: 24,
+      onTap: () => context.push('/transaction/${entry.transaction.id}'),
+      onDelete: () {
+        context
+            .read<HistoryBloc>()
+            .add(HistoryDeleteRequested(entry.transaction.id));
+      },
+    );
   }
 }

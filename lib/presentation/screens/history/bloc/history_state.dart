@@ -12,6 +12,8 @@ class HistoryState {
     required this.month,
     this.query = '',
     this.loading = false,
+    this.undoEntry,
+    this.errorMessage,
   });
 
   final HistoryFilter filter;
@@ -19,6 +21,8 @@ class HistoryState {
   final DateTime month;
   final String query;
   final bool loading;
+  final TransactionEntry? undoEntry;
+  final String? errorMessage;
 
   bool get isCurrentMonth => isSameMonth(month, DateTime.now());
 
@@ -56,6 +60,10 @@ class HistoryState {
     DateTime? month,
     String? query,
     bool? loading,
+    TransactionEntry? undoEntry,
+    String? errorMessage,
+    bool clearUndo = false,
+    bool clearError = false,
   }) {
     return HistoryState(
       filter: filter ?? this.filter,
@@ -63,6 +71,8 @@ class HistoryState {
       month: month ?? this.month,
       query: query ?? this.query,
       loading: loading ?? this.loading,
+      undoEntry: clearUndo ? null : (undoEntry ?? this.undoEntry),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }

@@ -115,14 +115,19 @@ enum BankSmsQueue {
     return components.url
   }
 
+  static func clear() {
+    lock.lock()
+    defer { lock.unlock() }
+    defaults().removeObject(forKey: queueKey)
+  }
+
   static func accepts(sender: String, body: String) -> Bool {
     let text = normalize(body)
     if text.isEmpty || looksLikeOtp(text) { return false }
     let normalizedSender = normalizeSender(sender)
-    if !placeholderSenders.contains(normalizedSender),
-       senderAllowed(normalizedSender) {
-      return true
-    }
+    let known = !placeholderSenders.contains(normalizedSender) &&
+      senderAllowed(normalizedSender)
+    if known { return bodyLooksLikeTransaction(text) }
     return bodyLooksLikeBankOrWallet(text)
   }
 
@@ -163,6 +168,19 @@ enum BankSmsQueue {
     return senderTokens.contains { token in
       sender.contains(token) || token.contains(sender)
     }
+  }
+
+  private static let lightTxnPattern =
+    "(debit(?:ed)?|credit(?:ed)?|purchased?|withdrawn|withdrawal|" +
+    "\\bpaid\\b|\\bpayment\\b|\\breceived\\b|\\bcharged\\b|\\bsent\\b|" +
+    "خصم|سحب|ايداع|إيداع|تحويل|مدفوع|مشتريات)"
+
+  private static func bodyLooksLikeTransaction(_ text: String) -> Bool {
+    let hasMoney = matches(moneyPattern, text) || text.rangeOfCharacter(from: .decimalDigits) != nil
+    return hasMoney &&
+      (matches(verbPattern, text) ||
+        matches(lightTxnPattern, text) ||
+        matches(arabicVerbPattern, text))
   }
 
   private static func bodyLooksLikeBankOrWallet(_ text: String) -> Bool {

@@ -40,6 +40,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   late final TextEditingController _amount;
   late final TextEditingController _note;
   var _hydrated = false;
+  var _allowPop = false;
 
   @override
   void initState() {
@@ -75,9 +76,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _onBack(
     BuildContext context,
     AddTransactionState state,
-    bool isNew,
   ) async {
-    if (isNew && state.isDirty) {
+    if (state.isDirty) {
       final l10n = context.l10n;
       final discard = await showDeleteConfirmDialog(
         context: context,
@@ -85,7 +85,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         message: l10n.discardEntryMessage,
         confirmLabel: l10n.discard,
       );
-      if (discard && context.mounted) context.pop();
+      if (discard && context.mounted) {
+        setState(() => _allowPop = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.pop();
+        });
+      }
       return;
     }
     context.pop();
@@ -147,12 +152,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         final bloc = context.read<AddTransactionBloc>();
         final symbol = currencyByCode(state.currencyCode).symbol;
 
-        return Scaffold(
+        return PopScope(
+          canPop: _allowPop || !state.isDirty,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            await _onBack(context, state);
+          },
+          child: Scaffold(
           appBar: LedgrAppBar(
             title: id == null ? l10n.newEntry : l10n.editEntry,
             leading: IconButton(
               tooltip: l10n.back,
-              onPressed: () => _onBack(context, state, id == null),
+              onPressed: () => _onBack(context, state),
               icon: DirectionalIcon(
                 TablerIcons.arrow_left,
                 color: colors.onSurface,
@@ -193,6 +204,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       children: [
                         Expanded(
                           child: ListView(
+                            key: const Key('entry-form-scroll'),
                             padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
                             children: [
                               DebitCreditToggle(
@@ -648,6 +660,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         ),
                       ],
                     ),
+          ),
         );
       },
     );

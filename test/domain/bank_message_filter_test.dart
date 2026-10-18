@@ -20,7 +20,7 @@ void main() {
     expect(
       isBankOrWalletMessage(
         sender: 'VF-Cash',
-        body: 'Your wallet was charged',
+        body: 'Your wallet was charged EGP 50.00',
       ),
       isTrue,
     );
@@ -41,7 +41,7 @@ void main() {
     expect(
       isBankOrWalletMessage(
         sender: 'AAIB',
-        body: 'Your account was debited',
+        body: 'Your account was debited EGP 100.00',
       ),
       isTrue,
     );
@@ -69,7 +69,7 @@ void main() {
     expect(
       isBankOrWalletMessage(
         sender: 'Halan',
-        body: 'Payment received',
+        body: 'Payment received EGP 20.00',
       ),
       isTrue,
     );
@@ -96,6 +96,27 @@ void main() {
     );
     expect(
       isBankOrWalletMessage(sender: 'share', body: 'See you at 7'),
+      isFalse,
+    );
+    expect(
+      isBankOrWalletMessage(sender: 'CIB', body: 'Hello from the bank'),
+      isFalse,
+    );
+  });
+
+  test('known sender still needs a transaction-shaped body', () {
+    expect(
+      isBankOrWalletMessage(
+        sender: 'CIB',
+        body: 'Your monthly statement is ready',
+      ),
+      isFalse,
+    );
+    expect(
+      isBankOrWalletMessage(
+        sender: 'NBE',
+        body: 'Thank you for banking with us. Ref 998877',
+      ),
       isFalse,
     );
   });

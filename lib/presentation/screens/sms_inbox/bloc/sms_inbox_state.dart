@@ -7,6 +7,7 @@ enum SmsInboxFlash {
   foundMessages,
   notBankOrWallet,
   shortcutsUnavailable,
+  scanFailed,
 }
 
 class SmsInboxState {

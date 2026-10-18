@@ -1309,6 +1309,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open Shortcuts.'**
   String get shortcutsUnavailable;
+
+  /// No description provided for @settingsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your ledger settings.'**
+  String get settingsLoadFailed;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @entryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry deleted'**
+  String get entryDeleted;
+
+  /// No description provided for @discardCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardCategoryTitle;
+
+  /// No description provided for @discardCategoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits to this category will be lost.'**
+  String get discardCategoryMessage;
+
+  /// No description provided for @iconCoffee.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee'**
+  String get iconCoffee;
+
+  /// No description provided for @iconShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get iconShopping;
+
+  /// No description provided for @iconTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'Transit'**
+  String get iconTransit;
+
+  /// No description provided for @iconBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get iconBooks;
+
+  /// No description provided for @iconDining.
+  ///
+  /// In en, this message translates to:
+  /// **'Dining'**
+  String get iconDining;
+
+  /// No description provided for @iconTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get iconTools;
+
+  /// No description provided for @iconHousing.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get iconHousing;
+
+  /// No description provided for @iconMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get iconMusic;
+
+  /// No description provided for @iconCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get iconCamera;
+
+  /// No description provided for @iconTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get iconTravel;
+
+  /// No description provided for @iconInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get iconInvoice;
+
+  /// No description provided for @iconHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get iconHealth;
+
+  /// No description provided for @iconMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get iconMovies;
+
+  /// No description provided for @iconWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get iconWallet;
+
+  /// No description provided for @iconWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get iconWork;
+
+  /// No description provided for @iconTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get iconTransfer;
+
+  /// No description provided for @iconOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get iconOther;
+
+  /// No description provided for @iconGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get iconGift;
+
+  /// No description provided for @iconPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get iconPhone;
+
+  /// No description provided for @iconUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get iconUtilities;
+
+  /// No description provided for @iconFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel'**
+  String get iconFuel;
+
+  /// No description provided for @iconBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get iconBank;
+
+  /// No description provided for @iconTv.
+  ///
+  /// In en, this message translates to:
+  /// **'TV'**
+  String get iconTv;
+
+  /// No description provided for @iconCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get iconCalendar;
+
+  /// No description provided for @iconTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get iconTag;
+
+  /// No description provided for @iconPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get iconPersonal;
+
+  /// No description provided for @iconReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get iconReceipt;
 }
 
 class _AppLocalizationsDelegate

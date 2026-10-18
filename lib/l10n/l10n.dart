@@ -11,3 +11,8 @@ extension LedgrL10n on BuildContext {
 double? ltrLetterSpacing(BuildContext context, double value) {
   return Directionality.of(context) == TextDirection.ltr ? value : null;
 }
+
+String latinUppercase(BuildContext context, String value) {
+  if (Directionality.of(context) != TextDirection.ltr) return value;
+  return value.toUpperCase();
+}

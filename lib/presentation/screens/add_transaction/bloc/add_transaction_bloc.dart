@@ -112,12 +112,28 @@ class AddTransactionBloc
             clearPending: categoryId != null,
             userPickedCategory: categoryId != null,
             loading: false,
+            baselineAmountText: '',
+            baselineType: type,
+            baselineNote: '',
+            baselineDate: dateOnly(DateTime.now()),
+            clearBaselineCategory: true,
+            clearBaselinePending: true,
           ),
         );
         _watchCategories(type);
         return;
       }
-      emit(state.copyWith(type: settings.defaultEntryType));
+      emit(
+        state.copyWith(
+          type: settings.defaultEntryType,
+          baselineType: settings.defaultEntryType,
+          baselineDate: dateOnly(DateTime.now()),
+          baselineAmountText: '',
+          baselineNote: '',
+          clearBaselineCategory: true,
+          clearBaselinePending: true,
+        ),
+      );
       _watchCategories(settings.defaultEntryType);
       return;
     }
@@ -142,6 +158,12 @@ class AddTransactionBloc
         note: tx.note ?? '',
         date: dateOnly(tx.date),
         loading: false,
+        baselineAmountText: minorToInput(tx.amount),
+        baselineType: tx.type,
+        baselineCategoryId: tx.categoryId,
+        baselineNote: tx.note ?? '',
+        baselineDate: dateOnly(tx.date),
+        clearBaselinePending: true,
       ),
     );
     _watchCategories(tx.type);
@@ -303,16 +325,7 @@ class AddTransactionBloc
     }
     final existing = await _categories.findByNameAndType(name, type);
     if (existing != null) return existing.id;
-    if (draft.createIfMissing) {
-      final current = await _categories.watchByType(type).first;
-      final created = await _createCategory(
-        name: name,
-        type: type,
-        iconCodePoint: TablerIcons.tag.codePoint,
-        colorValue: _nextCategoryColor(current),
-      );
-      return created.id;
-    }
+    if (draft.createIfMissing) return null;
     return (await _categories.findOther(type))?.id;
   }
 

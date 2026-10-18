@@ -49,9 +49,7 @@ void main() {
     await pumpApp(tester, db: db);
     await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
-    await tester.ensureVisible(addCategory);
-    await tester.drag(find.byType(ListView), const Offset(0, -180));
-    await tester.pumpAndSettle();
+    await revealOnEntryForm(tester, addCategory);
     await tester.tap(addCategory);
     await settle(tester);
 
@@ -71,7 +69,8 @@ void main() {
     );
 
     await tester.pump(const Duration(seconds: 4));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(
       find.text('A category with that name already exists.'),
       findsNothing,
@@ -93,6 +92,15 @@ void main() {
   testWidgets('missing transaction shows an error not a spinner', (tester) async {
     await pumpApp(tester, db: db);
     await pushRoute(tester, '/transaction/999');
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('This entry is no longer in the ledger.'), findsOneWidget);
+    await disposeApp(tester);
+  });
+
+  testWidgets('non-numeric transaction route shows not found', (tester) async {
+    await pumpApp(tester, db: db);
+    await pushRoute(tester, '/transaction/abc');
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.text('This entry is no longer in the ledger.'), findsOneWidget);
@@ -130,6 +138,25 @@ void main() {
     await settle(tester);
     expect(find.text('To delete'), findsNothing);
     expect(find.text('No transactions in this view'), findsOneWidget);
+    await disposeApp(tester);
+  });
+
+  testWidgets('edit screen asks before discarding a changed amount',
+      (tester) async {
+    final created = await insertTransaction(db, amount: 4500, note: 'Keep me');
+    await pumpApp(tester, db: db);
+    await pushRoute(tester, '/transaction/${created.id}');
+    await tester.enterText(find.byKey(const Key('amount-field')), '99');
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+
+    expect(find.text('Discard this entry?'), findsOneWidget);
+    await tester.tap(find.text('Discard'));
+    await settle(tester);
+
+    expect(find.byKey(const Key('add-transaction-fab')), findsOneWidget);
     await disposeApp(tester);
   });
 
@@ -171,9 +198,7 @@ void main() {
     await settle(tester);
     await openNewEntry(tester);
     final addCategory = find.byKey(const Key('add-new-category'));
-    await tester.ensureVisible(addCategory);
-    await tester.drag(find.byType(ListView), const Offset(0, -180));
-    await tester.pumpAndSettle();
+    await revealOnEntryForm(tester, addCategory);
     await tester.tap(addCategory);
     await settle(tester);
 

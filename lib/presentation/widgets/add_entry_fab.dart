@@ -14,13 +14,18 @@ import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 
 class AddEntryFab extends StatefulWidget {
-  const AddEntryFab({super.key});
+  const AddEntryFab({
+    super.key,
+    this.onExpandedChanged,
+  });
+
+  final ValueChanged<bool>? onExpandedChanged;
 
   @override
-  State<AddEntryFab> createState() => _AddEntryFabState();
+  State<AddEntryFab> createState() => AddEntryFabState();
 }
 
-class _AddEntryFabState extends State<AddEntryFab> {
+class AddEntryFabState extends State<AddEntryFab> {
   var _expanded = false;
   var _listening = false;
   var _liveText = '';
@@ -32,21 +37,34 @@ class _AddEntryFabState extends State<AddEntryFab> {
     super.dispose();
   }
 
+  void collapse() {
+    if (!_expanded && !_listening) return;
+    _speech?.stop();
+    setState(() {
+      _listening = false;
+      _expanded = false;
+      _liveText = '';
+    });
+    widget.onExpandedChanged?.call(false);
+  }
+
+  void _setExpanded(bool value) {
+    if (_expanded == value) return;
+    setState(() => _expanded = value);
+    widget.onExpandedChanged?.call(value);
+  }
+
   void _toggleMenu() {
     if (_listening) {
       _speech?.stop();
-      setState(() {
-        _listening = false;
-        _expanded = false;
-        _liveText = '';
-      });
+      collapse();
       return;
     }
-    setState(() => _expanded = !_expanded);
+    _setExpanded(!_expanded);
   }
 
   void _openManual() {
-    setState(() => _expanded = false);
+    collapse();
     context.push('/transaction/new');
   }
 
@@ -146,14 +164,9 @@ class _AddEntryFabState extends State<AddEntryFab> {
     const arabicIds = ['ar_eg', 'ar_sa', 'ar'];
     const englishIds = ['en_us', 'en_gb', 'en'];
     if (appLocale == AppLocale.ar) {
-      return match(arabicIds, 'ar') ??
-          (await speech.systemLocale())?.localeId ??
-          match(englishIds, 'en');
+      return match(arabicIds, 'ar');
     }
-    // Arabic speech pack first: this ledger is used in Arabic even when the UI is English.
-    return match(arabicIds, 'ar') ??
-        match(englishIds, 'en') ??
-        (await speech.systemLocale())?.localeId;
+    return match(englishIds, 'en');
   }
 
   String _bestTranscript() {
@@ -174,6 +187,7 @@ class _AddEntryFabState extends State<AddEntryFab> {
       _expanded = false;
       _liveText = '';
     });
+    widget.onExpandedChanged?.call(false);
     if (transcript.isEmpty) {
       _showMessage(l10n.voiceEmptyResult);
       return;
@@ -189,6 +203,7 @@ class _AddEntryFabState extends State<AddEntryFab> {
       _expanded = false;
       _liveText = '';
     });
+    widget.onExpandedChanged?.call(false);
     _showMessage(message);
   }
 

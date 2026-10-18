@@ -77,6 +77,7 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
       emit(
         state.copyWith(
           loading: false,
+          notFound: true,
           errorMessage: const SmsNotFoundException().message,
         ),
       );
@@ -84,16 +85,25 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
     }
 
     final type = item.type ?? TransactionType.expense;
+    final amountText = item.amount == null ? '' : minorToInput(item.amount!);
+    final note = item.note ?? '';
+    final date = dateOnly(item.valueDate ?? item.receivedAt);
     emit(
       state.copyWith(
-        amountText: item.amount == null ? '' : minorToInput(item.amount!),
+        amountText: amountText,
         type: type,
         categoryId: item.suggestedCategoryId,
-        note: item.note ?? '',
-        date: dateOnly(item.valueDate ?? item.receivedAt),
+        note: note,
+        date: date,
         smsCurrencyCode: item.currencyCode,
         body: item.body,
         loading: false,
+        baselineAmountText: amountText,
+        baselineType: type,
+        baselineCategoryId: item.suggestedCategoryId,
+        baselineNote: note,
+        baselineDate: date,
+        clearBaselineCategory: item.suggestedCategoryId == null,
       ),
     );
     _watchCategories(type);
@@ -138,7 +148,14 @@ class SmsReviewBloc extends Bloc<SmsReviewEvent, SmsReviewState> {
   ) async {
     final amount = parseMinorUnits(state.amountText) ?? 0;
     final categoryId = state.categoryId;
-    if (amount <= 0 || categoryId == null) return;
+    if (amount <= 0 || categoryId == null) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Choose a category.',
+        ),
+      );
+      return;
+    }
     emit(state.copyWith(saving: true, saved: false, clearError: true));
     try {
       await _importParsedSms(

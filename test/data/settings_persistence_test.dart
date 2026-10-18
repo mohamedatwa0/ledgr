@@ -4,12 +4,22 @@ import 'package:ledgr/data/db/app_database.dart';
 import 'package:ledgr/data/repositories/settings_repository_impl.dart';
 import 'package:ledgr/data/repositories/sms_inbox_repository_impl.dart';
 import 'package:ledgr/data/repositories/transaction_repository_impl.dart';
+import 'package:ledgr/data/sms/noop_sms_gateway.dart';
 import 'package:ledgr/domain/models/app_locale.dart';
 import 'package:ledgr/domain/models/app_theme_mode.dart';
 import 'package:ledgr/domain/models/transaction_type.dart';
 import 'package:ledgr/domain/sms/sms_inbox_item.dart';
 import 'package:ledgr/domain/sms/sms_inbox_status.dart';
 import 'package:ledgr/domain/usecases/reset_ledger.dart';
+
+class _ClearTrackingGateway extends NoOpSmsGateway {
+  var cleared = 0;
+
+  @override
+  Future<void> clearPending() async {
+    cleared += 1;
+  }
+}
 
 void main() {
   late AppDatabase db;
@@ -56,9 +66,17 @@ void main() {
         status: SmsInboxStatus.ready,
       ),
     );
+    await settings.setSmsLastScanAt(DateTime(2026, 9, 1));
 
-    final reset = ResetLedger(transactions: transactions, smsInbox: sms);
+    final gateway = _ClearTrackingGateway();
+    final reset = ResetLedger(
+      transactions: transactions,
+      smsInbox: sms,
+      settings: settings,
+      sms: gateway,
+    );
     await reset();
+    expect(gateway.cleared, 1);
 
     final remaining = await transactions.watchEntries().first;
     expect(remaining, isEmpty);
@@ -68,5 +86,6 @@ void main() {
     expect(settingsAfter.currencyCode, 'EGP');
     expect(settingsAfter.themeMode, AppThemeMode.system);
     expect(settingsAfter.locale, AppLocale.en);
+    expect(settingsAfter.smsLastScanAt, isNull);
   });
 }

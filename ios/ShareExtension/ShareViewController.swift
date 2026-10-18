@@ -19,10 +19,8 @@ class ShareViewController: UIViewController {
     if BankSmsQueue.canShareWithHost {
       BankSmsQueue.enqueue(sender: "", body: body, date: date)
       openHost(URL(string: "ledgr://sms-import"))
-    } else if let url = BankSmsQueue.importURL(sender: "", body: body, date: date) {
-      openHost(url)
     } else {
-      extensionContext?.completeRequest(returningItems: nil)
+      presentRejected()
     }
   }
 

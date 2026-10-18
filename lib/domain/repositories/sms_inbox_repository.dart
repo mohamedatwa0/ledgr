@@ -6,6 +6,7 @@ abstract class SmsInboxRepository {
   Stream<int> watchReadyCount();
   Future<SmsInboxItem?> getById(int id);
   Future<SmsInboxItem?> findByFingerprint(String fingerprint);
+  Future<SmsInboxItem?> findByPlatformMessageId(String platformMessageId);
   Future<SmsInboxItem> insert(SmsInboxInsert row);
   Future<void> markImported({required int id, required int transactionId});
   Future<void> markDismissed(int id);

@@ -23,9 +23,17 @@ bool senderMatchesAllowlist(String sender, Iterable<String> senderIds) {
   for (final id in senderIds) {
     final token = normalizeSender(id);
     if (token.isEmpty) continue;
-    if (normalized.contains(token) || token.contains(normalized)) {
-      return true;
-    }
+    if (senderTokenMatches(normalized, token)) return true;
+  }
+  return false;
+}
+
+/// Short bank codes match exactly so "BM" does not hit an unrelated sender.
+bool senderTokenMatches(String normalizedSender, String token) {
+  if (normalizedSender == token) return true;
+  if (token.length >= 4 && normalizedSender.contains(token)) return true;
+  if (normalizedSender.length >= 4 && token.contains(normalizedSender)) {
+    return true;
   }
   return false;
 }

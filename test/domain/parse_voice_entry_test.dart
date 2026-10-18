@@ -63,6 +63,22 @@ void main() {
     expect(parsed.createIfMissing, isTrue);
   });
 
+  test('bare got is not income', () {
+    expect(parseVoiceEntry('I got coffee for 20').type, isNot(TransactionType.income));
+    expect(parseVoiceEntry('I got paid 20').type, TransactionType.income);
+  });
+
+  test('we is not treated as bills', () {
+    expect(
+      parseVoiceEntry('we bought lunch for 40').categoryName,
+      'Food & Dining',
+    );
+    expect(
+      parseVoiceEntry('we pay 80 for the internet').categoryName,
+      'Bills & Utilities',
+    );
+  });
+
   test('english digits fill the amount', () {
     final parsed = parseVoiceEntry('I spent 50 pounds on uber');
     expect(parsed.type, TransactionType.expense);
@@ -120,8 +136,13 @@ void main() {
     expect(parseVoiceEntry('حولت ١٣٥ جنيه').amountMinor, 13500);
   });
 
-  test('135 from split digits', () {
-    expect(parseVoiceEntry('حولت 1 35 جنيه').amountMinor, 13500);
+  test('135 from split digits without currency', () {
+    expect(parseVoiceEntry('حولت 1 35').amountMinor, 13500);
+  });
+
+  test('2 50 pounds is 2.50 when a currency word is adjacent', () {
+    expect(parseVoiceEntry('I spent 2 50 pounds').amountMinor, 250);
+    expect(parseVoiceEntry('حولت 1 35 جنيه').amountMinor, 135);
   });
 
   test('135 from hundred plus remainder', () {

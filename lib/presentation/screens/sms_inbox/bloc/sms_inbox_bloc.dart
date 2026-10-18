@@ -128,15 +128,24 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
   ) async {
     emit(state.copyWith(scanning: true, clearMessage: true));
     try {
-      final added = await _scanSmsInbox();
+      final result = await _scanSmsInbox();
       if (isClosed) return;
+      if (result.failed) {
+        emit(
+          state.copyWith(
+            scanning: false,
+            flash: SmsInboxFlash.scanFailed,
+          ),
+        );
+        return;
+      }
       emit(
         state.copyWith(
           scanning: false,
-          flash: added == 0
+          flash: result.added == 0
               ? SmsInboxFlash.noNewBankMessages
               : SmsInboxFlash.foundMessages,
-          flashCount: added,
+          flashCount: result.added,
         ),
       );
     } catch (_) {
@@ -144,7 +153,7 @@ class SmsInboxBloc extends Bloc<SmsInboxEvent, SmsInboxState> {
         emit(
           state.copyWith(
             scanning: false,
-            message: 'Could not scan the inbox.',
+            flash: SmsInboxFlash.scanFailed,
           ),
         );
       }

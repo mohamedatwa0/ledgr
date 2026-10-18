@@ -34,6 +34,10 @@ class CategoryFormBloc extends Bloc<CategoryFormEvent, CategoryFormState> {
             iconCodePoint: TablerIcons.coffee.codePoint,
             colorValue: categoryColorChoices.first,
             loading: categoryId != null,
+            originalName: '',
+            originalType: type,
+            originalIconCodePoint: TablerIcons.coffee.codePoint,
+            originalColorValue: categoryColorChoices.first,
           ),
         ) {
     on<CategoryFormStarted>(_onStarted);
@@ -79,6 +83,10 @@ class CategoryFormBloc extends Bloc<CategoryFormEvent, CategoryFormState> {
         iconCodePoint: category.iconCodePoint,
         colorValue: category.colorValue,
         isDefault: category.isDefault,
+        originalName: category.name,
+        originalType: category.type,
+        originalIconCodePoint: category.iconCodePoint,
+        originalColorValue: category.colorValue,
       ),
     );
   }

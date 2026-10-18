@@ -65,7 +65,7 @@ void main() {
     await settle(tester);
     await tester.dragUntilVisible(
       find.byKey(const Key('settings-app-lock')),
-      find.byType(ListView),
+      find.byKey(const Key('settings-scroll')),
       const Offset(0, -200),
     );
     await tester.tap(find.byKey(const Key('settings-app-lock')));
@@ -89,7 +89,7 @@ void main() {
     await settle(tester);
     await tester.dragUntilVisible(
       find.byKey(const Key('settings-app-lock')),
-      find.byType(ListView),
+      find.byKey(const Key('settings-scroll')),
       const Offset(0, -200),
     );
     await tester.tap(find.byKey(const Key('settings-app-lock')));

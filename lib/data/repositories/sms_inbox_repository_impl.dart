@@ -50,6 +50,16 @@ class SmsInboxRepositoryImpl implements SmsInboxRepository {
   }
 
   @override
+  Future<SmsInboxItem?> findByPlatformMessageId(String platformMessageId) async {
+    final id = platformMessageId.trim();
+    if (id.isEmpty) return null;
+    final row = await (_db.select(_db.smsInboxRows)
+          ..where((t) => t.platformMessageId.equals(id)))
+        .getSingleOrNull();
+    return row == null ? null : smsInboxFromRow(row);
+  }
+
+  @override
   Future<SmsInboxItem> insert(SmsInboxInsert row) async {
     final id = await _db.into(_db.smsInboxRows).insert(
           SmsInboxRowsCompanion.insert(
@@ -83,6 +93,7 @@ class SmsInboxRepositoryImpl implements SmsInboxRepository {
       SmsInboxRowsCompanion(
         status: const Value(SmsInboxStatus.imported),
         transactionId: Value(transactionId),
+        body: const Value(''),
       ),
     );
   }
@@ -90,7 +101,10 @@ class SmsInboxRepositoryImpl implements SmsInboxRepository {
   @override
   Future<void> markDismissed(int id) {
     return (_db.update(_db.smsInboxRows)..where((t) => t.id.equals(id))).write(
-      const SmsInboxRowsCompanion(status: Value(SmsInboxStatus.dismissed)),
+      const SmsInboxRowsCompanion(
+        status: Value(SmsInboxStatus.dismissed),
+        body: Value(''),
+      ),
     );
   }
 

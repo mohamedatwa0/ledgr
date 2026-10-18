@@ -113,7 +113,7 @@ class RuledTransactionRow extends StatelessWidget {
                       entry.transaction.amount,
                       entry.transaction.type,
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.end,
                     style: amountStyle(
                       fontSize: 18,
                       color: isIncome ? colors.ledgerGreen : colors.ledgerRed,
@@ -144,14 +144,15 @@ class RuledTransactionRow extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(end: 16.w),
         child: Icon(TablerIcons.trash, color: colors.onPrimary, size: 20.r),
       ),
-      confirmDismiss: (_) {
-        return showDeleteConfirmDialog(
+      confirmDismiss: (_) async {
+        final confirmed = await showDeleteConfirmDialog(
           context: context,
           title: l10n.deleteEntry,
           message: l10n.deleteEntryMessage,
         );
+        if (confirmed) delete();
+        return false;
       },
-      onDismissed: (_) => delete(),
       child: row,
     );
   }

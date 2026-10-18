@@ -66,6 +66,7 @@ GoRouter createAppRouter() {
                     transactions: context.read<TransactionRepository>(),
                     settings: context.read<SettingsRepository>(),
                     deleteTransaction: context.read<DeleteTransaction>(),
+                    createTransaction: context.read<CreateTransaction>(),
                   )..add(const HomeStarted()),
                   child: const HomeScreen(),
                 ),
@@ -80,6 +81,7 @@ GoRouter createAppRouter() {
                   create: (context) => HistoryBloc(
                     transactions: context.read<TransactionRepository>(),
                     deleteTransaction: context.read<DeleteTransaction>(),
+                    createTransaction: context.read<CreateTransaction>(),
                   )..add(const HistoryStarted()),
                   child: const HistoryScreen(),
                 ),
@@ -121,7 +123,7 @@ GoRouter createAppRouter() {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/sms/:id',
         builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? -1;
           return BlocProvider(
             create: (context) => SmsReviewBloc(
               inboxId: id,
@@ -156,7 +158,7 @@ GoRouter createAppRouter() {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/transaction/:id',
         builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? -1;
           return BlocProvider(
             create: (context) => _addTransactionBloc(context, transactionId: id)
               ..add(const AddTransactionStarted()),

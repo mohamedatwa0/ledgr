@@ -22,6 +22,10 @@ class HistoryDeleteRequested extends HistoryEvent {
   final int id;
 }
 
+class HistoryUndoDeleteRequested extends HistoryEvent {
+  const HistoryUndoDeleteRequested();
+}
+
 class HistoryEntriesUpdated extends HistoryEvent {
   const HistoryEntriesUpdated(this.entries);
 

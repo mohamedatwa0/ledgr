@@ -135,8 +135,23 @@ bool isBankOrWalletMessage({
   final normalizedSender = normalizeSender(sender);
   final knownSender = !_placeholderSenders.contains(normalizedSender) &&
       senderMatchesAllowlist(normalizedSender, smsImportSenderAllowlist());
-  if (knownSender) return true;
+  if (knownSender) return _bodyLooksLikeTransaction(text);
   return bodyLooksLikeBankOrWallet(text);
+}
+
+final _lightTxn = RegExp(
+  r'(debit(?:ed)?|credit(?:ed)?|purchased?|withdrawn|withdrawal|'
+  r'\bpaid\b|\bpayment\b|\breceived\b|\bcharged\b|\bsent\b|'
+  r'خصم|سحب|ايداع|إيداع|تحويل|مدفوع|مشتريات)',
+  caseSensitive: false,
+);
+
+bool _bodyLooksLikeTransaction(String text) {
+  final hasMoney = _money.hasMatch(text) || RegExp(r'\d').hasMatch(text);
+  return hasMoney &&
+      (_txnVerb.hasMatch(text) ||
+          _lightTxn.hasMatch(text) ||
+          _arabicBankVerb.hasMatch(text));
 }
 
 bool bodyLooksLikeBankOrWallet(String text) {

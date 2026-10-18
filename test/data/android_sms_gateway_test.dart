@@ -21,5 +21,7 @@ void main() {
     expect(await gateway.takeInitialSharedText(), isNull);
     expect(await gateway.incoming.isEmpty, isTrue);
     expect(await gateway.sharedText.isEmpty, isTrue);
+    await gateway.acknowledge(['q1']);
+    await gateway.clearPending();
   });
 }

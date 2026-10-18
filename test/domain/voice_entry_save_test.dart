@@ -44,7 +44,7 @@ void main() {
     await bloc.stream.firstWhere(
       (state) =>
           !state.loading &&
-          state.categoryId != null &&
+          (state.categoryId != null || state.hasPendingCategory) &&
           state.amountText.isNotEmpty,
     );
     bloc.add(const AddTransactionSaveRequested());

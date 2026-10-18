@@ -13,9 +13,13 @@ import 'package:ledgr/domain/sms/sms_gateway.dart';
 import 'package:ledgr/domain/sms/sms_message.dart';
 import 'package:ledgr/presentation/widgets/ledgr_shell.dart';
 
-const cibSms =
-    'CIB: Purchase of EGP 250.00 at STARBUCKS using card ending 1234 '
-    'on 15/09/2026. Available balance EGP 5,000.00';
+String get cibSms {
+  final now = DateTime.now();
+  final day = now.day.toString().padLeft(2, '0');
+  final month = now.month.toString().padLeft(2, '0');
+  return 'CIB: Purchase of EGP 250.00 at STARBUCKS using card ending 1234 '
+      'on $day/$month/${now.year}. Available balance EGP 5,000.00';
+}
 
 Future<void> pumpApp(
   WidgetTester tester, {
@@ -41,9 +45,24 @@ Future<void> pumpApp(
   await tester.pump(const Duration(milliseconds: 50));
 }
 
+const entryFormScrollKey = Key('entry-form-scroll');
+
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+}
+
+Finder entryFormScroll() => find.byKey(entryFormScrollKey);
+
+Future<void> revealOnEntryForm(WidgetTester tester, Finder finder) async {
+  await tester.dragUntilVisible(
+    finder,
+    entryFormScroll(),
+    const Offset(0, -120),
+  );
+  await tester.pump();
 }
 
 Future<void> openNewEntry(WidgetTester tester) async {
@@ -86,18 +105,19 @@ Future<void> pushRoute(WidgetTester tester, String location) async {
 
 Future<void> openSmsAndParse(
   WidgetTester tester, {
-  String body = cibSms,
+  String? body,
 }) async {
+  final text = body ?? cibSms;
   await tester.tap(find.byKey(const Key('tab-settings')));
   await settle(tester);
   await tester.dragUntilVisible(
     find.byKey(const Key('settings-sms')),
-    find.byType(ListView),
+    find.byKey(const Key('settings-scroll')),
     const Offset(0, -200),
   );
   await tester.tap(find.byKey(const Key('settings-sms')));
   await settle(tester);
-  await tester.enterText(find.byKey(const Key('sms-paste-field')), body);
+  await tester.enterText(find.byKey(const Key('sms-paste-field')), text);
   await tester.pump();
   await tester.ensureVisible(find.byKey(const Key('sms-parse-button')));
   await tester.tap(find.byKey(const Key('sms-parse-button')));
@@ -126,6 +146,9 @@ class ThrowingScanGateway implements SmsGateway {
 
   @override
   Future<void> acknowledge(List<String> queueIds) async {}
+
+  @override
+  Future<void> clearPending() async {}
 
   @override
   Future<bool> openImportSetup() async => false;

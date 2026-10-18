@@ -66,6 +66,9 @@ final class SmsPlugin: NSObject, FlutterPlugin {
       let ids = args?["ids"] as? [String] ?? []
       BankSmsQueue.remove(ids: ids)
       result(true)
+    case "clearPending":
+      BankSmsQueue.clear()
+      result(true)
     case "takeInitialSharedText":
       result(BankSmsQueue.consumeOpenInbox() ? BankSmsQueue.scanSignal : nil)
     case "openImportSetup":

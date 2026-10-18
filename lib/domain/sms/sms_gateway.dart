@@ -14,6 +14,8 @@ abstract class SmsGateway {
 
   Future<void> acknowledge(List<String> queueIds);
 
+  Future<void> clearPending();
+
   Future<bool> openImportSetup();
 
   Stream<RawSms> get incoming;
